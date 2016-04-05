@@ -38,7 +38,7 @@ stop:
 clean:
 	@echo Cleaning Webapp
 
-	@rm -rf dist
+	@rm -rf webapp/dist
 	@rm -f .npminstall
 
 nuke:
