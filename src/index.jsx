@@ -104,5 +104,7 @@ function renderRootComponent() {
 
 global.window.setup_root = () => {
     // Do the pre-render setup and call renderRootComponent when done
+    // preRenderSetup(renderRootComponent);];
+    // Do the pre-render setup and call renderRootComponent when done
     preRenderSetup(renderRootComponent);
 };
