@@ -1,4 +1,4 @@
-.PHONY: build test run run-fullmap clean stop nuke
+.PHONY: build install test run run-fullmap clean stop nuke
 
 test:
 	@echo Checking for style guide compliance
