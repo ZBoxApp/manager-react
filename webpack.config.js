@@ -17,9 +17,9 @@ if (NPM_TARGET === 'run' || NPM_TARGET === 'run-fullmap') {
 }
 
 var config = {
-    entry: ['babel-polyfill', './webapp/index.jsx', 'webapp/index.html'],
+    entry: ['babel-polyfill', './src/index.jsx', 'src/index.html'],
     output: {
-        path: 'webapp/dist',
+        path: 'dist',
         publicPath: '/',
         filename: 'bundle.js'
     },
@@ -73,7 +73,7 @@ var config = {
     },
     plugins: [
         new CopyWebpackPlugin([
-            {from: 'webapp/config', to: 'config'}
+            {from: 'src/config', to: 'config'}
         ]),
         new webpack.ProvidePlugin({
             'window.jQuery': 'jquery'
