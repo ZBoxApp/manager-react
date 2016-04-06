@@ -5,24 +5,24 @@ test:
 
 	@npm run check
 
-.npminstall: package.json
+install: package.json
 	@echo Getting dependencies using npm
 
 	@npm install
 
 	@touch $@
 
-build: | .npminstall test
+build: | install test
 	@echo Building ZBox Manager Webapp
 
 	@npm run build
 
-run: .npminstall
+run: install
 	@echo Running ZBox Manager Webapp for development
 
 	@npm run run &
 
-run-fullmap: .npminstall
+run-fullmap: install
 	@echo FULL SOURCE MAP Running ZBox Manager Webapp for development FULL SOURCE MAP
 
 	@npm run run-fullmap &
@@ -38,8 +38,8 @@ stop:
 clean:
 	@echo Cleaning Webapp
 
-	@rm -rf webapp/dist
+	@rm -rf dist
 	@rm -f .npminstall
 
-nuke:
+nuke: clean
 	@rm -rf node_modules
