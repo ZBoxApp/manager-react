@@ -3,24 +3,32 @@
 
 import $ from 'jquery';
 import jszimbra from 'js-zimbra';
+import * as Utils from './utils.jsx';
 import Domain from '../zimbra/domain.jsx';
 
 let domain;
 
 // función que maneja el error como corresponde
 function handleError(methodName, err) {
-    var e = null;
+    let e = null;
     try {
-        e = JSON.parse(err);
+        e = JSON.parse(err.responseText);
     } catch (parseError) {
         e = null;
     }
 
     console.error(methodName, e); //eslint-disable-line no-console
 
+    const error = {};
+    if (e) {
+        error.message = e.Body.Fault.Reason.Text;
+    } else {
+        error.message = 'Ocurrio un error general';
+    }
+
     // Aqui deberiamos revisar si falta hacer login nuevamente
 
-    return e;
+    return error;
 }
 
 export function getClientConfig(success, error) {
@@ -36,8 +44,10 @@ export function getClientConfig(success, error) {
 }
 
 export function login(username, secret, success, error) {
+    const config = global.window.manager_config;
     const zimbra = new jszimbra.Communication({
-        url: global.window.manager_config.zimbraUrl
+        url: config.zimbraUrl,
+        debug: config.debug
     });
 
     zimbra.auth({
@@ -54,8 +64,35 @@ export function login(username, secret, success, error) {
         // aqui deberiamos inicializar todas las apis
         domain = new Domain(zimbra);
 
-        return success();
+        Utils.setCookie('token', zimbra.token, 3);
+        return success(zimbra);
     });
+}
+
+export function logout(callback) {
+    // Aqui debemos asignar como null todas aquellas clases instanciadas
+    domain = null;
+    const cookie = Utils.getCookie('token');
+    if (cookie) {
+        Utils.setCookie('token', '', -1);
+    }
+
+    return callback();
+}
+
+export function isLoggedIn(callback) {
+    const cookie = Utils.getCookie('token');
+    const data = {
+        logged_in: false,
+        token: null
+    };
+
+    if (cookie) {
+        data.logged_in = true;
+        data.token = cookie;
+    }
+
+    return callback(data);
 }
 
 export function getDomain(name, by, attrs, success, error) {
