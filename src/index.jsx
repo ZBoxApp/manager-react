@@ -18,7 +18,7 @@ import * as Utils from './utils/utils.jsx';
 const notFoundParams = {
     title: 'Page not found',
     message: 'The page you where trying to reach does not exist',
-    link: '/',
+    link: '/logout',
     linkmessage: 'Back to Manager'
 };
 
@@ -44,10 +44,20 @@ function preRenderSetup(callwhendone) {
     $.when(d1).done(callwhendone);
 }
 
+function onPreLoggedIn(nextState, replace, callback) {
+    Client.isLoggedIn((data) => {
+        if (!data || !data.logged_in) {
+            return browserHistory.push('/login');
+        }
+        return callback();
+    });
+}
+
 function onLoggedOut() {
     Client.logout(
         () => {
-            browserHistory.push('/login');
+            // window.location.href = '/login'
+            browserHistory.replace('/login');
         }
     );
 }
@@ -67,10 +77,10 @@ function renderRootComponent() {
                 />
                 <Route
                     component={LoggedIn}
+                    onEnter={onPreLoggedIn}
                 >
-
                     <Route
-                        path='/logout'
+                        path='logout'
                         onEnter={onLoggedOut}
                     />
                 </Route>
