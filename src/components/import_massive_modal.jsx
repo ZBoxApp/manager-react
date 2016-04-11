@@ -11,7 +11,6 @@ import * as Utils from '../utils/utils.jsx';
 import * as Client from '../utils/client.jsx';
 import MailboxStore from '../stores/mailbox_store.jsx';
 
-
 export default class ImportMassiveModal extends React.Component {
     constructor(props) {
         super(props);
@@ -34,7 +33,6 @@ export default class ImportMassiveModal extends React.Component {
 
         this.uploaded = null;
         this.disabled = {};
-
 
         this.plans = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
 
@@ -90,14 +88,17 @@ export default class ImportMassiveModal extends React.Component {
                 } else {
                     return this.setState({
                         alert: true,
-                        alertMessage: 'Su archvio esta vacio, verifiquelo, por favor',
+                        alertMessage: 'Su archvio esta vacio, verifiquelo, por favor'
                     });
                 }
 
+                return null;
             };
 
             fileReader.readAsText(file);
         }
+
+        return null;
     }
 
     onChangeColumn(e, option, key) {
@@ -149,6 +150,8 @@ export default class ImportMassiveModal extends React.Component {
             if (pos === '') {
                 return true;
             }
+
+            return null;
         });
 
         if (isEmpty) {
@@ -204,7 +207,7 @@ export default class ImportMassiveModal extends React.Component {
                 if (!ul[c]) {
                     if (col.indexOf('@') > -1) {
                         if (isEmail.test(col)) {
-                            ul[c] = {}
+                            ul[c] = {};
                             ul[c][flagDefault] = [];
                             this.disabled[flagDefault] = {
                                 col: c
@@ -246,8 +249,8 @@ export default class ImportMassiveModal extends React.Component {
                     counter++;
                 }
 
-                const length = (Array.isArray(this.uploaded[current])) ? this.uploaded[current].length : this.uploaded[current]['email'].length;
-                const data = (Array.isArray(this.uploaded[current])) ? this.uploaded[current] : this.uploaded[current]['email'];
+                const length = (Array.isArray(this.uploaded[current])) ? this.uploaded[current].length : this.uploaded[current].email.length;
+                const data = (Array.isArray(this.uploaded[current])) ? this.uploaded[current] : this.uploaded[current].email;
 
                 for (var i = 0; i < length; i++) {
                     if (!padre[i]) {
@@ -267,10 +270,11 @@ export default class ImportMassiveModal extends React.Component {
             return this.createMassiveAccounts(padre);
         }
 
-        return this.setState({
+        this.setState({
             alert: true,
             alertMessage: 'Faltan columnas que son obligatorias, verifique por favor.'
         });
+        return null;
     }
 
     createMassiveAccounts(accounts) {
@@ -324,9 +328,15 @@ export default class ImportMassiveModal extends React.Component {
             //Aqui va error batchrequest
 
             GlobalActions.emitEndTask({
-                id: 'casillamasiva'
+                id: 'casillamasiva',
+                toast: {
+                    message: 'Se han importado todas las casillas.',
+                    title: 'Mailbox - Carga Masiva'
+                }
             });
         });
+
+        return null;
     }
 
     render() {
@@ -338,7 +348,6 @@ export default class ImportMassiveModal extends React.Component {
                 <label className='text-danger'>{this.state.alertMessage}</label>
             );
         }
-
 
         if (this.state.cols) {
             const columns = this.state.cols;

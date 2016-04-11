@@ -39,12 +39,12 @@ export default class Pagination extends React.Component {
             pageUrl = this.getPageQueryString(page);
         }
 
-        browserHistory.push(`/${this.props.url}${pageUrl}`);
+        browserHistory.push(`${this.props.url}${pageUrl}`);
     }
     handleNext(e) {
         e.preventDefault();
         const page = this.getPageQueryString(this.props.currentPage + 1);
-        browserHistory.push(`/${this.props.url}${page}`);
+        browserHistory.push(`${this.props.url}${page}`);
     }
     handleLast(e) {
         e.preventDefault();

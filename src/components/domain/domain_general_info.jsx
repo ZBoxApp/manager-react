@@ -56,13 +56,11 @@ export default class DomainGeneralInfo extends React.Component {
                 company: company.name
             });
         } else {
-            Client.getCompany(id).
-            then((data) => {
+            Client.getCompany(id, (data) => {
                 this.setState({
                     company: data.name
                 });
-            }).
-            catch((error) => {
+            }, (error) => {
                 this.setState({
                     error: {
                         message: error.message,
