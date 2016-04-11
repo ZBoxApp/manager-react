@@ -8,6 +8,7 @@ import Promise from 'bluebird';
 import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
 import Panel from '../panel.jsx';
+import Pagination from '../pagination.jsx';
 
 import CompaniesStore from '../../stores/company_store.jsx';
 import ZimbraStore from '../../stores/zimbra_store.jsx';
@@ -26,12 +27,16 @@ export default class Companies extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {};
-
         this.getCompanies = this.getCompanies.bind(this);
         this.getDomains = this.getDomains.bind(this);
         this.getPlans = this.getPlans.bind(this);
         this.gotoCompany = this.gotoCompany.bind(this);
+        const page = parseInt(this.props.location.query.page, 10) || 1;
+
+        this.state = {
+            page,
+            offset: ((page - 1) * Constants.QueryOptions.DEFAULT_LIMIT)
+        };
 
         this.isGlobalAdmin = UserStore.isGlobalAdmin();
     }
@@ -160,7 +165,15 @@ export default class Companies extends React.Component {
         });
     }
 
-    componentWillReceiveProps() {
+    componentWillReceiveProps(nextProps) {
+        const arePagesDiff = (nextProps.location.query.page !== this.props.location.query.page);
+        if (arePagesDiff) {
+            const page = parseInt(nextProps.location.query.page, 10) || 1;
+            this.setState({
+                page,
+                offset: ((page - 1) * Constants.QueryOptions.DEFAULT_LIMIT)
+            });
+        }
         GlobalActions.emitEndLoading();
     }
 
@@ -180,6 +193,8 @@ export default class Companies extends React.Component {
 
         let panelBody;
         let noLimitError;
+        let pagination = null;
+
         if (this.state.companies.length === 0) {
             panelBody = (
                 <div className='center-block text-center'>
@@ -192,7 +207,23 @@ export default class Companies extends React.Component {
                 </div>
             );
         } else {
-            const rows = this.state.companies.map((c) => {
+            const data = this.state.companies;
+
+            if (data.length > Constants.QueryOptions.DEFAULT_LIMIT) {
+                const totalPages = Math.ceil(data.length / Constants.QueryOptions.DEFAULT_LIMIT);
+                pagination = (
+                    <Pagination
+                        key='panelPaginationCompanies'
+                        url='companies'
+                        currentPage={this.state.page}
+                        totalPages={totalPages}
+                    />
+                );
+            }
+
+            const chunk = data.slice(this.state.offset, (this.state.page * Constants.QueryOptions.DEFAULT_LIMIT));
+
+            const rows = chunk.map((c) => {
                 const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
                 const plansString = [];
                 const domains = c.domains;
@@ -290,7 +321,7 @@ export default class Companies extends React.Component {
                         <div className='col-md-12 central-content'>
                             <Panel
                                 hasHeader={false}
-                                children={panelBody}
+                                children={[panelBody, pagination]}
                             />
                         </div>
                     </div>
