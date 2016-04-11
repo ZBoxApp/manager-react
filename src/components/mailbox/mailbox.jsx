@@ -20,22 +20,96 @@ import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import Constants from '../../utils/constants.jsx';
 
+import ToggleModalButton from '../toggle_modal_button.jsx';
+import ImportMassiveModal from '../import_massive_modal.jsx';
+
 import DomainStore from '../../stores/domain_store.jsx';
 
 const QueryOptions = Constants.QueryOptions;
 const messageType = Constants.MessageType;
+
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 export default class Mailboxes extends React.Component {
     constructor(props) {
         super(props);
 
         this.showMessage = this.showMessage.bind(this);
+        this.refreshAllAccounts = this.refreshAllAccounts.bind(this);
+        this.handleFilterMailbox = this.handleFilterMailbox.bind(this);
+        this.handleChangeFilter = this.handleChangeFilter.bind(this);
         const page = parseInt(this.props.location.query.page, 10) || 1;
+        this.mailboxes = null;
+        this.status = '';
+        this.cos = null;
 
         this.state = {
             page,
             offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
         };
+    }
+
+    handleChangeFilter(e) {
+        const selected = e.target.value;
+        const cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
+
+        if (e.target.className.indexOf('plans') > -1) {
+            this.cos = cos[selected];
+        }
+
+        if (e.target.className.indexOf('status') > -1) {
+            this.status = selected;
+        }
+
+        const data = Object.assign({}, this.mailboxes);
+
+        const arrayFiltered = data.account.filter((strArray) => {
+            const status = this.status === '' ? strArray.attrs.zimbraAccountStatus : this.status;
+            const plan = this.cos ? this.cos : strArray.attrs.zimbraCOSId;
+
+            if (strArray.attrs.zimbraAccountStatus === status && strArray.attrs.zimbraCOSId === plan) {
+                return strArray;
+            }
+
+            return false;
+        });
+
+        data.account = arrayFiltered;
+        data.total = arrayFiltered.length;
+
+        const tables = this.buildTableFromData(data, ['Todas', 'Bloqueadas']);
+
+        return this.setState({
+            data: tables
+        });
+    }
+
+    handleFilterMailbox(e, info) {
+        const search = e.target.value;
+        const data = Object.assign({}, info);
+
+        const arrayFiltered = data.account.filter((strArray) => {
+            if (this.status === '') {
+                if (strArray.name.match(search)) {
+                    return strArray;
+                }
+            }
+
+            if (strArray.name.match(search) && strArray.attrs.zimbraAccountStatus === this.status) {
+                return strArray;
+            }
+
+            return false;
+        });
+
+        data.account = arrayFiltered;
+        data.total = arrayFiltered.length;
+
+        const tables = this.buildTableFromData(data, ['Todas', 'Bloqueadas']);
+
+        return this.setState({
+            data: tables
+        });
     }
 
     showMessage(attrs) {
@@ -122,6 +196,7 @@ export default class Mailboxes extends React.Component {
 
             return Client.getAllAccounts(attrs, (success) => {
                 MailboxStore.setMailboxes(success);
+                this.mailboxes = this.mailboxes = MailboxStore.getMailboxes();
                 return resolve(success);
             }, (error) => {
                 return reject(error);
@@ -143,10 +218,11 @@ export default class Mailboxes extends React.Component {
             }
 
             return this.setState({
-                domainNotFound: domainName
+                notMatches: true,
+                domain: domainName
             });
         }).catch(() => {
-            //console.log(error);
+            console.log('error',error);
         }).finally(() => {
             GlobalActions.emitEndLoading();
         });
@@ -163,15 +239,33 @@ export default class Mailboxes extends React.Component {
         return this.getAccounts();
     }
 
+    refreshAllAccounts() {
+        const mailboxes = MailboxStore.getMailboxes();
+        const tables = this.buildTableFromData(mailboxes, ['Todas', 'Bloqueadas']);
+
+        if (tables.lockedAlert) {
+            GlobalActions.emitMessage({
+                error: tables.lockedAlert.message,
+                typeError: messageType.LOCKED
+            });
+        }
+
+        this.setState({
+            data: tables
+        });
+    }
+
     componentDidMount() {
         $('#sidebar-mailboxes').addClass('active');
         EventStore.addMessageListener(this.showMessage);
+        MailboxStore.addListenerAddMassive(this.refreshAllAccounts);
         const domainId = this.props.params.domain_id;
         this.getAllMailboxes(domainId);
     }
 
     componentWillUnmount() {
         EventStore.removeMessageListener(this.showMessage);
+        MailboxStore.removeListenerAddMassive(this.showMessage);
         $('#sidebar-mailboxes').removeClass('active');
     }
 
@@ -235,6 +329,16 @@ export default class Mailboxes extends React.Component {
             );
         }
 
+        if (Array.isArray(rows) && rows.length < 1) {
+            return (
+                <div className='text-center'>
+                    <h4>
+                        No existen resultados para su búsqueda
+                    </h4>
+                </div>
+            );
+        }
+
         return (
             <div
                 key='mailbox'
@@ -264,14 +368,16 @@ export default class Mailboxes extends React.Component {
         );
     }
 
-    insertToPanel(table, id, btns) {
+    insertToPanel(table, id, btns, filter) {
         const btn = btns || [];
+        const getFilter = filter || null;
 
         return (
             <Panel
                 children={table}
                 key={id}
                 btnsHeader={btn}
+                filter={getFilter}
             />
         );
     }
@@ -327,6 +433,21 @@ export default class Mailboxes extends React.Component {
                     label: icon
                 },
                 {
+                    setComponent: (
+                        <ToggleModalButton
+                            role='button'
+                            className='btn btn-info hide-xs hide-sm'
+                            dialogType={ImportMassiveModal}
+                            dialogProps={{
+                                data: this.state.data
+                            }}
+                            key='change-passwd-import'
+                        >
+                            {'Importar'}
+                        </ToggleModalButton>
+                    )
+                },
+                {
                     props: {
                         className: 'btn btn-success',
                         onClick: (e) => Utils.handleLink(e, '/mailboxes/new')
@@ -352,8 +473,37 @@ export default class Mailboxes extends React.Component {
                 };
             }
 
+            const filter = (
+                <div>
+                    <div className='input-group pull-left'>
+                        <select
+                            className='form-control status'
+                            onChange={this.handleChangeFilter}
+                        >
+                            <option value=''>Todas</option>
+                            <option value='active'>Activa</option>
+                            <option value='locked'>Inactiva</option>
+                            <option value='lockedout'>Bloqueada</option>
+                            <option value='closed'>Cerradas</option>
+                        </select>
+                    </div>
+
+                    <div className='input-group'>
+                        <select
+                            className='form-control plans'
+                            onChange={this.handleChangeFilter}
+                        >
+                            <option value=''>Todoas los planes</option>
+                            <option value='basic'>Básico</option>
+                            <option value='professional'>Profesional</option>
+                            <option value='premium'>Premium</option>
+                        </select>
+                    </div>
+                </div>
+            );
+
             const tableActive = this.makeTable(activeAccounts, activePagination);
-            const panelActive = this.insertToPanel(tableActive, 'panel-all', btn);
+            const panelActive = this.insertToPanel(tableActive, 'panel-all', btn, filter);
 
             // create structure html for all locked accounts
             const tableLocked = this.makeTable(lockedAccounts, lockedPagination);
@@ -381,6 +531,7 @@ export default class Mailboxes extends React.Component {
 
     render() {
         let message = null;
+        let content = null;
 
         if (this.state.error) {
             message = (
@@ -392,13 +543,17 @@ export default class Mailboxes extends React.Component {
             );
         }
 
-        let content = (
-            <div className='text-center'>
-                <h4>
-                    No se han encontrado casillas para el dominio : {this.state.domainNotFound}
-                </h4>
-            </div>
-        );
+        if (this.state.notMatches) {
+            const domain = (this.state.domain) ? `para el dominio: ${this.state.domain}` : '';
+            content = (
+                <div className='text-center'>
+                    <h4>
+                        {`No se han encontrado resultados ${domain}`}
+                    </h4>
+                </div>
+            );
+        }
+
         const pagelInfo = (
             <PageInfo
                 titlePage='Casillas'
@@ -417,6 +572,7 @@ export default class Mailboxes extends React.Component {
                     onClick={this.handleTabChanged}
                 />
             );
+
         }
 
         return (

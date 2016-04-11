@@ -88,9 +88,20 @@ export default class MailboxDetails extends React.Component {
                 }
             }
 
-            this.setState({
-                data: account,
-                alias: items
+            account.viewMailPath(global.window.manager_config.webmailLifetime, (error, res) => {
+                if (res) {
+                    return this.setState({
+                        data: account,
+                        alias: items,
+                        webmail: `${global.window.manager_config.webMailUrl}${res}`
+                    });
+                }
+
+                this.setState({
+                    data: account,
+                    alias: items,
+                    webmail: false
+                });
             });
 
             GlobalActions.emitEndLoading();
@@ -112,9 +123,20 @@ export default class MailboxDetails extends React.Component {
                     }
                 }
 
-                this.setState({
-                    data: result,
-                    alias: items
+                result.viewMailPath(global.window.manager_config.webmailLifetime, (error, res) => {
+                    if (res) {
+                        return this.setState({
+                            data: result,
+                            alias: items,
+                            webmail: `${global.window.manager_config.webMailUrl}${res}`
+                        });
+                    }
+
+                    this.setState({
+                        data: result,
+                        alias: items,
+                        webmail: false
+                    });
                 });
             }).catch((error) => {
                 GlobalActions.emitMessage({
@@ -314,14 +336,29 @@ export default class MailboxDetails extends React.Component {
                 }
             ];
 
-            btnsStats = [
-                {
-                    props: {
-                        className: 'btn btn-xs btn-default action-info-btns'
-                    },
-                    label: 'Ver Correos'
-                }
-            ];
+            if (this.state.webmail) {
+                btnsStats = [
+                    {
+                        props: {
+                            className: 'btn btn-xs btn-default action-info-btns',
+                            target: '_blank',
+                            href: this.state.webmail
+                        },
+                        label: 'Ver Correos'
+                    }
+                ];
+            } else {
+                btnsStats = [
+                    {
+                        props: {
+                            className: 'btn btn-xs btn-default disabled',
+                            title: 'Hubo un error al obtener el acceso al mail',
+                            disabled: 'disabled'
+                        },
+                        label: 'Ver Correos'
+                    }
+                ];
+            }
 
             const formAutoResp = (
                 <FormVacacionesMailbox data={this.state.data}/>

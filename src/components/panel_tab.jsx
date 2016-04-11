@@ -13,6 +13,15 @@ export default class Panel extends React.Component {
         };
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (Object.keys(nextProps.tabs)[0] !== Object.keys(this.props.tabs)[0]) {
+            const tab = this.props.location.query.tab || Object.keys(nextProps.tabs)[0];
+            this.setState({
+                tab
+            });
+        }
+    }
+
     changeTab(e, tabName) {
         e.preventDefault();
 

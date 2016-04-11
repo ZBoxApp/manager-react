@@ -266,6 +266,25 @@ export function modifyDomain(domain, success, error) {
     );
 }
 
+export function modifyDomainByAttrs(domainId, attrs, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.modifyDomain(domainId, attrs, (err, data) => {
+                if (err) {
+                    const e = handleError('modifyDomainByAttrs', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('modifyDomainByAttrs', err);
+            return error(e);
+        }
+    );
+}
+
 export function addDistributionList(name, attrs, success, error) {
     initZimbra().then(
         (zimbra) => {
@@ -359,6 +378,20 @@ export function createAccount(mail, passwd, attrs, success, error) {
             return error(e);
         }
     );
+}
+
+export function createAccountByBatch(mail, passwd, attrs) {
+    return ZimbraStore.getCurrent().createAccount(mail, passwd, attrs);
+}
+
+export function modifyAccountByBatch(id, attrs) {
+    //window.Zimbra.modifyAccount(temp1.account[0].id, {sn: 'nuevo sn'});
+    return ZimbraStore.getCurrent().modifyAccount(id, attrs);
+}
+
+export function buildAccountByObject(account) {
+    const zimbra = ZimbraStore.getCurrent();
+    return zimbra.dictionary.classFactory('account', account, zimbra.client);
 }
 
 export function modifyAccount(idZimbra, attrs, success, error) {
@@ -553,6 +586,25 @@ export function getAllCos(success, error) {
             }
 
             return null;
+        }
+    );
+}
+
+export function getAllDistributionLists(query, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.getAllDistributionLists((err, data) => {
+                if (err) {
+                    const e = handleError('getAllDistributionLists', err);
+                    return error(e);
+                }
+
+                return success(data);
+            }, query);
+        },
+        (err) => {
+            const e = handleError('getAllDistributionLists', err);
+            return error(e);
         }
     );
 }

@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import React from 'react';
+import PasswordStrengthMeter from 'react-password-strength-meter';
 import Panel from '../panel.jsx';
 import Button from '../button.jsx';
 import MessageBar from '../message_bar.jsx';
@@ -11,6 +12,7 @@ import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import EventStore from '../../stores/event_store.jsx';
 import MailboxStore from '../../stores/mailbox_store.jsx';
+import DomainStore from '../../stores/domain_store.jsx';
 
 import Constants from '../../utils/constants.jsx';
 
@@ -25,9 +27,17 @@ export default class CreateMailBox extends React.Component {
         this.showMessage = this.showMessage.bind(this);
         this.handleRadioChanged = this.handleRadioChanged.bind(this);
         this.controllerDataList = this.controllerDataList.bind(this);
+        this.handlePasswd = this.handlePasswd.bind(this);
+
         this.reset = null;
 
         this.state = {};
+    }
+
+    handlePasswd(e) {
+        const hidePasswd = this.refs.passwd;
+
+        hidePasswd.value = e.target.value;
     }
 
     showMessage(attrs) {
@@ -43,6 +53,8 @@ export default class CreateMailBox extends React.Component {
         Utils.validateInputRequired(this.refs).then(() => {
             // here assign missing properties.
             const domain = document.querySelector('input[list=\'domain\']');
+            const passwd = this.refs.passwd.value;
+            const maskPasswd = document.getElementById('password');
 
             if (domain.value === '') {
                 GlobalActions.emitMessage({
@@ -51,6 +63,17 @@ export default class CreateMailBox extends React.Component {
                 });
 
                 domain.focus();
+
+                return false;
+            }
+
+            if (passwd.length < 9) {
+                GlobalActions.emitMessage({
+                    message: 'La contraseña debe ser mayor a 8 caracteres, verifique por favor.',
+                    typeError: messageType.ERROR
+                });
+
+                maskPasswd.focus();
 
                 return false;
             }
@@ -68,7 +91,7 @@ export default class CreateMailBox extends React.Component {
 
             Client.createAccount(
                 email,
-                this.refs.passwd.value,
+                passwd,
                 attrs,
                 (data) => {
                     // reset form when all is ok
@@ -76,6 +99,8 @@ export default class CreateMailBox extends React.Component {
                     this.reset.toggleOptions();
 
                     MailboxStore.setMailbox(data);
+
+                    //return Utils.handleLink(event, `/mailboxes/${data.id}`, this.props.location);
 
                     GlobalActions.emitMessage({
                         message: 'Se ha creado su cuenta con éxito.',
@@ -144,6 +169,24 @@ export default class CreateMailBox extends React.Component {
                 }
                 return true;
             });
+
+            if (this.props.params.id) {
+                let defaultDomain = null;
+                if (DomainStore.getCurrent()) {
+                    defaultDomain = DomainStore.getCurrent();
+                }
+
+                if (!defaultDomain) {
+                    const currentDomainId = this.props.params.id;
+                    defaultDomain = response.domains.domain.find((domain) => {
+                        if (currentDomainId === domain.id) {
+                            return domain;
+                        }
+                    });
+                }
+
+                response.currentDomain = defaultDomain.name;
+            }
 
             this.setState(response);
 
@@ -259,6 +302,7 @@ export default class CreateMailBox extends React.Component {
                                             className='form-control'
                                             placeholder='Dominio'
                                             getController={this.controllerDataList}
+                                            initialFilter={this.state.currentDomain}
                                         />
                                     </div>
                                 </div>
@@ -352,12 +396,27 @@ export default class CreateMailBox extends React.Component {
 
                         <div className='col-sm-8'>
                             <input
-                                type='password'
+                                type='hidden'
                                 className='form-control'
                                 data-required='true'
                                 data-message='La contraseña de su casilla es requerida, verifique por favor.'
                                 ref='passwd'
                                 id='passwdMeter'
+                            />
+                            <PasswordStrengthMeter
+                                passwordText=''
+                                className='form-control passwd-field'
+                                hasLabel={false}
+                                hasSuggestion={false}
+                                hasWarning={true}
+                                warning='Su contraseña debe ser mayor a 8 caracteres.'
+                                onChange={this.handlePasswd}
+                                strength={{
+                                    0: 'Su contraseña es muy debil',
+                                    1: 'Debe incrementar la dificultad de su contraseña',
+                                    2: 'Su contraseña es relativamente fuerte',
+                                    3: 'Su contraseña es fuerte'
+                                }}
                             />
                         </div>
                     </div>

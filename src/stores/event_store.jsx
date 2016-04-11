@@ -56,6 +56,30 @@ class EventStoreClass extends EventEmitter {
     removeToastListener(callback) {
         this.removeListener(eventTypes.NEW_TOAST_EVENT, callback);
     }
+
+    emitTask(params) {
+        this.emit(eventTypes.START_TASK_LOADING_EVENT, params);
+    }
+
+    emitEndTask(params) {
+        this.emit(eventTypes.END_TASK_LOADING_EVENT, params);
+    }
+
+    addEndTaskSListener(params) {
+        this.on(eventTypes.END_TASK_LOADING_EVENT, params);
+    }
+
+    addTaskSListener(callback) {
+        this.on(eventTypes.START_TASK_LOADING_EVENT, callback);
+    }
+
+    removeTaskSListener(callback) {
+        this.removeListener(eventTypes.START_TASK_LOADING_EVENT, callback);
+    }
+
+    removeEndTaskSListener(params) {
+        this.removeListener(eventTypes.END_TASK_LOADING_EVENT, params);
+    }
 }
 
 var EventStore = new EventStoreClass();
@@ -76,6 +100,12 @@ EventStore.dispatchToken = AppDispatcher.register((payload) => {
         break;
     case ActionTypes.NEW_TOAST:
         EventStore.emitToast(action.message);
+        break;
+    case ActionTypes.START_TASK_LOADING:
+        EventStore.emitTask(action.params);
+        break;
+    case ActionTypes.END_TASK_LOADING:
+        EventStore.emitEndTask(action.params);
         break;
     default:
     }
