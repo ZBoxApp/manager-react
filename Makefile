@@ -1,11 +1,19 @@
 .PHONY: build install test run run-fullmap clean stop nuke
 
-test:
-	@echo Checking for style guide compliance
+test: | install
+	@echo Checking for SCSS style guide compliance
+
+	@scss-lint ./src/sass/**/*.scss
+
+	@echo Checking for JS style guide compliance
 
 	@npm run check
 
 install: package.json
+	@echo Getting scss-lint using gem
+
+	@gem install scss_lint
+
 	@echo Getting dependencies using npm
 
 	@npm install
