@@ -178,3 +178,98 @@ export function getDomain(id, success, error) {
         }
     );
 }
+
+export function getAllAccounts(opts, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.getAllAccounts((err, data) => {
+                if (err) {
+                    let e = handleError('getAllAccounts', err);
+                    return error(e);
+                }
+
+                return success(data);
+            }, opts);
+        },
+        (err) => {
+            let e = handleError('getAllAccounts', err);
+            return error(e);
+        }
+    );
+}
+
+export function getAccount(id, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.getAccount(id, (err, data) => {
+                if (err) {
+                    let e = handleError('getAccount', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            let e = handleError('getAccount', err);
+            return error(e);
+        }
+    );
+}
+
+export function createAccount(mail, passwd, attrs, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.createAccount(mail, passwd, attrs, (err, data) => {
+                if (err) {
+                    let e = handleError('createAccount', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            let e = handleError('createAccount', err);
+            return error(e);
+        }
+    );
+}
+
+export function modifyAccount(idZimbra, attrs, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.modifyAccount(idZimbra, attrs, (err, data) => {
+                if (err) {
+                    let e = handleError('modifyAccount', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            let e = handleError('modifyAccount', err);
+            return error(e);
+        }
+    );
+}
+
+export function removeAccount(idZimbra, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.removeAccount(idZimbra, (err, data) => {
+                if (err) {
+                    let e = handleError('removeAccount', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            let e = handleError('removeAccount', err);
+            return error(e);
+        }
+    );
+}

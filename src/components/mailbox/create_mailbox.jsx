@@ -1,36 +1,101 @@
+import $ from 'jquery';
 import React from 'react';
-import {browserHistory} from 'react-router';
 import Panel from '../panel.jsx';
 import Button from '../button.jsx';
+import MessageBar from '../message_bar.jsx';
+
+import * as GlobalActions from '../../action_creators/global_actions.jsx';
+import * as Client from '../../utils/client.jsx';
+import * as Utils from '../../utils/utils.jsx';
 
 export default class CreateMailBox extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleClick = this.handleClick.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
 
-        this.state = {
-            notification: false,
-            notificationMsg: ''
-        };
+        this.state = {};
     }
 
-    componentDidMount() {
-        $('#selectDomains').select2({
-            placeholder: 'Por favor, introduzca 3 caracteres.',
-            allowClear: true
+    handleSubmit(e) {
+        e.preventDefault();
+
+        Utils.validateInputRequired(this.refs).then(() => {
+            // here assign missing properties.
+            let attrs = {
+                givenName: this.refs.givenName.value,
+                sn: this.refs.sn.value
+            };
+
+            Client.createAccount(
+                this.refs.mail.value,
+                this.refs.mail.passwd,
+                attrs,
+                (data) => {
+                    // reset form when all is ok
+                    document.getElementById('createAccount').reset();
+                    this.setState(
+                        {
+                            error: `Su cuenta ${data.name} ha sido creada con èxito.`,
+                            typeError: 'success'
+                        }
+                    );
+                },
+                (error) => {
+                    this.setState(
+                        {
+                            error: error.message,
+                            typeError: 'warning'
+                        }
+                    );
+                }
+            );
+        }).catch((err) => {
+            this.setState(
+                {
+                    error: err.message,
+                    typeError: err.typeError
+                }
+            );
+
+            err.node.focus();
         });
     }
 
-    handleClick(e, path) {
-        e.preventDefault();
+    componentDidMount() {
+        /*$('#selectDomains').select2({
+            placeholder: 'Por favor, introduzca 3 caracteres.',
+            allowClear: true
+        });*/
 
-        browserHistory.push(path);
+        $('#sidebar-mailboxes').addClass('active');
+        GlobalActions.emitEndLoading();
+    }
+
+    componentWillUnmount() {
+        $('#sidebar-mailboxes').removeClass('active');
     }
 
     render() {
+        let message;
+        if (this.state.error) {
+            message = (
+                <MessageBar
+                    message={this.state.error}
+                    type={this.state.typeError}
+                    autoclose={true}
+                />
+            );
+        }
+
         let form = (
-            <form className='simple_form form-horizontal mailbox-form'>
+            <form
+                className='simple_form form-horizontal mailbox-form'
+                onSubmit={(e) => {
+                    this.handleSubmit(e);
+                }}
+                id='createAccount'
+            >
                 <div className='form-group string required'>
                     <label className='string required col-sm-3 control-label'>
                         <abbr title='requerido'>{'*'}</abbr>
@@ -42,9 +107,9 @@ export default class CreateMailBox extends React.Component {
                             <div className='col-xs-6'>
                                 <input
                                     type='text'
-                                    required='required'
                                     className='form-control'
-                                    ref='address'
+                                    ref='mail'
+                                    data-required='true'
                                 />
                             </div>
                             <div className='col-xs-6'>
@@ -71,7 +136,7 @@ export default class CreateMailBox extends React.Component {
                         <input
                             type='text'
                             className='form-control'
-                            ref='name'
+                            ref='givenName'
                         />
                     </div>
                 </div>
@@ -85,7 +150,7 @@ export default class CreateMailBox extends React.Component {
                         <input
                             type='text'
                             className='form-control'
-                            ref='lastname'
+                            ref='sn'
                         />
                     </div>
                 </div>
@@ -106,25 +171,6 @@ export default class CreateMailBox extends React.Component {
 
                 <div className='form-group string'>
                     <label className='string required col-sm-3 control-label'>
-                        {'Chat'}
-                    </label>
-
-                    <div className='col-sm-8'>
-                        <label className='radio-inline pretty-input'>
-                            <div className='pretty-checkbox'>
-                                <input
-                                    type='checkbox'
-                                    className='pretty'
-                                    ref='hasChat'
-                                />
-                                <span></span>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <div className='form-group string'>
-                    <label className='string required col-sm-3 control-label'>
                         {'Administrador delegado'}
                     </label>
 
@@ -134,7 +180,7 @@ export default class CreateMailBox extends React.Component {
                                 <input
                                     type='checkbox'
                                     className='pretty'
-                                    ref='isAdministrator'
+                                    ref='zimbraIsDelegatedAdminAccount'
                                 />
                                 <span></span>
                             </div>
@@ -200,6 +246,7 @@ export default class CreateMailBox extends React.Component {
                         <input
                             type='password'
                             className='form-control'
+                            data-required='true'
                             ref='passwd'
                         />
                     </div>
@@ -218,7 +265,7 @@ export default class CreateMailBox extends React.Component {
                             {
                                 className: 'btn btn-default',
                                 onClick: (e) => {
-                                    this.handleClick(e, '/mailboxes');
+                                    Utils.handleLink(e, '/mailboxes', this.props.location);
                                 }
                             }
                             }
@@ -236,20 +283,33 @@ export default class CreateMailBox extends React.Component {
                 props: {
                     className: 'btn btn-default btn-xs',
                     onClick: (e) => {
-                        this.handleClick(e, '/mailboxes');
+                        Utils.handleLink(e, '/mailboxes', this.props.location);
                     }
                 }
             }
         ];
 
         return (
-            <Panel
-                title={'Agregar Casilla'}
-                btnsHeader={actions}
-                classHeader={'forum-box'}
-            >
-                {form}
-            </Panel>
+            <div>
+                {message}
+                <div className='content animate-panel'>
+                    <div className='row'>
+                        <div className='col-md-12 central-content'>
+                            <Panel
+                                title={'Agregar Casilla'}
+                                btnsHeader={actions}
+                                classHeader={'forum-box'}
+                            >
+                                {form}
+                            </Panel>
+                        </div>
+                    </div>
+                </div>
+            </div>
         );
     }
 }
+
+CreateMailBox.propTypes = {
+    location: React.PropTypes.object
+};

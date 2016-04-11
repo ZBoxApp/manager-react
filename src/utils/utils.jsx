@@ -159,3 +159,58 @@ export function handleLink(e, path, location) {
         browserHistory.push(path);
     }
 }
+
+export function isObjectEmpty(value) {
+    for (const key in value) {
+        if (value.hasOwnProperty(key)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function validateInputRequired(refs) {
+    return new Promise((resolve, reject) => {
+        if (!refs || isObjectEmpty(refs) || Array.isArray(refs)) {
+            reject({
+                message: 'No se puede validar un arreglo o un objeto vacio o indefinido',
+                typeError: 'warning'
+            });
+        }
+
+        for (const ref in refs) {
+            if (refs.hasOwnProperty(ref)) {
+                if (refs[ref].hasAttribute('data-required') && refs[ref].getAttribute('data-required') === 'true' && refs[ref].value === '') {
+                    let message;
+                    if (refs[ref].getAttribute('data-message') && refs[ref].getAttribute('data-message').length > 0) {
+                        message = refs[ref].getAttribute('data-message');
+                    } else {
+                        message = 'Algunos Campos son requeridos, verificar por favor.';
+                    }
+                    const Error = {
+                        message,
+                        typeError: 'warning',
+                        node: refs[ref]
+                    };
+
+                    return reject(Error);
+                }
+            }
+        }
+        return resolve(null);
+    });
+}
+
+export function toggleStatusButtons(classNames, isDisabled) {
+    let elements = document.querySelectorAll(classNames);
+    if (elements.length > 0) {
+        let l = elements.length;
+        for (; l-- > 0;) {
+            if (isDisabled) {
+                elements[l].setAttribute('disabled', 'disabled');
+            } else {
+                elements[l].removeAttribute('disabled');
+            }
+        }
+    }
+}

@@ -1,5 +1,4 @@
 import React from 'react';
-
 import * as Utils from '../utils/utils.jsx';
 
 export default class Panel extends React.Component {
@@ -8,14 +7,21 @@ export default class Panel extends React.Component {
 
         this.changeTab = this.changeTab.bind(this);
 
+        const tab = this.props.location.query.tab || Object.keys(this.props.tabs)[0];
         this.state = {
-            tab: Object.keys(this.props.tabs)[0]
+            tab
         };
     }
 
     changeTab(e, tabName) {
         e.preventDefault();
-        this.setState({tab: Utils.slug(tabName)});
+
+        const tab = Utils.slug(tabName);
+        this.setState({tab});
+
+        if (this.props.onClick) {
+            this.props.onClick(tab);
+        }
     }
 
     render() {
@@ -61,5 +67,7 @@ export default class Panel extends React.Component {
 
 Panel.propTypes = {
     tabNames: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    tabs: React.PropTypes.array.isRequired
+    tabs: React.PropTypes.object.isRequired,
+    location: React.PropTypes.object.isRequired,
+    onClick: React.PropTypes.func
 };

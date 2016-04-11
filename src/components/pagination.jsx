@@ -10,6 +10,10 @@ export default class Pagination extends React.Component {
         this.handleNext = this.handleNext.bind(this);
         this.handleLast = this.handleLast.bind(this);
     }
+    getPageQueryString(number) {
+        const url = this.props.url;
+        return `${(url.indexOf('?') > -1 ? '&' : '?')}page=${number}`;
+    }
     handleFirst(e) {
         e.preventDefault();
         browserHistory.push(`/${this.props.url}`);
@@ -17,11 +21,13 @@ export default class Pagination extends React.Component {
     handlePrev(e) {
         e.preventDefault();
         const prevPage = this.props.currentPage - 1;
+        const url = this.props.url;
 
         if (prevPage > 1) {
-            browserHistory.push(`/${this.props.url}?page=${prevPage}`);
+            const page = this.getPageQueryString(prevPage);
+            browserHistory.push(`/${url}${page}`);
         } else {
-            browserHistory.push(`/${this.props.url}`);
+            browserHistory.push(`/${url}`);
         }
     }
     handleChange(e) {
@@ -30,18 +36,20 @@ export default class Pagination extends React.Component {
         const page = parseInt(e.currentTarget.innerText, 10);
         let pageUrl = '';
         if (page > 1) {
-            pageUrl = `?page=${page}`;
+            pageUrl = this.getPageQueryString(page);
         }
 
         browserHistory.push(`/${this.props.url}${pageUrl}`);
     }
     handleNext(e) {
         e.preventDefault();
-        browserHistory.push(`/${this.props.url}?page=${this.props.currentPage + 1}`);
+        const page = this.getPageQueryString(this.props.currentPage + 1);
+        browserHistory.push(`/${this.props.url}${page}`);
     }
     handleLast(e) {
         e.preventDefault();
-        browserHistory.push(`/${this.props.url}?page=${this.props.totalPages}`);
+        const page = this.getPageQueryString(this.props.totalPages);
+        browserHistory.push(`/${this.props.url}${page}`);
     }
     render() {
         const total = this.props.totalPages;
@@ -114,7 +122,7 @@ export default class Pagination extends React.Component {
         }
 
         return (
-            <div className='pagination'>
+            <div id='pagination'>
                 <ul className='pagination'>
                     {first}
                     {prev}
