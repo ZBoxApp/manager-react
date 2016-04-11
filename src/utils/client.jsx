@@ -556,3 +556,60 @@ export function getAllCos(success, error) {
         }
     );
 }
+
+export function getDistributionList(id, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.getDistributionList(id, (err, data) => {
+                if (err) {
+                    const e = handleError('getDistributionList', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('getDistributionList', err);
+            return error(e);
+        }
+    );
+}
+
+export function modifyDistributionList(id, attrs, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.modifyDistributionList(id, attrs, (err, data) => {
+                if (err) {
+                    const e = handleError('modifyDistributionList', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('modifyDistributionList', err);
+            return error(e);
+        }
+    );
+}
+
+export function renameAccount(account, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.renameAccount(account, (err, data) => {
+                if (err) {
+                    const e = handleError('renameAccount', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('renameAccount', err);
+            return error(e);
+        }
+    );
+}

@@ -112,7 +112,7 @@ MessageBar.defaultProps = {
 
 MessageBar.propTypes = {
     message: React.PropTypes.string.isRequired,
-    type: React.PropTypes.oneOf(['SUCCESS', 'ERROR', 'WARNING', 'INFO']),
+    type: React.PropTypes.oneOf(['SUCCESS', 'ERROR', 'WARNING', 'INFO', 'LOCKED']),
     position: React.PropTypes.oneOf(['absolute', 'fixed', 'relative', 'static', 'inherit']),
     canClose: React.PropTypes.bool,
     autoclose: React.PropTypes.bool,

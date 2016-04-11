@@ -21,6 +21,7 @@ export default {
     EventTypes: keyMirror({
         DOMAIN_ADMINS_CHANGE_EVENT: null,
         DOMAIN_DLS_CHANGE_EVENT: null,
+        ACCOUNT_CHANGE_EVENT: null,
         START_LOADING_EVENT: null,
         END_LOADING_EVENT: null,
         USER_CHANGE_EVENT: null,
@@ -32,7 +33,8 @@ export default {
         SUCCESS: null,
         WARNING: null,
         ERROR: null,
-        INFO: null
+        INFO: null,
+        LOCKED: null
     }),
 
     ZimbraCodes: {
