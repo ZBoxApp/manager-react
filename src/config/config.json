@@ -1,5 +1,5 @@
 {
-    "debug": true,
+    "debug": false,
     "zimbraUrl": "http://zimbra.zboxapp.dev:8000/service/admin/soap",
     "zimbraProxy": "https://zimbra.zboxapp.dev:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",

@@ -7,7 +7,23 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         this.date = null;
         this.status = null;
         this.className = null;
-        this.lastConection = 'no se ha conectado';
+        this.lastConection = 'No se ha conectado';
+        this.getMailSize = this.getMailSize.bind(this);
+
+        this.state = {};
+    }
+
+    getMailSize() {
+        this.props.data.getMailboxSize((err, bytes) => {
+            let currentSize = '0 MB';
+            if (bytes) {
+                currentSize = Utils.bytesToMegas(bytes);
+            }
+
+            this.setState({
+                size: currentSize
+            });
+        });
     }
 
     componentWillMount() {
@@ -16,24 +32,32 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         switch (this.props.data.attrs.zimbraAccountStatus) {
         case 'inactive':
             this.status = 'Desactivada';
-            this.className = 'btn btn-md btn-default';
+            this.className = 'btn-default mailbox-status';
             break;
         case 'locked':
             this.status = 'Bloqueada';
-            this.className = 'btn btn-md btn-primary2';
+            this.className = 'btn-primary2 mailbox-status';
             break;
         default:
             this.status = 'Activa';
-            this.className = 'btn btn-md btn-info';
+            this.className = 'btn-info mailbox-status';
             break;
         }
 
         if (this.props.data.attrs.zimbraLastLogonTimestamp) {
             this.lastConection = Utils.dateFormatted(this.props.data.attrs.zimbraLastLogonTimestamp);
         }
+
+        this.getMailSize();
     }
 
     render() {
+        let size = null;
+
+        if (this.state.size) {
+            size = this.state.size;
+        }
+
         return (
             <div>
                 <div className='row'>
@@ -59,7 +83,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
                         <div>
                             <p>
                                 <span className='center-block'>Espacio Usado</span>
-                                <strong>0 Bytes</strong>
+                                <strong>{size}</strong>
                             </p>
                         </div>
                     </div>

@@ -10,6 +10,8 @@ class DomainStoreClass extends EventEmitter {
     constructor() {
         super();
         this.current = null;
+        this.distributionListOwners = null;
+        this.distributionListMembers = null;
     }
 
     getCurrent() {
@@ -129,6 +131,26 @@ class DomainStoreClass extends EventEmitter {
         return lists;
     }
 
+    getDistributionListById(listId, domain) {
+        if (this.current !== domain) {
+            this.setCurrent(domain);
+        }
+
+        const distributionLists = this.current.lists;
+
+        if (!distributionLists) {
+            return null;
+        }
+
+        for (const id in distributionLists) {
+            if (distributionLists.hasOwnProperty(id) && id === listId) {
+                return distributionLists[id];
+            }
+        }
+
+        return false;
+    }
+
     setDistibutionLists(domain, listsArray) {
         if (this.current !== domain) {
             this.setCurrent(domain);
@@ -149,6 +171,74 @@ class DomainStoreClass extends EventEmitter {
         this.current.lists = lists;
 
         this.emitDistributionListsChange();
+    }
+
+    getMembers() {
+        if (this.distributionListMembers) {
+            return this.distributionListMembers;
+        }
+
+        return null;
+    }
+
+    setMembers(members) {
+        this.distributionListMembers = members;
+    }
+
+    addMember(member) {
+        if (this.distributionListMembers && Array.isArray(this.distributionListMembers)) {
+            this.distributionListMembers.push(member);
+        }
+    }
+
+    removeMember(member) {
+        if (this.distributionListMembers && Array.isArray(this.distributionListMembers)) {
+            const members = this.distributionListMembers;
+            const length = members.length;
+
+            for (let i = 0; i < length; i++) {
+                if (members[i] === member) {
+                    members.splice(i, 1);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    getOwners() {
+        if (this.distributionListOwners) {
+            return this.distributionListOwners;
+        }
+
+        return null;
+    }
+
+    setOwners(owners) {
+        this.distributionListOwners = owners;
+    }
+
+    addOwners(owner) {
+        if (this.distributionListOwners && Array.isArray(this.distributionListOwners)) {
+            this.distributionListOwners.push(owner);
+        }
+    }
+
+    removeOwner(owner) {
+        if (this.distributionListOwners && Array.isArray(this.distributionListOwners)) {
+            const owners = this.distributionListOwners;
+            const length = owners.length;
+
+            for (let i = 0; i < length; i++) {
+                if (owners[i] === owner) {
+                    owners.splice(i, 1);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     removeDistributionList(listId) {

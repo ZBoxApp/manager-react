@@ -1,7 +1,10 @@
 import React from 'react';
 import Button from '../button.jsx';
+import StatusLabel from '../status_label.jsx';
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
+import * as GlobalActions from '../../action_creators/global_actions.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 export default class BlockGeneralInfoMailbox extends React.Component {
     constructor(props) {
@@ -16,24 +19,22 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         this.state = {};
     }
 
-    componentWillMount() {
-        this.domain = this.props.data.name.split('@');
-        this.domain = this.domain[this.domain.length - 1];
-    }
-
     componentDidMount() {
         this.getDomain();
     }
 
     getDomain() {
-        Client.getDomain(this.domain, (data) => {
+        const domain = Utils.getDomainFromString(this.data.name);
+
+        Client.getDomain(domain, (data) => {
             this.setState({
                 hasDomain: true,
                 domainData: data
             });
         }, (error) => {
-            this.setState({
-                error: error.message
+            GlobalActions.emitMessage({
+                error: error.message,
+                typeError: error.type
             });
         });
     }
@@ -44,25 +45,64 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 
     render() {
         let blockInfo = null;
+        let statusCos = null;
+        const cosID = Utils.getEnabledPlansObjectByCos(ZimbraStore.getAllCos(), this.props.data.attrs.zimbraCOSId);
+        let cosName = null;
+
+        switch (cosID.name) {
+        case 'premium':
+            cosName = Utils.titleCase(cosID.name);
+            statusCos = 'label btn-primary2 btn-xs';
+            break;
+        case 'professional':
+            cosName = Utils.titleCase(cosID.name);
+            statusCos = 'label btn-primary btn-xs';
+            break;
+        case 'basic':
+            cosName = Utils.titleCase(cosID.name);
+            statusCos = 'label btn-success btn-xs';
+            break;
+        default:
+            cosName = 'Sin Plan';
+            statusCos = 'label noplan btn-xs';
+            break;
+        }
 
         if (this.state.hasDomain) {
+            const data = this.props.data;
+            const attrs = this.props.data.attrs;
+            const owner = (!attrs.givenName || !attrs.sn) ? null : attrs.givenName + ' ' + attrs.sn;
+            const mail = data.name;
+
+            //properties
+            const description = attrs.description;
+            const mailhost = attrs.zimbraMailHost;
+            const archive = attrs.zimbraArchiveAccount;
+
             blockInfo = (
-                <article>
+                <article className='account-info'>
                     <div>
                         <h4>
-                            <span className='mailbox-name text-success'>{this.data.name}</span>
+                            <span className='mailbox-name text-success'>{mail}</span>
                         </h4>
+                        {owner && (
+                            <h5>
+                                {owner}
+                            </h5>
+                        )}
                     </div>
+
+                    {description && (
+                        <div>
+                            <p>
+                                {description}
+                            </p>
+                        </div>
+                    )}
 
                     <div>
                         <p>
-                            {this.data.attrs.description}
-                        </p>
-                    </div>
-
-                    <div>
-                        <p>
-                            <strong>{'Dominio'}: </strong>
+                            <strong>{'Dominio: '}</strong>
                             <Button
                                 btnAttrs={{
                                     onClick: (e) => {
@@ -70,8 +110,34 @@ export default class BlockGeneralInfoMailbox extends React.Component {
                                     }
                                 }}
                             >
-                                {this.domain}
+                                {this.state.domainData.name}
                             </Button>
+                        </p>
+                    </div>
+
+                    {archive && (
+                        <div>
+                            <p>
+                                <strong>{'Archive: '}</strong>
+                                {archive}
+                            </p>
+                        </div>
+                    )}
+
+                    {mailhost && (
+                        <div>
+                            <p>
+                                <strong>{'Mail Host'}: </strong>
+                                {mailhost}
+                            </p>
+                        </div>
+                    )}
+
+                    <div>
+                        <p>
+                            <StatusLabel classes={statusCos}>
+                                {cosName}
+                            </StatusLabel>
                         </p>
                     </div>
                 </article>
