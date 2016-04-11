@@ -12,7 +12,7 @@ import Panel from '../panel.jsx';
 import BlockGeneralInfoMailbox from './info_general_mailbox.jsx';
 import BlockStatsMailbox from './stats_mailbox.jsx';
 import FormVacacionesMailbox from './form_resp_vacaciones_mailbox.jsx';
-import FormAliasMailbox from './form_alias_mailbox.jsx';
+import FormAliasMailbox from './../panel_actions.jsx';
 import ChangePasswordModal from './change_passwd_modal.jsx';
 import ToggleModalButton from '../toggle_modal_button.jsx';
 import MessageBar from '../message_bar.jsx';
@@ -20,6 +20,7 @@ import MessageBar from '../message_bar.jsx';
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
+import Constants from '../../utils/constants.jsx';
 
 export default class MailboxDetails extends React.Component {
     constructor(props) {
@@ -28,6 +29,7 @@ export default class MailboxDetails extends React.Component {
         this.getMailbox = this.getMailbox.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
         this.showMessage = this.showMessage.bind(this);
+        this.handleModifyAlias = this.handleModifyAlias.bind(this);
 
         this.state = {};
     }
@@ -36,11 +38,58 @@ export default class MailboxDetails extends React.Component {
         Utils.handleLink(e, path, location);
     }
 
+    handleModifyAlias(response) {
+        const account = this.state.data;
+
+        Utils.addOrRemoveAlias(account, response).then((handle) => {
+            const errors = [];
+            let flag = false;
+            for (let i = 0; i < handle.length; i++) {
+                if (!handle[i].hasOwnProperty('err')) {
+                    flag = true;
+                }
+
+                if (handle[i].hasOwnProperty('err')) {
+                    const action = (handle[i].action === 'add') ? 'Agregar' : 'Eliminar';
+                    errors.push({
+                        error: `No se ha podido ${action} el alias : ${handle[i].item}`,
+                        type: Constants.MessageType.ERROR
+                    });
+                }
+            }
+
+            if (flag) {
+                errors.push({
+                    error: 'Se han realizado los cambios éxitosamente.',
+                    type: Constants.MessageType.SUCCESS
+                });
+            }
+
+            Client.getAccount(this.state.data.id, (data) => {
+                const items = (typeof data.attrs.zimbraMailAlias == 'string') ? new Array(data.attrs.zimbraMailAlias) : data.attrs.zimbraMailAlias;
+                this.setState({
+                    alias: items
+                });
+
+                GlobalActions.emitMessage({
+                    error: errors,
+                    type: Constants.MessageType.ERROR
+                });
+
+                response.reset();
+            }, (error) => {
+                this.setState({
+                    notFound: true,
+                    message: error.message
+                });
+            });
+        });
+    }
+
     showMessage(attrs) {
         this.setState({
-            error: attrs.message,
-            type: attrs.type.toLowerCase(),
-            autocloseInSecs: 10
+            error: attrs.error,
+            type: attrs.type.toLowerCase()
         });
     }
 
@@ -49,8 +98,10 @@ export default class MailboxDetails extends React.Component {
         Utils.toggleStatusButtons('.action-info-btns', true);
 
         Client.getAccount(id, (data) => {
+            let alias = (typeof data.attrs.zimbraMailAlias == 'string') ? new Array(data.attrs.zimbraMailAlias) : data.attrs.zimbraMailAlias;
             this.setState({
-                data
+                data,
+                alias: alias
             });
 
             GlobalActions.emitEndLoading();
@@ -86,13 +137,26 @@ export default class MailboxDetails extends React.Component {
         let message;
 
         if (this.state.error) {
-            message = (
-                <MessageBar
-                    message={this.state.error}
-                    type={this.state.type}
-                    autoclose={true}
-                />
-            );
+            if (typeof this.state.error === 'object' && Array.isArray(this.state.error)) {
+                message = this.state.error.map((err, i) => {
+                    return (
+                        <MessageBar
+                            key={`new-error-${i}`}
+                            message={err.error}
+                            type={err.type.toLowerCase()}
+                            autoclose={true}
+                        />
+                    );
+                });
+            } else {
+                message = (
+                    <MessageBar
+                        message={this.state.error}
+                        type={this.state.type.toLowerCase()}
+                        autoclose={true}
+                    />
+                );
+            }
         }
 
         if (this.state.data) {
@@ -151,7 +215,10 @@ export default class MailboxDetails extends React.Component {
 
             const formAlias = (
                 <FormAliasMailbox
-                    data={this.state.data}
+                    name={'alias'}
+                    data={this.state.alias}
+                    onApplyChanges={this.handleModifyAlias}
+                    hasExport={true}
                 />
             );
 

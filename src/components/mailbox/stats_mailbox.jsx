@@ -8,6 +8,22 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         this.status = null;
         this.className = null;
         this.lastConection = 'no se ha conectado';
+        this.getMailSize = this.getMailSize.bind(this);
+
+        this.state = {};
+    }
+
+    getMailSize() {
+        this.props.data.getMailboxSize((err, success) => {
+            let currentSize = '0 MB';
+            if (success) {
+                currentSize = Utils.bytesToMegas(success);
+            }
+
+            this.setState({
+                size: currentSize
+            });
+        });
     }
 
     componentWillMount() {
@@ -31,9 +47,17 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         if (this.props.data.attrs.zimbraLastLogonTimestamp) {
             this.lastConection = Utils.dateFormatted(this.props.data.attrs.zimbraLastLogonTimestamp);
         }
+
+        this.getMailSize();
     }
 
     render() {
+        let size = null;
+
+        if (this.state.size) {
+            size = this.state.size;
+        }
+
         return (
             <div>
                 <div className='row'>
@@ -59,7 +83,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
                         <div>
                             <p>
                                 <span className='center-block'>Espacio Usado</span>
-                                <strong>0 Bytes</strong>
+                                <strong>{size}</strong>
                             </p>
                         </div>
                     </div>
