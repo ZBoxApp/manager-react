@@ -1,8 +1,5 @@
 import React from 'react';
 import {browserHistory} from 'react-router';
-import Constants from '../utils/constants.jsx';
-
-const limit = Constants.QueryOptions.DEFAULT_LIMIT;
 
 export default class Pagination extends React.Component {
     constructor(props) {
@@ -51,14 +48,13 @@ export default class Pagination extends React.Component {
     }
     handleLast(e) {
         e.preventDefault();
-        const page = this.getPageQueryString(Math.ceil(this.props.totalPages / limit));
+        const page = this.getPageQueryString(this.props.totalPages);
         browserHistory.push(`/${this.props.url}${page}`);
     }
     render() {
         //let i = 1;
         const total = this.props.totalPages;
         const current = this.props.currentPage;
-        const totalPages = Math.ceil(total / limit);
         const pages = [];
 
         let first;
@@ -68,11 +64,11 @@ export default class Pagination extends React.Component {
 
         const console = (
             <li key='console-page'>
-                <span>{`${current} de ${totalPages}`}</span>
+                <span>{`${current} de ${total}`}</span>
             </li>
         );
 
-        if (current > 1 && current <= totalPages) {
+        if (current > 1 && current <= total) {
             first = (
                 <li key='first-page'>
                     <a
@@ -90,7 +86,7 @@ export default class Pagination extends React.Component {
             );
         }
 
-        if (current < totalPages) {
+        if (current < total) {
             next = (
                 <li key='next-page'>
                     <a
@@ -109,7 +105,7 @@ export default class Pagination extends React.Component {
         }
 
         const rangeBack = current - this.props.range;
-        const rangeForward = ((current + this.props.range) + 1) > totalPages ? totalPages + 1 : ((current + this.props.range) + 1);
+        const rangeForward = ((current + this.props.range) + 1) > total ? total + 1 : ((current + this.props.range) + 1);
 
         for (let p = rangeBack; p < rangeForward; p++) {
             if ((p > 0) && (p <= total)) {
