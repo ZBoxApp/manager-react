@@ -28,7 +28,7 @@
     "react-textarea-autosize": "4.0.0",
     "react-toastr": "^2.6.0",
     "toastr": "^2.1.2",
-    "zimbra-admin-api-js": "ZBoxApp/zimbra-admin-api-js"
+    "zimbra-admin-api-js": "ZBoxApp/zimbra-admin-api-js#manager"
   },
   "devDependencies": {
     "assets-webpack-plugin": "^3.4.0",
