@@ -3,10 +3,11 @@
 
 import $ from 'jquery';
 import React from 'react';
+import {Link} from 'react-router';
 import ReactDOM from 'react-dom';
 import * as GlobalActions from '../action_creators/global_actions.jsx';
 
-import {browserHistory, Link} from 'react-router';
+import * as Utils from '../utils/utils.jsx';
 import logo from '../images/logo.png';
 
 export default class Header extends React.Component {
@@ -15,18 +16,22 @@ export default class Header extends React.Component {
         this.handleSearch = this.handleSearch.bind(this);
         this.toggleSidebar = this.toggleSidebar.bind(this);
     }
+
     handleSearch(e) {
+        //browserHistory.push(`search/?utf8=${utf8}&query=${encodeURIComponent(term)}`);
+        //const utf8 = ReactDOM.findDOMNode(this.refs.utf8).value.trim();
         e.preventDefault();
         const search = ReactDOM.findDOMNode(this.refs.query);
         const term = search.value.trim();
-        const utf8 = ReactDOM.findDOMNode(this.refs.utf8).value.trim();
         search.value = '';
         GlobalActions.emitStartLoading();
-        browserHistory.push(`search/global?utf8=${utf8}&query=${encodeURIComponent(term)}`);
+        Utils.handleLink(e, `/search/${encodeURIComponent(term)}`);
     }
+
     toggleSidebar() {
         $('body').toggleClass('hide-sidebar').toggleClass('show-sidebar');
     }
+
     render() {
         return (
             <div id='header'>

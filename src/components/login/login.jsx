@@ -34,7 +34,7 @@ export default class Login extends React.Component {
     componentDidMount() {
         Client.isLoggedIn((data) => {
             if (data && data.logged_in) {
-                browserHistory.push('/companies');
+                browserHistory.push('/mailboxes');
             } else {
                 $('body').addClass('blank');
             }
@@ -46,7 +46,7 @@ export default class Login extends React.Component {
         this.setState({user});
 
         if (user) {
-            browserHistory.push('/companies');
+            browserHistory.push('/mailboxes');
         }
     }
     submit(email, password) {
@@ -71,7 +71,7 @@ export default class Login extends React.Component {
                 return Client.getAllCos(
                     (cosData) => {
                         ZimbraStore.setAllCos(cosData);
-                        browserHistory.push('/companies');
+                        browserHistory.push('/mailboxes');
                     }
                 );
             },
