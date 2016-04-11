@@ -33,8 +33,10 @@ export default class SearchView extends React.Component {
             loading: true
         });
         Client.search({
+            maxResults: window.manager_config.maxResultOnRequestZimbra,
             query: `(|(mail=*${query}*)(cn=*${query}*)(sn=*${query}*)(gn=*${query}*)(displayName=*${query}*)(zimbraMailDeliveryAddress=*${query}*)(zimbraDomainName=*${query}*)(uid=*${query}*)(zimbraMailAlias=*${query}*)(uid=*${query}*)(zimbraDomainName=*${query}*)(cn=*${query}*))`,
-            types: 'accounts,distributionlists,domains'
+            types: 'accounts,distributionlists,domains',
+            attrs: 'objectClass'
         }, (success) => {
             const result = [];
 
@@ -55,7 +57,8 @@ export default class SearchView extends React.Component {
 
             return this.setState({
                 result,
-                loading: false
+                loading: false,
+                notfound: false
             });
         }, (error) => {
             console.log(error); //eslint-disable-line no-console
@@ -131,6 +134,7 @@ export default class SearchView extends React.Component {
                     <tr
                         key={id}
                         className={'mailbox-row'}
+                        onClick={(e) => Utils.handleLink(e, url)}
                     >
                         <td className={'mailbox-name'}>
                             {tipo}
@@ -166,7 +170,7 @@ export default class SearchView extends React.Component {
                         id='index-domains'
                         cellPadding='1'
                         cellSpacing='1'
-                        className='table table-condensed table-striped vertical-align index-mailbox-table'
+                        className='table table-condensed table-striped vertical-align index-mailbox-table table-search'
                     >
                         <thead>
                         <tr>

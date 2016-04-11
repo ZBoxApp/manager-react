@@ -18,6 +18,7 @@ class DomainStoreClass extends EventEmitter {
 
     resetThisStore() {
         this.current = null;
+        this.domains = null;
         this.distributionListOwners = null;
         this.distributionListMembers = null;
         this.zoneDNS = null;
@@ -34,6 +35,24 @@ class DomainStoreClass extends EventEmitter {
     getDomains() {
         if (this.domains) {
             return this.domains;
+        }
+
+        return null;
+    }
+
+    getDomainByName(name) {
+        if (this.domains) {
+            const data = this.domains.domain;
+
+            if (data) {
+                let length = data.length;
+
+                for (;length-- > 0;) {
+                    if (data[length].name === name) {
+                        return data[length];
+                    }
+                }
+            }
         }
 
         return null;

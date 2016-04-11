@@ -7,6 +7,8 @@ import DNSZoneForm from './multiform/dns_form.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
 import EventStore from '../../stores/event_store.jsx';
 import MessageBar from '../message_bar.jsx';
+import UserStore from '../../stores/user_store.jsx';
+import * as GlobalActions from '../../action_creators/global_actions.jsx';
 
 export default class CreateDomain extends React.Component {
     constructor(props) {
@@ -15,6 +17,7 @@ export default class CreateDomain extends React.Component {
         this.getNextStep = this.getNextStep.bind(this);
         this.showMessage = this.showMessage.bind(this);
 
+        this.isGlobalAdmin = UserStore.isGlobalAdmin();
         this.multiform = window.manager_config.multiFormDomain;
         let total = 1;
 
@@ -30,7 +33,8 @@ export default class CreateDomain extends React.Component {
 
         this.state = {
             step: 1,
-            total
+            total,
+            isGlobalAdmin: this.isGlobalAdmin
         };
     }
 
@@ -56,6 +60,7 @@ export default class CreateDomain extends React.Component {
     componentDidMount() {
         DomainStore.addNextStepListener(this.getNextStep);
         EventStore.addMessageListener(this.showMessage);
+        GlobalActions.emitEndLoading();
     }
 
     componentWillUnmount() {
@@ -73,76 +78,97 @@ export default class CreateDomain extends React.Component {
             width: `${width}%`
         };
         let error = null;
+        let actions = null;
 
-        if (this.state.error) {
-            error = (
-                <MessageBar
-                    message={this.state.error}
-                    type={this.state.type}
-                    autoclose={true}
-                />
-            );
-        }
-
-        let step = this.state.step;
-
-        if (!this.multiform.hasMailCleaner && step > 1) {
-            ++step;
-        }
-
-        switch (step) {
-        case 1:
-            form = (
-                <CreateDomainForm
-                    params={this.props.params}
-                    state={this.state}
-                />
-            );
-            titleForm = 'Creación de Dominio';
-            break;
-        case 2:
-            form = <MailCleanerForm state={this.state}/>;
-            titleForm = 'Asignación del Dominio al MailCleaner';
-            break;
-        case 3:
-            form = <DNSZoneForm state={this.state}/>;
-            titleForm = 'Asignación de la Zona DNS';
-            break;
-        }
-
-        //onClick: (e) => Utils.handleLink(e, backUrl)
-        const actions = [
-            {
-                label: 'Cancelar',
-                props: {
-                    className: 'btn btn-default btn-xs'
-                }
+        if (this.state.isGlobalAdmin) {
+            if (this.state.error) {
+                error = (
+                    <MessageBar
+                        message={this.state.error}
+                        type={this.state.type}
+                        autoclose={true}
+                    />
+                );
             }
-        ];
 
-        if (this.state.total > 1) {
-            progressForm = (
-                <div className='progress'>
-                    <div
-                        className={'progress-bar progress-bar-info progress-bar-striped active text-center step'}
-                        style={progressSize}
-                    >
-                        <span className='progress-text'>{`${titleForm} - ${progress}`}</span>
+            let step = this.state.step;
+
+            if (!this.multiform.hasMailCleaner && step > 1) {
+                ++step;
+            }
+
+            switch (step) {
+            case 1:
+                form = (
+                    <CreateDomainForm
+                        params={this.props.params}
+                        state={this.state}
+                    />
+                );
+                titleForm = 'Creación de Dominio';
+                break;
+            case 2:
+                form = <MailCleanerForm state={this.state}/>;
+                titleForm = 'Asignación del Dominio al MailCleaner';
+                break;
+            case 3:
+                form = <DNSZoneForm state={this.state}/>;
+                titleForm = 'Asignación de la Zona DNS';
+                break;
+            }
+
+            //onClick: (e) => Utils.handleLink(e, backUrl)
+            actions = [
+                {
+                    label: 'Cancelar',
+                    props: {
+                        className: 'btn btn-default btn-xs'
+                    }
+                }
+            ];
+
+            if (this.state.total > 1) {
+                progressForm = (
+                    <div className='progress'>
+                        <div
+                            className={'progress-bar progress-bar-info progress-bar-striped active text-center step'}
+                            style={progressSize}
+                        >
+                            <span className='progress-text'>{`${titleForm} - ${progress}`}</span>
+                        </div>
                     </div>
+                );
+            }
+        }
+
+        if (!this.state.isGlobalAdmin) {
+            form = (
+                <div className='text-center'>
+                    <h4>
+                        {'Lo sentimos pero usted no tiene permiso para crear dominios.'}
+                    </h4>
                 </div>
             );
         }
 
         return (
-            <Panel
-                title={'Agregar Dominio'}
-                classHeader={'forum-box'}
-                btnsHeader={actions}
-            >
-                {error}
-                {progressForm}
-                {form}
-            </Panel>
+            <div>
+                <div className='content animate-panel'>
+                    <div className='row'>
+                        <div className='col-md-12 panel-with-tabs'>
+                            <Panel
+                                title={'Agregar Dominio'}
+                                classHeader={'forum-box'}
+                                btnsHeader={actions}
+                            >
+                                {error}
+                                {progressForm}
+                                {form}
+                            </Panel>
+                        </div>
+                    </div>
+                </div>
+            </div>
         );
     }
 }
