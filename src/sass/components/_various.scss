@@ -1260,9 +1260,17 @@ label {
 
 // File manager
 
-.hpanel .panel-body.file-body {
-  padding: 30px 0;
-  text-align: center;
+.hpanel {
+  .panel-body.file-body {
+    padding: 30px 0;
+    text-align: center;
+  }
+
+  &.with-min-height {
+    .panel-body {
+      min-height: 200px;
+    }
+  }
 }
 
 .file-body {

@@ -1,9 +1,11 @@
 //import select2 from 'select2';
 import $ from 'jquery';
 import React from 'react';
-import Panel from '../panel.jsx';
 import Button from '../button.jsx';
 import MessageBar from '../message_bar.jsx';
+import Panel from '../panel.jsx';
+import ConfirmDeleteModal from './confirm_delete_modal.jsx';
+import ToggleModalButton from '../toggle_modal_button.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
@@ -15,13 +17,10 @@ export default class EditMailBox extends React.Component {
 
         this.handleEdit = this.handleEdit.bind(this);
         this.handleRadioChanged = this.handleRadioChanged.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
         this.getMailbox = this.getMailbox.bind(this);
         this.fillForm = this.fillForm.bind(this);
 
-        this.state = {
-            data: false
-        };
+        this.state = {};
     }
 
     handleRadioChanged(val) {
@@ -33,11 +32,9 @@ export default class EditMailBox extends React.Component {
         Utils.toggleStatusButtons('.action-button', true);
 
         Utils.validateInputRequired(this.refs).then(() => {
-            let isAdmin = (this.refs.zimbraIsDelegatedAdminAccount.checked === true).toString().toUpperCase();
             let attrs = {
                 givenName: this.refs.givenName.value,
-                sn: this.refs.sn.value,
-                zimbraIsDelegatedAdminAccount: isAdmin
+                sn: this.refs.sn.value
             };
 
             Client.modifyAccount(
@@ -104,27 +101,12 @@ export default class EditMailBox extends React.Component {
         $('#sidebar-mailboxes').removeClass('active');
     }
 
-    handleDelete(e) {
-        e.preventDefault();
-
-        Client.removeAccount(
-            this.state.data.id,
-            (data) => {
-                console.log('success', data); //eslint-disable-line no-console
-            },
-            (error) => {
-                console.log('error', error); //eslint-disable-line no-console
-            }
-        );
-    }
-
     fillForm() {
         let attrs = this.state.data.attrs;
         this.refs.mail.value = this.state.data.name;
         this.refs.givenName.value = attrs.givenName || '';
         this.refs.sn.value = attrs.sn;
         this.refs.description.value = attrs.description || '';
-        this.refs.zimbraIsDelegatedAdminAccount.checked = attrs.zimbraIsDelegatedAdminAccount === 'true';
     }
 
     render() {
@@ -139,10 +121,16 @@ export default class EditMailBox extends React.Component {
             );
         }
 
+        let data;
+        let actions;
+        let form;
+
         if (this.state.data) {
+            data = this.state.data;
             this.fillForm();
         }
-        let form = (
+
+        form = (
             <form
                 className='simple_form form-horizontal mailbox-form'
                 id='editAccount'
@@ -226,25 +214,6 @@ export default class EditMailBox extends React.Component {
 
                 <div className='form-group string'>
                     <label className='string required col-sm-3 control-label'>
-                        {'Administrador delegado'}
-                    </label>
-
-                    <div className='col-sm-8'>
-                        <label className='radio-inline pretty-input'>
-                            <div className='pretty-checkbox'>
-                                <input
-                                    type='checkbox'
-                                    className='pretty'
-                                    ref='zimbraIsDelegatedAdminAccount'
-                                />
-                                <span></span>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <div className='form-group string'>
-                    <label className='string required col-sm-3 control-label'>
                         <abbr title='Requerido'>{'*'}</abbr>
                         {'Tipo de casilla'}
                     </label>
@@ -315,12 +284,12 @@ export default class EditMailBox extends React.Component {
                         />
                         <Button
                             btnAttrs={
-                            {
-                                className: 'btn btn-default action-button',
-                                onClick: (e) => {
-                                    Utils.handleLink(e, '/mailboxes', this.props.location);
+                                {
+                                    className: 'btn btn-default action-button',
+                                    onClick: (e) => {
+                                        Utils.handleLink(e, '/mailboxes', this.props.location);
+                                    }
                                 }
-                            }
                             }
                         >
                             {'Cancelar'}
@@ -330,7 +299,7 @@ export default class EditMailBox extends React.Component {
             </form>
         );
 
-        const actions = [
+        actions = [
             {
                 label: 'Cancelar',
                 props: {
@@ -341,13 +310,17 @@ export default class EditMailBox extends React.Component {
                 }
             },
             {
-                label: 'Eliminar',
-                props: {
-                    className: 'btn btn-danger btn-xs action-button',
-                    onClick: (e) => {
-                        this.handleDelete(e);
-                    }
-                }
+                setComponent: (
+                    <ToggleModalButton
+                        role='button'
+                        className='btn btn-xs btn-danger action-button'
+                        dialogType={ConfirmDeleteModal}
+                        dialogProps={{data}}
+                        key='delete-mailbox'
+                    >
+                        {'Eliminar'}
+                    </ToggleModalButton>
+                )
             }
         ];
 

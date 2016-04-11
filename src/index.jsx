@@ -18,6 +18,7 @@ import DomainDetails from './components/domain/domain_details.jsx';
 import CreateDomains from './components/domain/create_domain.jsx';
 import EditDomains from './components/domain/edit_domain.jsx';
 import Mailboxes from './components/mailbox/mailbox.jsx';
+import MailboxDetails from './components/mailbox/mailbox_details.jsx';
 import CreateMailBox from './components/mailbox/create_mailbox.jsx';
 import EditMailBox from './components/mailbox/edit_mailbox.jsx';
 
@@ -161,6 +162,11 @@ function renderRootComponent() {
                     <Route
                         path='mailboxes/:id/edit'
                         component={EditMailBox}
+                    />
+
+                    <Route
+                        path='mailboxes/:id'
+                        component={MailboxDetails}
                     />
 
                     <Route

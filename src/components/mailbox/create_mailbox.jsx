@@ -68,6 +68,8 @@ export default class CreateMailBox extends React.Component {
             allowClear: true
         });*/
 
+        $('#passwdMeter').pwstrength();
+
         $('#sidebar-mailboxes').addClass('active');
         GlobalActions.emitEndLoading();
     }
@@ -248,6 +250,7 @@ export default class CreateMailBox extends React.Component {
                             className='form-control'
                             data-required='true'
                             ref='passwd'
+                            id='passwdMeter'
                         />
                     </div>
                 </div>
