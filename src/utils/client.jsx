@@ -360,6 +360,10 @@ export function getAllAccounts(opts, success, error) {
     );
 }
 
+export function getAllAccountsByBatch(attrs) {
+    return ZimbraStore.getCurrent().getAllAccounts(attrs);
+}
+
 export function getAccount(id, success, error) {
     initZimbra().then(
         (zimbra) => {
@@ -572,7 +576,7 @@ export function batchRequest(requestArray, success, error) {
                     }
 
                     return success(data);
-                });
+                }, {onError: 'continue'});
         },
         (err) => {
             const e = handleError('batchRequest', err);

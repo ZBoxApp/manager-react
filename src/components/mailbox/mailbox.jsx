@@ -51,7 +51,7 @@ export default class Mailboxes extends React.Component {
         this.optionStatus = {
             active: 'Active',
             locked: 'Inactiva',
-            lockedout: 'Bloqueada',
+            lockout: 'Bloqueada',
             closed: 'Cerrada'
         };
         this.optionPlans = window.manager_config.plans;
@@ -187,6 +187,8 @@ export default class Mailboxes extends React.Component {
     }
 
     getAccounts(domainName, maxResult) {
+        //const promises = [];
+
         const attrs = {
             maxResults: maxResult
         };
@@ -202,6 +204,19 @@ export default class Mailboxes extends React.Component {
             this.domainName = domainName;
         }
 
+        /*const attrsForLockOut = Object.assign({}, attrs);
+        attrsForLockOut.query = 'zimbraAccountStatus=lockout';
+        attrsForLockOut.limit = 10;
+        attrsForLockOut.countOnly = true;
+
+        promises.push(Client.getAllAccountsByBatch(attrsForLockOut));
+
+        Client.batchRequest(promises, (exito) => {
+            console.log('exito', exito);
+        }, (err) => {
+            console.log('error', err);
+        });*/
+
         new Promise((resolve, reject) => {
             if (domainName) {
                 const hasMailboxForDomain = MailboxStore.getMailboxByDomainId(this.domainId);
@@ -211,7 +226,9 @@ export default class Mailboxes extends React.Component {
                 }
 
                 return Client.getAllAccounts(attrs, (success) => {
-                    MailboxStore.setMailboxesByDomain(this.domainId, success);
+                    const data = Utils.extractLockOuts(success);
+                    MailboxStore.setMailboxesByDomain(this.domainId, data);
+
                     return resolve(success);
                 }, (error) => {
                     return reject(error);
@@ -223,8 +240,10 @@ export default class Mailboxes extends React.Component {
             }
 
             return Client.getAllAccounts(attrs, (success) => {
-                MailboxStore.setMailboxes(success);
-                return resolve(success);
+                const data = Utils.extractLockOuts(success);
+                MailboxStore.setMailboxes(data);
+
+                return resolve(data);
             }, (error) => {
                 return reject(error);
             });
@@ -238,9 +257,9 @@ export default class Mailboxes extends React.Component {
 
                 const tables = this.buildTableFromData(items, ['Todas', 'Bloqueadas']);
 
-                if (tables.lockedAlert) {
+                if (items.lockout) {
                     GlobalActions.emitMessage({
-                        error: tables.lockedAlert.message,
+                        error: `${items.lockout.length} casillas bloqueadas.`,
                         typeError: messageType.LOCKED
                     });
                 }
@@ -463,10 +482,20 @@ export default class Mailboxes extends React.Component {
             let lockedAccounts = [];
             const tabs = {};
             let partialAccounts = accounts;
+            let partialLockOut = data.lockout ? data.lockout : 0;
+            const limitLockout = data.lockout ? data.lockout.length : 0;
+            const hasPageLockOut = limitLockout > Constants.QueryOptions.DEFAULT_LIMIT;
 
             if (hasPage) {
                 partialAccounts = accounts.slice(this.state.offset, (this.state.page * Constants.QueryOptions.DEFAULT_LIMIT));
                 limit = partialAccounts.length;
+            }
+
+            if (hasPageLockOut) {
+                partialLockOut = partialLockOut.slice(this.state.offset, (this.state.page * Constants.QueryOptions.DEFAULT_LIMIT));
+                partialLockOut = partialLockOut.map((lockout) => {
+                    return this.buildRow(lockout, 'label label-locked m-r', 'Bloqueada');
+                });
             }
 
             const response = {};
@@ -490,7 +519,7 @@ export default class Mailboxes extends React.Component {
                 }
             }
             const all = `${arrayTabNames.shift()} (${totalAccounts})`;
-            const locked = `${arrayTabNames.shift()} (${lockedAccounts.length})`;
+            const locked = `${arrayTabNames.shift()} (${limitLockout})`;
 
             // create structure html for all accountsç
             let exportBtn = null;
@@ -537,11 +566,18 @@ export default class Mailboxes extends React.Component {
             ];
 
             let activePagination = null;
-            let lockedPagination = null;
             if (hasPage) {
                 const totalPage = Math.ceil(totalAccounts / QueryOptions.DEFAULT_LIMIT);
                 activePagination = {
                     total: totalPage
+                };
+            }
+
+            let lockedPagination = null;
+            if (hasPageLockOut) {
+                const totalPageLockOut = Math.ceil(limitLockout / QueryOptions.DEFAULT_LIMIT);
+                lockedPagination = {
+                    total: totalPageLockOut
                 };
             }
 
@@ -601,7 +637,7 @@ export default class Mailboxes extends React.Component {
             const panelActive = this.insertToPanel(tableActive, 'panel-all', btn, filter);
 
             // create structure html for all locked accounts
-            const tableLocked = this.makeTable(lockedAccounts, lockedPagination);
+            const tableLocked = this.makeTable(partialLockOut, lockedPagination);
             const panelLocked = this.insertToPanel(tableLocked, 'panel-locked');
 
             arrayTabNames.push(all, locked);
