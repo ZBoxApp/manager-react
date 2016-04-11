@@ -29,25 +29,23 @@ export default class DomainGeneralInfo extends React.Component {
     }
     componentWillMount() {
         const domain = this.props.domain;
-        this.getMXRecord(domain.name);
+        this.getMXRecord(domain);
         this.getCompany(domain.attrs.businessCategory);
     }
-    getMXRecord(name) {
+    getMXRecord(domain) {
         const self = this;
 
-        Client.getDnsInfo(
-            name,
-            (data) => {
-                self.setState({
-                    mx: data.mx
-                });
-            },
-            (err) => {
-                self.setState({
+        domain.checkMxRecord((err, data) => {
+            if (err) {
+                return self.setState({
                     mx: err
                 });
             }
-        );
+
+            return self.setState({
+                mx: data.entry
+            });
+        });
     }
     getCompany(id) {
         const company = CompanyStore.getCompanyById(id);

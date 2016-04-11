@@ -35,7 +35,8 @@ export default class Companies extends React.Component {
 
         this.state = {
             page,
-            offset: ((page - 1) * Constants.QueryOptions.DEFAULT_LIMIT)
+            offset: ((page - 1) * Constants.QueryOptions.DEFAULT_LIMIT),
+            loading: true
         };
 
         this.isGlobalAdmin = UserStore.isGlobalAdmin();
@@ -68,13 +69,15 @@ export default class Companies extends React.Component {
                     CompaniesStore.setCompanies(comps);
 
                     self.setState({
-                        companies: comps
+                        companies: comps,
+                        loading: false
                     });
                 }).
                 catch((error) => {
                     self.setState({error: {
                         message: error,
-                        type: messageTypes.ERROR
+                        type: messageTypes.ERROR,
+                        loading: false
                     }});
                 });
             }).catch((error) => {
@@ -91,7 +94,8 @@ export default class Companies extends React.Component {
             }, (error) => {
                 self.setState({error: {
                     message: error,
-                    type: messageTypes.ERROR
+                    type: messageTypes.ERROR,
+                    loading: false
                 }});
             });
         } else {
@@ -103,13 +107,15 @@ export default class Companies extends React.Component {
                 }, (error) => {
                     self.setState({error: {
                         message: error,
-                        type: messageTypes.ERROR
+                        type: messageTypes.ERROR,
+                        loading: false
                     }});
                 });
             }, (error) => {
                 self.setState({
                     error,
-                    type: messageTypes.ERROR
+                    type: messageTypes.ERROR,
+                    loading: false
                 });
             });
         }
@@ -194,6 +200,16 @@ export default class Companies extends React.Component {
         let panelBody;
         let noLimitError;
         let pagination = null;
+        const textLoading = this.isGlobalAdmin ? 'Cargando Empresas...' : 'Cargando Mi Empresa...';
+
+        if (this.state.loading) {
+            panelBody = (
+                <div className='text-center'>
+                    <i className='fa fa-spinner fa-spin fa-4x fa-fw'></i>
+                    <p>{textLoading}</p>
+                </div>
+            );
+        }
 
         if (this.state.companies.length === 0) {
             panelBody = (
@@ -213,7 +229,7 @@ export default class Companies extends React.Component {
                 const totalPages = Math.ceil(data.length / Constants.QueryOptions.DEFAULT_LIMIT);
                 pagination = (
                     <Pagination
-                        key='panelPaginationCompanies'
+                        key='paginationCompany'
                         url='companies'
                         currentPage={this.state.page}
                         totalPages={totalPages}

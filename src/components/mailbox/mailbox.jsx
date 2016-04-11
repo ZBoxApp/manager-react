@@ -36,14 +36,25 @@ export default class Mailboxes extends React.Component {
 
         this.showMessage = this.showMessage.bind(this);
         this.refreshAllAccounts = this.refreshAllAccounts.bind(this);
-        this.handleFilterMailbox = this.handleFilterMailbox.bind(this);
         this.handleChangeFilter = this.handleChangeFilter.bind(this);
+        this.makeFilter = this.makeFilter.bind(this);
+
         const page = parseInt(this.props.location.query.page, 10) || 1;
         this.mailboxes = null;
-        this.status = '';
+        this.mailboxesFiltered = null;
+        this.filtering = false;
+        this.selectedStatusFilter = '';
+        this.selectedPlanFilter = '';
         this.cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
         this.cosById = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
         this.isRefreshing = true;
+        this.optionStatus = {
+            active: 'Active',
+            locked: 'Inactiva',
+            lockedout: 'Bloqueada',
+            closed: 'Cerrada'
+        };
+        this.optionPlans = window.manager_config.plans;
 
         this.state = {
             page,
@@ -54,65 +65,49 @@ export default class Mailboxes extends React.Component {
 
     handleChangeFilter(e) {
         const selected = e.target.value;
-        const cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
 
         if (e.target.className.indexOf('plans') > -1) {
-            this.cos = cos[selected];
+            this.selectedPlanFilter = '';
+            if (this.cos[selected]) {
+                this.selectedPlanFilter = this.cos[selected];
+            }
         }
 
         if (e.target.className.indexOf('status') > -1) {
-            this.status = selected;
+            this.selectedStatusFilter = selected.length > 0 ? selected : null;
         }
 
-        const data = Object.assign({}, this.mailboxes);
+        const domainId = this.props.params.domain_id;
 
-        const arrayFiltered = data.account.filter((strArray) => {
-            const status = this.status === '' ? strArray.attrs.zimbraAccountStatus : this.status;
-            const plan = this.cos ? this.cos : strArray.attrs.zimbraCOSId;
-
-            if (strArray.attrs.zimbraAccountStatus === status && strArray.attrs.zimbraCOSId === plan) {
-                return strArray;
-            }
-
-            return false;
-        });
-
-        data.account = arrayFiltered;
-        data.total = arrayFiltered.length;
-
-        const tables = this.buildTableFromData(data, ['Todas', 'Bloqueadas']);
-
-        return this.setState({
-            data: tables
-        });
+        this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);
     }
 
-    handleFilterMailbox(e, info) {
-        const search = e.target.value;
-        const data = Object.assign({}, info);
+    makeFilter() {
+        const mailboxes = Object.assign({}, this.mailboxes);
+        let cos = this.selectedPlanFilter;
+        let status = this.selectedStatusFilter;
 
-        const arrayFiltered = data.account.filter((strArray) => {
-            if (this.status === '') {
-                if (strArray.name.match(search)) {
-                    return strArray;
-                }
-            }
+        if (cos === '' && status === '') {
+            return false;
+        }
 
-            if (strArray.name.match(search) && strArray.attrs.zimbraAccountStatus === this.status) {
+        const arrayFiltered = mailboxes.account.filter((strArray) => {
+            const CurrentStatus = status || strArray.attrs.zimbraAccountStatus;
+            const plan = cos || strArray.attrs.zimbraCOSId;
+
+            if (strArray.attrs.zimbraAccountStatus === CurrentStatus && strArray.attrs.zimbraCOSId === plan) {
                 return strArray;
             }
 
             return false;
         });
 
-        data.account = arrayFiltered;
-        data.total = arrayFiltered.length;
+        mailboxes.account = arrayFiltered;
+        mailboxes.total = arrayFiltered.length;
 
-        const tables = this.buildTableFromData(data, ['Todas', 'Bloqueadas']);
+        this.mailboxesFiltered = mailboxes;
 
-        return this.setState({
-            data: tables
-        });
+        return this.mailboxesFiltered;
     }
 
     showMessage(attrs) {
@@ -224,7 +219,9 @@ export default class Mailboxes extends React.Component {
 
                 this.isRefreshing = false;
 
-                const tables = this.buildTableFromData(data, ['Todas', 'Bloqueadas']);
+                const items = this.makeFilter() || this.mailboxes;
+
+                const tables = this.buildTableFromData(items, ['Todas', 'Bloqueadas']);
 
                 if (tables.lockedAlert) {
                     GlobalActions.emitMessage({
@@ -441,26 +438,33 @@ export default class Mailboxes extends React.Component {
         if (data.account) {
             const accounts = data.account;
             const totalAccounts = data.total;
-            const limit = data.account.length;
+            let limit = data.account.length;
+            const hasPage = totalAccounts > Constants.QueryOptions.DEFAULT_LIMIT;
             let activeAccounts = [];
             let lockedAccounts = [];
             const tabs = {};
+            let partialAccounts = accounts;
+
+            if (hasPage) {
+                partialAccounts = accounts.slice(this.state.offset, (this.state.page * Constants.QueryOptions.DEFAULT_LIMIT));
+                limit = partialAccounts.length;
+            }
 
             for (let i = 0; i < limit; i++) {
-                const account = accounts[i].attrs;
+                const account = partialAccounts[i].attrs;
                 switch (account.zimbraAccountStatus) {
                 case 'active':
-                    activeAccounts.push(this.buildRow(accounts[i], 'label label-success m-r', 'Activa'));
+                    activeAccounts.push(this.buildRow(partialAccounts[i], 'label label-success m-r', 'Activa'));
                     break;
                 case 'closed':
-                    activeAccounts.push(this.buildRow(accounts[i], 'label label-default m-r', 'Cerrada'));
+                    activeAccounts.push(this.buildRow(partialAccounts[i], 'label label-default m-r', 'Cerrada'));
                     break;
                 case 'locked':
-                    activeAccounts.push(this.buildRow(accounts[i], 'label label-warning m-r', 'Inactiva'));
+                    activeAccounts.push(this.buildRow(partialAccounts[i], 'label label-warning m-r', 'Inactiva'));
                     break;
                 case 'lockedout':
-                    lockedAccounts.push(this.buildRow(accounts[i], 'label label-locked m-r', 'Bloqueada'));
-                    activeAccounts.push(this.buildRow(accounts[i], 'label label-locked m-r', 'Bloqueada'));
+                    lockedAccounts.push(this.buildRow(partialAccounts[i], 'label label-locked m-r', 'Bloqueada'));
+                    activeAccounts.push(this.buildRow(partialAccounts[i], 'label label-locked m-r', 'Bloqueada'));
                     break;
                 }
             }
@@ -513,24 +517,40 @@ export default class Mailboxes extends React.Component {
                 }
             ];
 
-            const totalPage = Math.ceil(totalAccounts / QueryOptions.DEFAULT_LIMIT);
-            let activePagination = {
-                total: totalPage
-            };
-            if (activeAccounts.length > QueryOptions.DEFAULT_LIMIT) {
-                activeAccounts = activeAccounts.slice(this.state.offset, (this.state.page * QueryOptions.DEFAULT_LIMIT));
+            let activePagination = null;
+            let lockedPagination = null;
+            if (hasPage) {
+                const totalPage = Math.ceil(totalAccounts / QueryOptions.DEFAULT_LIMIT);
                 activePagination = {
                     total: totalPage
                 };
             }
 
-            let lockedPagination = null;
-            if (lockedAccounts.length > QueryOptions.DEFAULT_LIMIT) {
-                lockedAccounts = lockedAccounts.slice(this.state.offset, (this.state.page * QueryOptions.DEFAULT_LIMIT));
-                lockedPagination = {
-                    total: totalPage
-                };
-            }
+            const status = Object.keys(this.optionStatus).map((item, i) => {
+                return (
+                    <option
+                        key={`status-${i}`}
+                        value={`${item}`}
+                    >
+                        {Utils.titleCase(this.optionStatus[item])}
+                    </option>
+                );
+            });
+
+            const plans = Object.keys(this.optionPlans).map((item, i) => {
+                if (item.toLowerCase() === 'default') {
+                    return false;
+                }
+
+                return (
+                    <option
+                        key={`plan-${i}`}
+                        value={`${item}`}
+                    >
+                        {Utils.titleCase(this.optionPlans[item].label)}
+                    </option>
+                );
+            });
 
             const filter = (
                 <div>
@@ -538,12 +558,10 @@ export default class Mailboxes extends React.Component {
                         <select
                             className='form-control status'
                             onChange={this.handleChangeFilter}
+                            value={this.selectedStatusFilter}
                         >
                             <option value=''>Todas</option>
-                            <option value='active'>Activa</option>
-                            <option value='locked'>Inactiva</option>
-                            <option value='lockedout'>Bloqueada</option>
-                            <option value='closed'>Cerradas</option>
+                            {status}
                         </select>
                     </div>
 
@@ -551,11 +569,10 @@ export default class Mailboxes extends React.Component {
                         <select
                             className='form-control plans'
                             onChange={this.handleChangeFilter}
+                            value={this.selectedPlanFilter}
                         >
                             <option value=''>Todos los planes</option>
-                            <option value='basic'>Básico</option>
-                            <option value='professional'>Profesional</option>
-                            <option value='premium'>Premium</option>
+                            {plans}
                         </select>
                     </div>
                 </div>
