@@ -7,6 +7,7 @@ import Promise from 'bluebird';
 import ZimbraAdminApi from 'zimbra-admin-api-js';
 import Powerdns from 'js-powerdns';
 import ZimbraStore from '../stores/zimbra_store.jsx';
+import ResetStores from '../stores/reset_stores.jsx';
 
 import * as GlobalActions from '../action_creators/global_actions.jsx';
 import * as Utils from './utils.jsx';
@@ -45,6 +46,7 @@ function initZimbra() {
             let zimbra = ZimbraStore.getCurrent();
 
             if (zimbra && token) {
+                window.manager_config.dns.token = token;
                 return resolve(zimbra);
             } else if (token) {
                 zimbra = new ZimbraAdminApi({
@@ -52,6 +54,7 @@ function initZimbra() {
                 });
                 zimbra.client.token = token;
                 ZimbraStore.setCurrent(zimbra);
+                window.manager_config.dns.token = token;
                 return resolve(zimbra);
             }
 
@@ -112,7 +115,6 @@ export function login(user, password, success, error) {
         }
 
         Utils.setCookie('token', zimbra.client.token);
-        window.manager_config.dns.token = Utils.getCookie('token');
         return getMe(success, error);
     });
 }
@@ -124,6 +126,7 @@ export function logout(callback) {
     }
     ZimbraStore.setCurrent(null);
     GlobalActions.saveUser(null);
+    ResetStores.resetAllStores();
 
     if (callback && typeof callback === 'function') {
         callback();

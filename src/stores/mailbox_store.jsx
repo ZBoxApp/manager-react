@@ -7,13 +7,20 @@ import Constants from '../utils/constants.jsx';
 const eventTypes = Constants.EventTypes;
 
 let mailboxesArray = null;
-let mailboxexInstances = [];
+let mailboxesInstances = [];
 
 class MailboxStoreClass extends EventEmitter {
     constructor() {
         super();
         this.current = null;
         this.currentPage = {};
+    }
+
+    resetThisStore() {
+        this.current = null;
+        this.currentPage = {};
+        mailboxesArray = null;
+        mailboxesInstances = [];
     }
 
     getMailboxById(id) {
@@ -54,7 +61,6 @@ class MailboxStoreClass extends EventEmitter {
 
     getMailboxByPage(page) {
         if (page && this.currentPage[page]) {
-            console.log(this.currentPage); //eslint-disable-line no-console
             return this.currentPage[page];
         }
 
@@ -87,21 +93,22 @@ class MailboxStoreClass extends EventEmitter {
 
     setMailboxes(mailboxes, page) {
         if (mailboxesArray) {
-            Array.prototype.push.apply(mailboxexInstances, mailboxes.account);
-            mailboxesArray.account = mailboxexInstances;
-            console.log('mailbox', mailboxes); //eslint-disable-line no-console
+            Array.prototype.push.apply(mailboxesInstances, mailboxes.account);
+            mailboxesArray.account = mailboxesInstances;
+
             if (page) {
                 this.currentPage[page] = mailboxes;
-                console.log(this.currentPage[page]); //eslint-disable-line no-console
             }
             return true;
         }
 
-        mailboxesArray = mailboxes;
-        mailboxexInstances = mailboxes.account;
+        const copy = Object.assign({}, mailboxes);
+        const accounts = mailboxes.account.slice();
+        mailboxesArray = copy;
+        mailboxesInstances = accounts;
+
         if (page) {
             this.currentPage[page] = mailboxes;
-            console.log(this.currentPage[page]); //eslint-disable-line no-console
         }
         return true;
     }

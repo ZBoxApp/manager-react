@@ -90,6 +90,9 @@ var config = {
         new webpack.LoaderOptionsPlugin({
             minimize: !DEV,
             debug: false
+        }),
+        new webpack.optimize.UglifyJsPlugin({
+            compress: { warnings: false }
         })
     ],
     resolve: {

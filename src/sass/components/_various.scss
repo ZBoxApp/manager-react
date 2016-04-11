@@ -1628,3 +1628,8 @@ label {
 .pointer {
   cursor: pointer;
 }
+
+.format-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

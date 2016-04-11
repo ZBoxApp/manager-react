@@ -7,6 +7,11 @@ class ZimbraStoreClass {
         this.cos = null;
     }
 
+    resetThisStore() {
+        this.zimbra = null;
+        this.cos = null;
+    }
+
     getCurrent() {
         return this.zimbra;
     }

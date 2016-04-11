@@ -7,6 +7,11 @@ class TabStateStoreClass {
         this.states = {};
     }
 
+    resetThisStore() {
+        this.current = null;
+        this.states = {};
+    }
+
     getCurrent() {
         return this.current;
     }

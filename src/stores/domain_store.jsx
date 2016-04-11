@@ -15,6 +15,13 @@ class DomainStoreClass extends EventEmitter {
         this.zoneDNS = null;
     }
 
+    resetThisStore() {
+        this.current = null;
+        this.distributionListOwners = null;
+        this.distributionListMembers = null;
+        this.zoneDNS = null;
+    }
+
     getCurrent() {
         return this.current;
     }

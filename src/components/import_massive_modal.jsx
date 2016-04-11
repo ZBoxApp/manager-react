@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-
 import {Modal} from 'react-bootstrap';
 import * as GlobalActions from '../action_creators/global_actions.jsx';
 import SelectCols from './select-col.jsx';
@@ -35,6 +34,8 @@ export default class ImportMassiveModal extends React.Component {
         this.disabled = {};
 
         this.plans = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
+
+        this.limit = 200;
 
         this.state = {
             options: this.options
@@ -280,6 +281,8 @@ export default class ImportMassiveModal extends React.Component {
     createMassiveAccounts(accounts) {
         const allAccounts = [];
         let hasError = false;
+        let runAgain = false;
+        let loop = 0;
 
         for (const account in accounts) {
             if (accounts.hasOwnProperty(account)) {
@@ -294,6 +297,17 @@ export default class ImportMassiveModal extends React.Component {
                 Reflect.deleteProperty(accounts[account], 'passwd');
 
                 allAccounts.push(Client.createAccountByBatch(email, passwd, accounts[account]));
+                Reflect.deleteProperty(accounts, account);
+                loop++;
+
+                if (loop >= this.limit) {
+                    const step = parseInt(account, 10);
+                    if (accounts[step + 1]) {
+                        runAgain = true;
+                        loop = 0;
+                    }
+                    break;
+                }
             }
         }
 
@@ -325,9 +339,20 @@ export default class ImportMassiveModal extends React.Component {
                 }
             }
 
+            if (runAgain) {
+                setTimeout(() => {
+                    this.createMassiveAccounts(accounts);
+                }, 250);
+                return null;
+            }
+
             //Aqui va error batchrequest
 
-            GlobalActions.emitEndTask({
+            if (this.show) {
+                this.onHide();
+            }
+
+            return GlobalActions.emitEndTask({
                 id: 'casillamasiva',
                 toast: {
                     message: 'Se han importado todas las casillas.',

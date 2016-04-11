@@ -47,7 +47,8 @@ export default class Mailboxes extends React.Component {
 
         this.state = {
             page,
-            offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
+            offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT),
+            loading: true
         };
     }
 
@@ -143,7 +144,8 @@ export default class Mailboxes extends React.Component {
 
             this.state = {
                 page,
-                offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
+                offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT),
+                loading: true
             };
 
             domainId = this.props.params.domain_id;
@@ -229,13 +231,15 @@ export default class Mailboxes extends React.Component {
                 }
 
                 return this.setState({
-                    data: tables
+                    data: tables,
+                    loading: false
                 });
             }
 
             return this.setState({
                 notMatches: true,
-                domain: domainName
+                domain: domainName,
+                loading: false
             });
         }).catch((error) => {
             if (error.code === 'account.TOO_MANY_SEARCH_RESULTS') {
@@ -582,6 +586,15 @@ export default class Mailboxes extends React.Component {
     render() {
         let message = null;
         let content = null;
+
+        if (this.state.loading) {
+            content = (
+                <div className='text-center'>
+                    <i className='fa fa-spinner fa-spin fa-4x fa-fw'></i>
+                    <p>{'Cargando Casillas...'}</p>
+                </div>
+            );
+        }
 
         if (this.state.error) {
             message = (
