@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import {browserHistory} from 'react-router';
 
 import EventStore from '../../stores/event_store.jsx';
 
@@ -52,6 +53,12 @@ export default class MailboxDetails extends React.Component {
             error: attrs.error,
             type: attrs.typeError
         });
+
+        if (attrs.logout) {
+            setTimeout(() => {
+                browserHistory.push('/logout');
+            }, 3000);
+        }
     }
 
     onRemoveAlias(alias) {

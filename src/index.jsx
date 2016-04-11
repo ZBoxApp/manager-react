@@ -22,6 +22,7 @@ import CreateMailBox from './components/mailbox/create_mailbox.jsx';
 import EditMailBox from './components/mailbox/edit_mailbox.jsx';
 import DistributionLists from './components/distribution/distribution_lists.jsx';
 import EditDistributionList from './components/distribution/edit_distribution_lists.jsx';
+import SearchView from './components/search/search.jsx';
 
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
@@ -156,18 +157,18 @@ function renderRootComponent() {
                             component={EditDistributionList}
                         />
 
-                    <Route
-                        path='companies'
-                        component={Companies}
-                    />
-                    <Route
-                        path='companies/:id'
-                        component={Company}
-                    />
-                    <Route
-                        path='companies/:id/domains/new'
-                        component={CreateDomains}
-                    />
+                        <Route
+                            path='companies'
+                            component={Companies}
+                        />
+                        <Route
+                            path='companies/:id'
+                            component={Company}
+                        />
+                        <Route
+                            path='companies/:id/domains/new'
+                            component={CreateDomains}
+                        />
 
                         <Route
                             path='mailboxes'
@@ -192,6 +193,11 @@ function renderRootComponent() {
                         <Route
                             path='logout'
                             onEnter={onLoggedOut}
+                        />
+
+                        <Route
+                            path='search/:query'
+                            component={SearchView}
                         />
                     </Route>
                     <Route component={NotLoggedIn}>

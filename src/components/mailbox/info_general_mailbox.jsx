@@ -46,6 +46,8 @@ export default class BlockGeneralInfoMailbox extends React.Component {
     render() {
         let blockInfo = null;
         let statusCos = null;
+        console.log(ZimbraStore.getAllCos());
+        console.log(this.data);
         const cosID = Utils.getEnabledPlansObjectByCos(ZimbraStore.getAllCos(), this.props.data.attrs.zimbraCOSId);
         let cosName = null;
 

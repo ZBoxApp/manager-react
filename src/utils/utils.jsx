@@ -544,3 +544,59 @@ export function getOwners(owners) {
 
     throw Error('Owners array no es un arreglo :' + typeof owners);
 }
+
+export function getDomainIdFromDL(dlName, arr) {
+    const domainName = dlName.indexOf('@') > -1 ? dlName.split('@').pop() : dlName;
+
+    for (const domain in arr) {
+        if (arr.hasOwnProperty(domain)) {
+            if (domain.constructor.name.toString().toLowerCase() === 'domain') {
+                if (arr[domain].name === domainName) {
+                    return arr[domain];
+                }
+            }
+        }
+    }
+}
+
+export function getInitialDateFromTimestamp(timestamp) {
+    const time = parseInt(timestamp, 10);
+    const date = new Date(time).toLocaleString();
+    let dateParts = date.split('/');
+    const lastPosition = dateParts.pop();
+    const formattedLastPosition = lastPosition.substring(0, 4);
+    dateParts.push(formattedLastPosition);
+    const timestampReseted = new Date(dateParts[2], (parseInt(dateParts[1], 10) - 1).toString(), dateParts[0], '00', '00', '00').getTime();
+
+    return timestampReseted;
+}
+
+export function forceTimestampFromHumanDate(date) {
+    const arrDate = date.split('/').reverse();
+    const newDateArr = arrDate.map((pos, i) => {
+        let item = parseInt(pos, 10);
+        if (i === 1) {
+            const tmp = item - 1;
+            item = tmp;
+        }
+        return item;
+    });
+
+    const formattedTimeStamp = new Date(newDateArr[0], newDateArr[1], newDateArr[2], '00', '00', '00').getTime();
+
+    return formattedTimeStamp;
+}
+
+export function setInitialDate(){
+    const dateInstance = new Date();
+    const day = dateInstance.getDate().toString().length < 2 ? '0' + dateInstance.getDate().toString() : dateInstance.getDate();
+    const month = (dateInstance.getMonth() + 1).toString().length < 2 ? '0' + (dateInstance.getMonth() + 1).toString() : (dateInstance.getMonth() + 1);
+    const formatted = `${day}/${month}/${dateInstance.getFullYear()}`;
+    const date = new Date(dateInstance.getFullYear(), dateInstance.getMonth(), dateInstance.getDate(), '00','00','00').getTime();
+    const dateObject = {
+        timestamp: date,
+        formatted
+    };
+
+    return dateObject;
+}
