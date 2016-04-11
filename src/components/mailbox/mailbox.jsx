@@ -424,6 +424,7 @@ export default class Mailboxes extends React.Component {
                     currentPage={this.state.page}
                     totalPages={hasPage.total}
                     total={hasPage.totalItems}
+                    name={'Casillas'}
                 />
             );
         }

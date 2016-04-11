@@ -70,11 +70,13 @@ export default class Pagination extends React.Component {
         const total = this.props.totalPages;
         const current = this.props.currentPage;
         const pages = [];
+        const hasName = this.props.name;
 
         let first;
         let prev;
         let next;
         let last;
+        let totalItems;
 
         const console = (
             <li key='console-page'>
@@ -82,11 +84,13 @@ export default class Pagination extends React.Component {
             </li>
         );
 
-        let totalItems = (
-            <li key='total-items'>
-                <span>{`${this.props.total} Casillas`}</span>
-            </li>
-        );
+        if (hasName) {
+            totalItems = (
+                <li key='total-items'>
+                    <span>{`${this.props.total} ${hasName}`}</span>
+                </li>
+            );
+        }
 
         if (current > 1 && current <= total) {
             first = (
@@ -196,7 +200,8 @@ Pagination.propTypes = {
     currentPage: React.PropTypes.number.isRequired,
     totalPages: React.PropTypes.number.isRequired,
     range: React.PropTypes.number,
-    total: React.PropTypes.number
+    total: React.PropTypes.number,
+    name: React.PropTypes.string
 };
 
 Pagination.defaultProps = {

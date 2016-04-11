@@ -158,7 +158,10 @@ export default class Domains extends React.Component {
 
         if (this.state.loading) {
             panelBody = (
-                <div className='text-center'>
+                <div
+                    className='text-center'
+                    key={'domain-loading'}
+                >
                     <i className='fa fa-spinner fa-spin fa-4x fa-fw'></i>
                     <p>{'Cargando Dominios...'}</p>
                 </div>
@@ -276,7 +279,7 @@ export default class Domains extends React.Component {
             }
 
             panelBody = (
-                <div>
+                <div key={'body-domains'}>
                     <div
                         id='index-domains-table'
                         className='table-responsive'

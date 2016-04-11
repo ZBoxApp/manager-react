@@ -75,7 +75,7 @@ export default class CompaniesDetails extends React.Component {
                 },
                 (data) => {
                     const domains = data.domain;
-                    self.getPlans(domains).
+                    return self.getPlans(domains).
                     then(() => {
                         company.domains = domains;
                         resolve(company);

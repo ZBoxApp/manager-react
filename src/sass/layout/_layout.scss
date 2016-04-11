@@ -44,7 +44,9 @@ body {
   height: inherit;
 
   > div {
-    height: inherit;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   #wrapper {
