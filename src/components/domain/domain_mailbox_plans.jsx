@@ -64,6 +64,7 @@ export default class DomainMailboxPlans extends React.Component {
         ];
 
         const mailboxPlans = [];
+        let panelBody = null;
         const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
         const planKeys = Object.keys(cos).map((c) => {
             return cos[c];
@@ -95,7 +96,7 @@ export default class DomainMailboxPlans extends React.Component {
         }
 
         for (const key in plans) {
-            if (plans.hasOwnProperty(key)) {
+            if (plans.hasOwnProperty(key) && plans[key].used !== 0 && plans[key].limit !== 0) {
                 const plan = plans[key];
                 totalUsed += (parseInt(plan.used, 10)) ? parseInt(plan.used, 10) : 0;
                 if (plan.limit === 0) {
@@ -138,48 +139,56 @@ export default class DomainMailboxPlans extends React.Component {
             }
         }
 
-        mailboxPlans.push(
-            <tr key='totalizacion-planes'>
-                <td className='mbx-plan'
-                    style={{borderTop: 0}}
-                >
-                    <strong>{'Total'}</strong>
-                </td>
-                <td
-                    className='text-center'
-                    style={{borderTop: 0}}
-                >
-                    <strong>{totalLimit}</strong>
-                </td>
-                <td
-                    className='text-center'
-                    style={{borderTop: 0}}
-                >
-                    <strong>{totalUsed}</strong>
-                </td>
-            </tr>
-        );
-
-        const panelBody = (
-            <table
-                id='domain-mbxs'
-                cellPadding='1'
-                cellSpacing='1'
-                className='table'
-                style={{marginBottom: '0px'}}
-            >
-                <thead>
-                <tr>
-                    <th style={{width: '50%'}}></th>
-                    <th className='text-center'>{'Límite'}</th>
-                    <th className='text-center'>{'Usadas'}</th>
+        if (mailboxPlans.length > 0) {
+            mailboxPlans.push(
+                <tr key='totalizacion-planes'>
+                    <td className='mbx-plan'
+                        style={{borderTop: 0}}
+                    >
+                        <strong>{'Total'}</strong>
+                    </td>
+                    <td
+                        className='text-center'
+                        style={{borderTop: 0}}
+                    >
+                        <strong>{totalLimit}</strong>
+                    </td>
+                    <td
+                        className='text-center'
+                        style={{borderTop: 0}}
+                    >
+                        <strong>{totalUsed}</strong>
+                    </td>
                 </tr>
-                </thead>
-                <tbody>
-                {mailboxPlans}
-                </tbody>
-            </table>
-        );
+            );
+
+            panelBody = (
+                <table
+                    id='domain-mbxs'
+                    cellPadding='1'
+                    cellSpacing='1'
+                    className='table'
+                    style={{marginBottom: '0px'}}
+                >
+                    <thead>
+                    <tr>
+                        <th style={{width: '50%'}}></th>
+                        <th className='text-center'>{'Límite'}</th>
+                        <th className='text-center'>{'Usadas'}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {mailboxPlans}
+                    </tbody>
+                </table>
+            );
+        } else {
+            panelBody = (
+                <div className='text-center'>
+                    <h4 className='text-danger'>{'No posee casillas asignadas a su dominio.'}</h4>
+                </div>
+            );
+        }
 
         return (
             <Panel

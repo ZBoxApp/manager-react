@@ -4,6 +4,7 @@
 import {browserHistory} from 'react-router';
 import * as GlobalActions from '../action_creators/global_actions.jsx';
 import Constants from './constants.jsx';
+import ZimbraStore from '../stores/zimbra_store.jsx';
 
 const messageType = Constants.MessageType;
 
@@ -345,34 +346,55 @@ export function getDomainFromString(string, otherwise) {
     return domain;
 }
 
-export function exportAsCSV(data, title, hasLabel) {
-    const info = (typeof data === 'object') ? data : JSON.parse(data);
-
+export function exportAsCSV(data, target, title, hasLabel) {
+    let info = (typeof data === 'object') ? data : JSON.parse(data);
+    const cos = getEnabledPlansByCosId(ZimbraStore.getAllCos());
+    const headers = window.manager_config.export[target];
+    const keys = Object.keys(headers);
+    const colNames = Object.values(headers);
+    const status = {
+        active: 'Activa',
+        closed: 'Cerrada',
+        locked: 'Inactiva',
+        lockout: 'Bloqueada'
+    };
+    let row = '';
     let CSV = '';
 
     CSV += title + '\r\n\n';
 
     if (hasLabel) {
-        let row = '';
-
-        for (const index in info[0]) {
-            if (info[0].hasOwnProperty(index)) {
-                row += index + ',';
-            }
-        }
-
-        row = row.slice(0, row.length - 1);
+        row = colNames.join(',');
 
         CSV += row + '\r\n';
     }
 
     for (var i = 0; i < info.length; i++) {
-        let row = '';
+        row = '';
+        const item = info[i];
+        for (var j = 0; j < keys.length; j++) {
+            let col = null;
 
-        for (var index in info[i]) {
-            if (info[i].hasOwnProperty(index)) {
-                row += '\'' + info[i][index] + '\',';
+            if (typeof item === 'object') {
+                col = status[item.attrs[keys[j]]] || item.attrs[keys[j]];
             }
+
+            if (keys[j] === 'name') {
+                if (typeof item === 'string') {
+                    col = item;
+                } else {
+                    col = item[keys[j]] || item;
+                }
+            }
+
+            if (keys[j] === 'zimbraCOSId') {
+                col = cos[item.attrs[keys[j]]] || 'Sin plan';
+                col = titleCase(col);
+            }
+
+            col = col || 'No definido';
+
+            row += col + ',';
         }
 
         row = row.slice(0, -1);

@@ -516,8 +516,10 @@ body {
       margin-left: -$menu-width;
     }
 
-    #wrapper {
-      margin-left: 0;
+    #root {
+      #wrapper {
+        margin-left: 0;
+      }
     }
   }
 
