@@ -1,7 +1,7 @@
 {
     "debug": true,
     "zimbraUrl": "http://zimbra.zboxapp.dev:8000/service/admin/soap",
-    "zimbraProxy": "https://zimbra.zboxapp.dev:7071",
+    "zimbraProxy": "https://192.168.1.8:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
     "webMailUrl": "https://zimbra.zboxapp.dev",
     "dns": {
@@ -11,9 +11,15 @@
     "maxResultOnRequestZimbra": 4000,
     "autoincrementOnFailRequestZimbra": 500,
     "plans": {
-        "basic": true,
-        "premium": true,
-        "professional": true,
+        "basic": {
+            "statusCos": "btn-success"
+        },
+        "premium": {
+            "statusCos": "btn-primary2"
+        },
+        "professional": {
+            "statusCos": "btn-primary"
+        },
         "default": false
     },
     "multiFormDomain": {
