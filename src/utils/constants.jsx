@@ -8,7 +8,8 @@ export default {
         START_LOADING: null,
         END_LOADING: null,
         USER_CHANGED: null,
-        RECEIVED_ERROR: null
+        RECEIVED_ERROR: null,
+        NEW_MESSAGE: null
     }),
 
     PayloadSources: keyMirror({
@@ -21,7 +22,14 @@ export default {
         DOMAIN_DLS_CHANGE_EVENT: null,
         START_LOADING_EVENT: null,
         END_LOADING_EVENT: null,
-        USER_CHANGE_EVENT: null
+        USER_CHANGE_EVENT: null,
+        NEW_MESSAGE_EVENT: null
+    }),
+
+    MessageType: keyMirror({
+        SUCCESS: null,
+        WARNING: null,
+        ERROR: null
     }),
 
     ZimbraCodes: {

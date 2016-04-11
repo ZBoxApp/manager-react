@@ -17,6 +17,8 @@
     "perfect-scrollbar": "0.6.10",
     "react": "15.0.0",
     "react-bootstrap": "0.28.5",
+    "react-bootstrap-datetimepicker": "0.0.22",
+    "react-datalist": "^3.0.0",
     "react-dom": "15.0.0",
     "react-router": "2.0.1",
     "react-textarea-autosize": "3.3.1",

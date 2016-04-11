@@ -1266,6 +1266,18 @@ label {
     text-align: center;
   }
 
+  &.reset-panel {
+    margin: 0;
+
+    .panel-body {
+      padding: 0;
+
+      .btn {
+        margin: 0;
+      }
+    }
+  }
+
   &.with-min-height {
     .panel-body {
       min-height: 200px;
@@ -1611,4 +1623,8 @@ label {
       }
     }
   }
+}
+
+.pointer {
+  cursor: pointer;
 }

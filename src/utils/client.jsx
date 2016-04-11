@@ -362,3 +362,22 @@ export function getDnsInfo(domain, success, error) {
         }
     });
 }
+
+export function addAccountAlias(alias, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.addAccountAlias(alias, (err, data) => {
+                if (err) {
+                    const e = handleError('addAccountAlias', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('addAccountAlias', err);
+            return error(e);
+        }
+    );
+}
