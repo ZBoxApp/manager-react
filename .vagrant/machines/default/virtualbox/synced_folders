@@ -1,0 +1,1 @@
+{"virtualbox":{"/opt/zimbra/zimlets-deployed/_dev":{"guestpath":"/opt/zimbra/zimlets-deployed/_dev","hostpath":"/Applications/MAMP/htdocs/manager-react/src","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"/Applications/MAMP/htdocs/manager-react","disabled":false,"__vagrantfile":true}}}

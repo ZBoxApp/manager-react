@@ -40,13 +40,25 @@ export default class Domains extends React.Component {
 
     getDomains() {
         const self = this;
+        let domains = null;
+        if (DomainStore.getDomains()) {
+            const data = DomainStore.getDomains();
+
+            GlobalActions.emitEndLoading();
+
+            return self.setState({
+                data,
+                loading: false
+            });
+        }
+
         Client.getAllDomains(
             {
-                limit: QueryOptions.DEFAULT_LIMIT,
-                offset: this.state.offset
+                maxResults: window.manager_config.maxResultOnRequestZimbra
             },
             (data) => {
-                const domains = data.domain;
+                domains = data.domain;
+                DomainStore.setDomains(data);
                 this.getPlans(domains).
                 then(() => {
                     self.setState({
@@ -78,6 +90,8 @@ export default class Domains extends React.Component {
                 GlobalActions.emitEndLoading();
             }
         );
+
+        return null;
     }
 
     getPlans(domains) {
@@ -164,8 +178,15 @@ export default class Domains extends React.Component {
         }
 
         if (this.state.data) {
+            const domain = this.state.data;
+            let domains = domain.domain;
+
+            if (domain.total > Constants.QueryOptions.DEFAULT_LIMIT) {
+                domains = domain.domain.slice(this.state.offset, (this.state.page * QueryOptions.DEFAULT_LIMIT));
+            }
+
             const configPlans = global.window.manager_config.plans;
-            tableResults = this.state.data.domain.map((d) => {
+            tableResults = domains.map((d) => {
                 let status;
                 let statusClass = 'btn btn-sm ';
                 switch (d.attrs.zimbraDomainStatus) {
@@ -242,7 +263,7 @@ export default class Domains extends React.Component {
                 );
             });
 
-            if (this.state.offset > 0 || (this.state.data && this.state.data.more)) {
+            if (domain.total > Constants.QueryOptions.DEFAULT_LIMIT) {
                 const totalPages = this.state.data ? Math.ceil(this.state.data.total / QueryOptions.DEFAULT_LIMIT) : 0;
                 pagination = (
                     <Pagination

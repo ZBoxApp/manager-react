@@ -186,10 +186,14 @@ export default class Mailboxes extends React.Component {
 
     getAccounts(domainName, maxResult) {
         const attrs = {
-            limit: QueryOptions.DEFAULT_LIMIT,
-            maxResults: maxResult,
-            offset: this.state.offset
+            maxResults: maxResult
         };
+
+        const attrneeded = Utils.getAttrsBySectionFromConfig('mailboxes');
+
+        if (attrneeded) {
+            attrs.attrs = attrneeded;
+        }
 
         if (domainName) {
             attrs.domain = domainName;
@@ -204,21 +208,20 @@ export default class Mailboxes extends React.Component {
                 });
             }
 
-            if (MailboxStore.hasMailboxes() && MailboxStore.hasThisPage(this.state.page)) {
-                console.log('has page with data'); //eslint-disable-line no-console
-                return resolve(MailboxStore.getMailboxByPage(this.state.page));
+            if (MailboxStore.hasMailboxes()) {
+                return resolve(MailboxStore.getMailboxes());
             }
 
             return Client.getAllAccounts(attrs, (success) => {
-                MailboxStore.setMailboxes(success, this.state.page);
-                this.mailboxes = MailboxStore.getMailboxes();
-
+                MailboxStore.setMailboxes(success);
                 return resolve(success);
             }, (error) => {
                 return reject(error);
             });
         }).then((data) => {
             if (data.account) {
+                this.mailboxes = data;
+
                 this.isRefreshing = false;
 
                 const tables = this.buildTableFromData(data, ['Todas', 'Bloqueadas']);
@@ -467,22 +470,24 @@ export default class Mailboxes extends React.Component {
             const locked = `${arrayTabNames.shift()} (${lockedAccounts.length})`;
 
             // create structure html for all accountsç
-            const icon = (
-                <div>
-                    <i className='fa fa-download'/>
-                    <span>{'Exportar'}</span>
-                </div>
-            );
+            let exportBtn = null;
+            if (this.props.params.domain_id) {
+                exportBtn = (
+                    <button
+                        onClick={(e) => {
+                            this.handleExportAsCSV(e);
+                        }}
+                        className='btn btn-default'
+                    >
+                        <i className='fa fa-download'/>
+                        <span>{'Exportar'}</span>
+                    </button>
+                );
+            }
 
             const btn = [
                 {
-                    props: {
-                        className: 'btn btn-default',
-                        onClick: (e) => {
-                            this.handleExportAsCSV(e);
-                        }
-                    },
-                    label: icon
+                    setComponent: exportBtn
                 },
                 {
                     setComponent: (

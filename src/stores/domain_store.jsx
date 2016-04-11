@@ -10,6 +10,7 @@ class DomainStoreClass extends EventEmitter {
     constructor() {
         super();
         this.current = null;
+        this.domains = null;
         this.distributionListOwners = null;
         this.distributionListMembers = null;
         this.zoneDNS = null;
@@ -20,6 +21,22 @@ class DomainStoreClass extends EventEmitter {
         this.distributionListOwners = null;
         this.distributionListMembers = null;
         this.zoneDNS = null;
+    }
+
+    setDomains(domains) {
+        if (domains) {
+            this.domains = domains;
+        }
+
+        return true;
+    }
+
+    getDomains() {
+        if (this.domains) {
+            return this.domains;
+        }
+
+        return null;
     }
 
     getCurrent() {

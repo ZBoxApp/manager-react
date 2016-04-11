@@ -1,11 +1,11 @@
 {
-    "debug": false,
-    "zimbraUrl": "http://zimbra.zboxapp.dev:8000/service/admin/soap",
+    "debug": true,
+    "zimbraUrl": "http://zimbra.zboxapp.dev:9081/zimbra_proxy/service/admin/soap",
     "zimbraProxy": "https://192.168.1.8:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
     "webMailUrl": "https://zimbra.zboxapp.dev",
     "dns": {
-        "url": "http://192.168.1.8:8081/powerdns_proxy/",
+        "url": "http://zimbra.zboxapp.dev:9081//powerdns_proxy/",
         "token": "otto"
     },
     "maxResultOnRequestZimbra": 20000,
@@ -28,8 +28,30 @@
     },
     "webmailLifetime": 3600,
     "companiesEndPoints": {
-        "list": "http://zimbra.zboxapp.dev:8001/list",
-        "detail": "http://zimbra.zboxapp.dev:8001/company/{id}",
-        "invoices": "http://zimbra.zboxapp.dev:8001/company/{id}/invoices"
+        "list": "http://zimbra.zboxapp.dev:9081/folio/companies.json",
+        "detail": "http://zimbra.zboxapp.dev:9081/folio/companies/{id}.json",
+        "invoices": "http://zimbra.zboxapp.dev:9081/folio/companies/{id}/invoices.json"
+    },
+    "globalAttrsBySection": {
+        "mailboxes": {
+            "attrs": {
+                "givenName": true,
+                "sn": true,
+                "cn": true,
+                "displayName": true,
+                "description": true,
+                "zimbraCOSId": true,
+                "zimbraAccountStatus": true,
+                "zimbraMailHost": true,
+                "zimbraArchiveAccount": true,
+                "zimbraMailAlias": true,
+                "zimbraPrefOutOfOfficeReplyEnabled": true,
+                "zimbraPrefOutOfOfficeFromDate": true,
+                "zimbraPrefOutOfOfficeUntilDate": true,
+                "zimbraPrefOutOfOfficeReply": true,
+                "zimbraCreateTimestamp": true,
+                "zimbraLastLogonTimestamp": true
+            }
+        }
     }
 }

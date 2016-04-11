@@ -609,3 +609,27 @@ export function kickOutUserWhenAuthExpired() {
     GlobalActions.emitEndLoading();
     browserHistory.push(`/login${query}`);
 }
+
+export function handleMaxResults(caller, error) {
+    if (error.code === 'account.TOO_MANY_SEARCH_RESULTS') {
+        caller();
+    }
+}
+
+export function getAttrsBySectionFromConfig(section, asObject) {
+    const returnAsObject = asObject || false;
+    const globalAttrs = window.manager_config.globalAttrsBySection;
+    const currentSection = globalAttrs[section];
+
+    if (currentSection) {
+        if (!returnAsObject) {
+            const attrs = Object.keys(currentSection.attrs);
+            if (attrs && attrs.length > 0) {
+                const attrsAsString = attrs.join();
+                return attrsAsString;
+            }
+        }
+    }
+
+    return false;
+}
