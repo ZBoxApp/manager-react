@@ -22,7 +22,7 @@ Vagrant.configure(2) do |config|
   config.vm.network 'forwarded_port', guest: 8081, host: 8081
   config.vm.network 'forwarded_port', guest: 9081, host: 9081
   config.vm.network 'forwarded_port', guest: 9082, host: 9082
-  config.vm.network 'forwarded_port', guest: 443, host: 7443
+  config.vm.network 'forwarded_port', guest: 8443, host: 7443
   config.vm.network 'forwarded_port', guest: 80, host: 7080
   config.vm.network 'forwarded_port', guest: 389, host: 7389
 

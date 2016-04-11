@@ -95,7 +95,7 @@ export default class DomainGeneralInfo extends React.Component {
                         <p>
                             <a
                                 className='account-name'
-                                onClick={(e) => Utils.handleLink(e, `/accounts/${domain.id_empresa}`, this.props.location)}
+                                onClick={(e) => Utils.handleLink(e, `/companies/${domain.attrs.businessCategory}`, this.props.location)}
                             >
                                 {this.state.company}
                             </a>

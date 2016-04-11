@@ -24,11 +24,10 @@ import ToggleModalButton from '../toggle_modal_button.jsx';
 import ImportMassiveModal from '../import_massive_modal.jsx';
 
 import DomainStore from '../../stores/domain_store.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 const QueryOptions = Constants.QueryOptions;
 const messageType = Constants.MessageType;
-
-import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 export default class Mailboxes extends React.Component {
     constructor(props) {
@@ -57,6 +56,7 @@ export default class Mailboxes extends React.Component {
         };
         this.optionPlans = window.manager_config.plans;
         this.domainId = null;
+        this.domainName = null;
 
         this.state = {
             page,
@@ -122,10 +122,10 @@ export default class Mailboxes extends React.Component {
 
     handleExportAsCSV(e) {
         e.preventDefault();
-        const accounts = MailboxStore.getMailboxes();
-
-        if (accounts && accounts.account && accounts.account.length > 0) {
-            return Utils.exportAsCSV(accounts.account, 'all_accounts', true);
+        if (MailboxStore.getMailboxByDomainId(this.domainId)) {
+            const accounts = MailboxStore.getMailboxByDomainId(this.domainId);
+            const title = `Casillas de ${accounts.account[0].domain}`;
+            return Utils.exportAsCSV(accounts.account, 'domain', title, true);
         }
 
         return false;
@@ -134,6 +134,7 @@ export default class Mailboxes extends React.Component {
     componentWillReceiveProps(newProps) {
         const condition = this.props.location.query.page !== newProps.location.query.page;
         let domainId = null;
+        this.domainName = null;
 
         if (condition) {
             const page = parseInt(newProps.location.query.page, 10) || 1;
@@ -198,18 +199,19 @@ export default class Mailboxes extends React.Component {
 
         if (domainName) {
             attrs.domain = domainName;
+            this.domainName = domainName;
         }
 
         new Promise((resolve, reject) => {
             if (domainName) {
-                const hasMailboxForDomain = MailboxStore.getMailboxByDomainId(domainName);
+                const hasMailboxForDomain = MailboxStore.getMailboxByDomainId(this.domainId);
 
                 if (hasMailboxForDomain) {
                     return resolve(hasMailboxForDomain);
                 }
 
                 return Client.getAllAccounts(attrs, (success) => {
-                    MailboxStore.setMailboxesByDomain(domainName, success);
+                    MailboxStore.setMailboxesByDomain(this.domainId, success);
                     return resolve(success);
                 }, (error) => {
                     return reject(error);
@@ -265,8 +267,10 @@ export default class Mailboxes extends React.Component {
             }
         }).finally(() => {
             if (!this.isRefreshing) {
-                GlobalActions.emitEndLoading();
+                return GlobalActions.emitEndLoading();
             }
+
+            return GlobalActions.emitEndLoading();
         });
     }
 
@@ -310,6 +314,7 @@ export default class Mailboxes extends React.Component {
         EventStore.removeMessageListener(this.showMessage);
         MailboxStore.removeListenerAddMassive(this.showMessage);
         $('#sidebar-mailboxes').removeClass('active');
+        this.domainName = null;
     }
 
     buildRow(row, classes, status) {
@@ -464,6 +469,8 @@ export default class Mailboxes extends React.Component {
                 limit = partialAccounts.length;
             }
 
+            const response = {};
+
             for (let i = 0; i < limit; i++) {
                 const account = partialAccounts[i].attrs;
                 switch (account.zimbraAccountStatus) {
@@ -476,14 +483,12 @@ export default class Mailboxes extends React.Component {
                 case 'locked':
                     activeAccounts.push(this.buildRow(partialAccounts[i], 'label label-warning m-r', 'Inactiva'));
                     break;
-                case 'lockedout':
+                case 'lockout':
                     lockedAccounts.push(this.buildRow(partialAccounts[i], 'label label-locked m-r', 'Bloqueada'));
                     activeAccounts.push(this.buildRow(partialAccounts[i], 'label label-locked m-r', 'Bloqueada'));
                     break;
                 }
             }
-
-            const response = {};
             const all = `${arrayTabNames.shift()} (${totalAccounts})`;
             const locked = `${arrayTabNames.shift()} (${lockedAccounts.length})`;
 
@@ -622,6 +627,8 @@ export default class Mailboxes extends React.Component {
     render() {
         let message = null;
         let content = null;
+        let panelInfo = null;
+        const data = this.state.data;
 
         if (this.state.loading) {
             content = (
@@ -643,7 +650,7 @@ export default class Mailboxes extends React.Component {
         }
 
         if (this.state.notMatches) {
-            const domain = (this.state.domain) ? `para el dominio: ${this.state.domain}` : '';
+            const domain = (this.domainName) ? `para el dominio: ${this.domainName}` : '';
             content = (
                 <div className='text-center'>
                     <h4>
@@ -653,16 +660,24 @@ export default class Mailboxes extends React.Component {
             );
         }
 
-        const pagelInfo = (
+        panelInfo = (
             <PageInfo
                 titlePage='Casillas'
                 descriptionPage='Usuarios de correo electrónico'
             />
         );
 
-        if (this.state.data) {
-            const data = this.state.data;
+        if (this.domainId && data && this.domainName) {
+            const domainName = this.domainName;
+            panelInfo = (
+                <PageInfo
+                    titlePage='Casillas'
+                    descriptionPage={`Usuarios de correo electrónico de ${domainName}`}
+                />
+            );
+        }
 
+        if (data) {
             content = (
                 <PanelTab
                     tabNames={data.tabNames}
@@ -675,7 +690,7 @@ export default class Mailboxes extends React.Component {
 
         return (
             <div>
-                {pagelInfo}
+                {panelInfo}
                 <div className='content animate-panel'>
                     {message}
                     <div className='row'>
