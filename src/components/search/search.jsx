@@ -26,7 +26,7 @@ export default class SearchView extends React.Component {
         GlobalActions.emitEndLoading();
         const query = newProps.params.query;
         this.makeSearch(query);
-    };
+    }
 
     makeSearch(query) {
         Client.search({
@@ -53,7 +53,7 @@ export default class SearchView extends React.Component {
                 result
             });
         }, (error) => {
-            console.log(error);
+            console.log(error); //eslint-disable-line no-console
         });
     }
 
@@ -77,12 +77,12 @@ export default class SearchView extends React.Component {
                 let url = null;
                 const id = item.id;
 
-                switch(type) {
+                switch (type) {
                 case 'domain':
                     tipo = (
                         <div>
                             <i className='fa fa-globe fa-lg'></i>
-                            <span className='marginLeft'>{'Dominio'}</span>
+                            <span className='margin-left'>{'Dominio'}</span>
                         </div>
                     );
 
@@ -93,17 +93,17 @@ export default class SearchView extends React.Component {
                     tipo = (
                         <div>
                             <i className='fa fa-user fa-lg'></i>
-                            <span className='marginLeft'>{'Casilla'}</span>
+                            <span className='margin-left'>{'Casilla'}</span>
                         </div>
                     );
 
                     url = `/mailboxes/${id}`;
                     break;
-                case 'distributionlist':
+                case 'distributionlist': {
                     tipo = (
                         <div>
                             <i className='fa fa-users fa-lg'></i>
-                            <span className='marginLeft'>{'Lista de Distribución'}</span>
+                            <span className='margin-left'>{'Lista de Distribución'}</span>
                         </div>
                     );
 
@@ -118,6 +118,8 @@ export default class SearchView extends React.Component {
 
                     url = `/domains/${domainId}/distribution_lists/${id}`;
                     break;
+                }
+
                 }
 
                 return (

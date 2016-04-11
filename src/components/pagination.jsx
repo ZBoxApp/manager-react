@@ -52,6 +52,7 @@ export default class Pagination extends React.Component {
         browserHistory.push(`/${this.props.url}${page}`);
     }
     render() {
+        //let i = 1;
         const total = this.props.totalPages;
         const current = this.props.currentPage;
         const pages = [];
@@ -61,7 +62,6 @@ export default class Pagination extends React.Component {
         let next;
         let last;
         let console;
-        //let i = 1;
 
         if (current > 1 && current <= total) {
             first = (
@@ -180,4 +180,4 @@ Pagination.propTypes = {
 
 Pagination.defaultProps = {
     range: 2
-}
+};

@@ -203,7 +203,7 @@ export default class Mailboxes extends React.Component {
             }
 
             if (MailboxStore.hasMailboxes() && MailboxStore.hasThisPage(this.state.page)) {
-                console.log('has page with data');
+                console.log('has page with data'); //eslint-disable-line no-console
                 return resolve(MailboxStore.getMailboxByPage(this.state.page));
             }
 

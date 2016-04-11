@@ -46,7 +46,7 @@ export default class MultipleTaskModal extends React.Component {
         const collection = [];
         const refs = this.refs;
         let message = null;
-        let error = false;
+        let err = false;
         const isEnabled = refs.zimbraPrefOutOfOfficeReplyEnabled.checked;
 
         const start = refs.zimbraPrefOutOfOfficeFromDate.value;
@@ -54,13 +54,13 @@ export default class MultipleTaskModal extends React.Component {
 
         if ((start > end) && isEnabled) {
             message = 'La fecha en la que termina su respuesta automática, debe ser mayor que en la que comienza.';
-            error = true;
+            err = true;
         } else if ((start === end) && isEnabled) {
             message = 'La fecha en la que comienza su respuesta automática no puede ser la misma fecha en la que termina.';
-            error = true;
+            err = true;
         }
 
-        if (error) {
+        if (err) {
             this.setState({
                 error: true,
                 message,
@@ -125,11 +125,13 @@ export default class MultipleTaskModal extends React.Component {
 
             return null;
         }, (error) => {
-            console.log(error);
+            console.log(error); //eslint-disable-line no-console
             if (this.props.show) {
                 this.props.onHide();
             }
         });
+
+        return null;
     }
 
     getOwnAccounts(attrs) {

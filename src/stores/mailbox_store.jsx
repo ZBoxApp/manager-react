@@ -54,7 +54,7 @@ class MailboxStoreClass extends EventEmitter {
 
     getMailboxByPage(page) {
         if (page && this.currentPage[page]) {
-            console.log(this.currentPage);
+            console.log(this.currentPage); //eslint-disable-line no-console
             return this.currentPage[page];
         }
 
@@ -89,10 +89,10 @@ class MailboxStoreClass extends EventEmitter {
         if (mailboxesArray) {
             Array.prototype.push.apply(mailboxexInstances, mailboxes.account);
             mailboxesArray.account = mailboxexInstances;
-            console.log('mailbox', mailboxes);
+            console.log('mailbox', mailboxes); //eslint-disable-line no-console
             if (page) {
                 this.currentPage[page] = mailboxes;
-                console.log(this.currentPage[page]);
+                console.log(this.currentPage[page]); //eslint-disable-line no-console
             }
             return true;
         }
@@ -101,7 +101,7 @@ class MailboxStoreClass extends EventEmitter {
         mailboxexInstances = mailboxes.account;
         if (page) {
             this.currentPage[page] = mailboxes;
-            console.log(this.currentPage[page]);
+            console.log(this.currentPage[page]); //eslint-disable-line no-console
         }
         return true;
     }
