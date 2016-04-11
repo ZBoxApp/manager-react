@@ -12,11 +12,32 @@ class MailboxStoreClass extends EventEmitter {
     constructor() {
         super();
         this.current = null;
+        this.mailboxesByDomain = null;
     }
 
     resetThisStore() {
         this.current = null;
+        this.mailboxesByDomain = null;
         mailboxesArray = null;
+    }
+
+    setMailboxesByDomain(id, mailboxes) {
+        if (mailboxes) {
+            this.mailboxesByDomain = {};
+            this.mailboxesByDomain[id] = mailboxes;
+        }
+
+        return true;
+    }
+
+    getMailboxByDomainId(id) {
+        if (id) {
+            if (this.mailboxesByDomain) {
+                return this.mailboxesByDomain[id];
+            }
+        }
+
+        return false;
     }
 
     getMailboxById(id) {

@@ -45,6 +45,7 @@ export default class Mailboxes extends React.Component {
         this.filtering = false;
         this.selectedStatusFilter = '';
         this.selectedPlanFilter = '';
+        this.selectedPlan = '';
         this.cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
         this.cosById = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
         this.isRefreshing = true;
@@ -55,6 +56,7 @@ export default class Mailboxes extends React.Component {
             closed: 'Cerrada'
         };
         this.optionPlans = window.manager_config.plans;
+        this.domainId = null;
 
         this.state = {
             page,
@@ -70,6 +72,7 @@ export default class Mailboxes extends React.Component {
             this.selectedPlanFilter = '';
             if (this.cos[selected]) {
                 this.selectedPlanFilter = this.cos[selected];
+                this.selectedPlan = selected;
             }
         }
 
@@ -77,7 +80,7 @@ export default class Mailboxes extends React.Component {
             this.selectedStatusFilter = selected.length > 0 ? selected : null;
         }
 
-        const domainId = this.props.params.domain_id;
+        const domainId = this.domainId;
 
         this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);
     }
@@ -143,15 +146,18 @@ export default class Mailboxes extends React.Component {
                 loading: true
             };
 
-            domainId = this.props.params.domain_id;
+            domainId = this.domainId;
+
+            if (this.props.params.domain_id) {
+                domainId = this.props.params.domain_id;
+                this.domainId = domainId;
+            }
 
             this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);
         } else {
             GlobalActions.emitStartLoading();
 
-            if (newProps.params.domain_id !== this.props.params.domain_id) {
-                domainId = newProps.params.domain_id;
-            }
+            domainId = newProps.params.domain_id;
 
             this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);
         }
@@ -196,7 +202,14 @@ export default class Mailboxes extends React.Component {
 
         new Promise((resolve, reject) => {
             if (domainName) {
+                const hasMailboxForDomain = MailboxStore.getMailboxByDomainId(domainName);
+
+                if (hasMailboxForDomain) {
+                    return resolve(hasMailboxForDomain);
+                }
+
                 return Client.getAllAccounts(attrs, (success) => {
+                    MailboxStore.setMailboxesByDomain(domainName, success);
                     return resolve(success);
                 }, (error) => {
                     return reject(error);
@@ -289,6 +302,7 @@ export default class Mailboxes extends React.Component {
         EventStore.addMessageListener(this.showMessage);
         MailboxStore.addListenerAddMassive(this.refreshAllAccounts);
         const domainId = this.props.params.domain_id;
+        this.domainId = domainId;
         this.getAllMailboxes(domainId);
     }
 
@@ -569,7 +583,7 @@ export default class Mailboxes extends React.Component {
                         <select
                             className='form-control plans'
                             onChange={this.handleChangeFilter}
-                            value={this.selectedPlanFilter}
+                            value={this.selectedPlan}
                         >
                             <option value=''>Todos los planes</option>
                             {plans}
