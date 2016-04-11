@@ -59,27 +59,27 @@ app.get('/company/:id/invoices', (req, res) => {
             number: 355,
             link: 'http://google.com',
             date: moment('2016-01-01').toJSON(),
-            total: '$ 54.490',
+            total: '235581',
             status: 1
         },
         {
             number: 356,
             link: 'http://google.com',
             date: moment('2016-02-01').toJSON(),
-            total: '$ 54.490',
+            total: '27581',
             status: 2
         },
         {
             number: 357,
             date: moment('2016-02-01').toJSON(),
-            total: '$ 54.490',
+            total: '30581',
             status: 3
         },
         {
             number: 358,
             link: 'http://google.com',
             date: moment('2016-03-01').toJSON(),
-            total: '$ 54.490',
+            total: '35581',
             status: 0
         }
     ]);

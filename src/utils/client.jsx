@@ -18,7 +18,9 @@ function handleError(methodName, err) {
     if (err.extra &&
         (err.extra.code === Constants.ZimbraCodes.AUTH_EXPIRED || err.extra.code === Constants.ZimbraCodes.AUTH__REQUIRED)
     ) {
-        logout();
+        logout(() => {
+            Utils.kickOutUserWhenAuthExpired();
+        });
         return err;
     }
 

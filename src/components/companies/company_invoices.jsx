@@ -12,6 +12,7 @@ import StatusLabel from '../status_label.jsx';
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import Constants from '../../utils/constants.jsx';
+import currencyFormatter from 'currency-formatter';
 
 const messageType = Constants.MessageType;
 
@@ -86,6 +87,7 @@ export default class CompanyInvoices extends React.Component {
                     let status;
                     let statusClass = '';
                     let number = i.number;
+                    const total = i.total > 0 ? currencyFormatter.format(i.total, {code: 'USD', symbol: '$ '}) : i.total;
                     if (i.link) {
                         number = (
                             <a
@@ -122,7 +124,7 @@ export default class CompanyInvoices extends React.Component {
                                 {number}
                             </td>
                             <td className='text-center'>
-                                {i.total}
+                                {total}
                             </td>
                             <td className='text-center'>
                                 {moment(i.date).locale('es').format('DD [de] MMMM [de] YYYY')}
