@@ -1,3 +1,4 @@
 {
+    "debug": true,
     "zimbraUrl": "https://zimbra.zboxapp.dev:7071/service/admin/soap"
 }

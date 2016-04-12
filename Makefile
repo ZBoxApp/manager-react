@@ -1,4 +1,4 @@
-.PHONY: build install test run run-fullmap clean stop nuke
+.PHONY: build install test run run-fullmap clean stop nuke stop-server start-server
 
 test: | install
 	@echo Checking for SCSS style guide compliance
@@ -23,17 +23,17 @@ build: | install test
 
 	@npm run build
 
-run: install
+run: | install start-server
 	@echo Running ZBox Manager Webapp for development
 
 	@npm run run &
 
-run-fullmap: install
+run-fullmap: | install start-server
 	@echo FULL SOURCE MAP Running ZBox Manager Webapp for development FULL SOURCE MAP
 
 	@npm run run-fullmap &
 
-stop:
+stop: | stop-server
 	@echo Stopping changes watching
 
 	@for PROCID in $$(ps -ef | grep "[n]ode.*[w]ebpack" | awk '{ print $$2 }'); do \
@@ -49,3 +49,15 @@ clean:
 
 nuke: clean
 	@rm -rf node_modules
+
+stop-server:
+	@echo Stopping ZBox Manager 2.0 Test Server
+
+	@for PROCID in $$(ps -ef | grep "[b]abel-node.*server" | awk '{ print $$2 }'); do \
+		echo stopping webpack watch $$PROCID; \
+		kill $$PROCID; \
+	done
+
+start-server:
+	@echo Starting ZBox Manager 2.0 Test Server
+	@npm run server &

@@ -49,6 +49,7 @@
     "check": "eslint --ext \".jsx\" --ignore-pattern node_modules --quiet .",
     "build": "webpack",
     "run": "webpack --progress --watch",
-    "run-fullmap": "webpack --progress --watch"
+    "run-fullmap": "webpack --progress --watch",
+    "server": "babel-node server.js"
   }
 }
