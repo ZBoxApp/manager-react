@@ -1,1 +1,72 @@
 @charset 'UTF-8';
+
+// Color Variables
+$primary-color: rgb(35, 137, 215);
+$primary-color--hover: darken($primary-color, 10%);
+$bg--gray: rgb(245, 245, 245);
+$white: rgb(255, 255, 255);
+$black: rgb(0, 0, 0);
+$red: rgb(229, 101, 101);
+$yellow: rgb(255, 255, 0);
+$light-gray: rgba(0, 0, 0, .15);
+$gray: rgba(0, 0, 0, .3);
+$dark-gray: rgba(0, 0, 0, .5);
+
+// Random variables
+$border-rad: 1px;
+
+// Alert component variables
+//------ PRE-DEFINED TEMPLATES VARS
+$color-navy-blue: #34495e;
+$color-violet: #9b59b6;
+$color-blue: #3498db;
+$color-green: #62cb31;
+$color-yellow: #ffb606;
+$color-orange: #e67e22;
+$color-red: #e74c3c;
+$color-red-deep: #c0392b;
+
+// Additional colors
+$color-text: #6a6c6f;
+$color-bright: #f7f9fa;
+$color-background: #f1f3f6;
+$color-background-boxed: lighten($color-background, 3%);
+$border-color: #e4e5e7;
+
+// Additional variables
+$menu-width: 180px;
+$main-transition: all .1s ease-out 0s;
+//------ PRE-DEFINED TEMPLATES VARS
+$black-opacity-p1: rgba(0, 0, 0, .1);
+$black-opacity-p2: rgba(0, 0, 0, .2);
+$sweet-alert-btn-color: #34495e;
+$sweet-alert-btn-color-hover: #a1d9f2;
+$sweet-alert-btn-color-active: #81ccee;
+$sweet-alert-btn-rgba-focus-p1: rgba(128, 179, 235, .5);
+$sweet-alert-btn-rgba-focus-p2: rgba(0, 0, 0, .05);
+$sweet-alert-btn-cancel: #d0d0d0;
+$sweet-alert-btn-cancel-hover: #c8c8c8;
+$sweet-alert-btn-cancel-active: #b6b6b6;
+$table-children-border-bottom-color: #ddd;
+$bg-event-row-color: #f9f9f9;
+// Alert component variables
+
+// Page Variables
+$border-gray: 1px solid $table-children-border-bottom-color;
+// Tabs Variables
+$border-color-tabs-state: #eee;
+// Modal Variables
+$color-shadow-modal-content1: rgba(0, 0, 0, .1);
+$color-shadow-modal-content2: rgba(0, 0, 0, .2);
+// Various Variables
+$border-bottom-message: #e7eaec;
+$well-border-color: #e7eaec;
+$project-list-td-color: #e7eaec;
+$color-ifont-i: #676a6c;
+$color-ifont-span: #a6a8a9;
+$hbreadcrumb-color: #9d9fa2;
+$ui-sortable-placeholder: #f7f9fa;
+$ui-sortable-placeholder-border-color: #cecece;
+$filter-body-panel-bg: #fafcfd;
+$filter-body-panel-shadow: rgba(0, 0, 0, .175);
+$code-mirror-border-color: #eee;

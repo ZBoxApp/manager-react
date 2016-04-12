@@ -1,0 +1,274 @@
+// Estas variables deben ir en el archivo de variables
+$color-dark: #455463;
+$text-light: #a7afb8;
+$heading-color: #edf0f5;
+$white: #fff;
+$color-51: rgba(51, 51, 51, 1);
+$pricing-plan-li-color: #aeaeae;
+
+.landing-page {
+
+  .navbar-form-custom,
+  .navbar-right,
+  #logo {
+    display: block;
+  }
+
+  .navbar-default {
+    background: $white;
+
+    &.navbar-toggle:hover,
+    .navbar-toggle:focus {
+      background: $color-green;
+
+      &.icon-bar {
+        background-color: $white;
+      }
+    }
+
+    &.navbar-nav {
+      > .active > a,
+      > .active > a:hover,
+      > .active > a:focus {
+        background-color: transparent;
+        border: 0;
+        color: $color-green;
+      }
+    }
+  }
+
+  li {
+    a:hover {
+      border-bottom: 0;
+    }
+
+    &.pricing-desc {
+      border-top: 0;
+      font-size: 13px;
+      padding: 20px 16px 0;
+    }
+
+    &.pricing-title {
+      border-radius: 4px 4px 0 0;
+      color: $color-dark;
+      font-size: 22px;
+      font-weight: 600;
+      padding: 25px 10px 0;
+    }
+  }
+
+  .navbar {
+    &.navbar-brand {
+      background-color: $color-green;
+      border-radius: 5px;
+      color: $white;
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      height: auto;
+      margin-left: 0;
+      margin-top: 8px;
+      padding: 9px 15px;
+    }
+  }
+
+  .brand-desc {
+    color: $color-dark;
+    margin: 17px 10px 0 90px;
+    width: 180px;
+  }
+
+  .navbar-nav {
+    > li {
+      height: 55px;
+
+      > a {
+        color: $color-dark;
+        font-size: 14px;
+        font-weight: 600;
+        height: 55px;
+        padding: 15px;
+      }
+    }
+  }
+
+  header {
+    height: 480px;
+    margin-bottom: 30px;
+    padding-top: 50px;
+
+    .container {
+      position: relative;
+    }
+  }
+
+  section {
+    border-bottom: 1px solid $border-color;
+    padding: 50px 0;
+
+    h2 {
+      margin-top: 0;
+    }
+
+    p {
+      margin-top: 0;
+    }
+  }
+
+  .heading {
+    color: $heading-color;
+    margin-top: 60px;
+
+    h1 {
+      font-size: 34px;
+      font-weight: 600;
+      letter-spacing: -.5px;
+      margin-bottom: 5px;
+    }
+
+    span {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    p {
+      &.small {
+        color: $text-light;
+        margin-top: 10px;
+        max-width: 260px;
+      }
+    }
+  }
+
+  h4 {
+    font-weight: 600;
+  }
+
+  p {
+    color: $text-light;
+  }
+
+  .heading-image {
+    position: absolute;
+    right: 60px;
+    text-align: right;
+    top: 120px;
+
+    p {
+      color: $text-light;
+      margin-bottom: 5px;
+    }
+
+    img {
+      border-radius: 1px;
+      box-shadow: 0 0 8px 0 $color-51;
+      margin-left: 12px;
+      margin-top: 12px;
+      width: 180px;
+    }
+  }
+
+  .navy-link {
+    background: $color-dark;
+    color: $white;
+  }
+
+  .icon-big {
+    font-size: 70px;
+  }
+
+  .team-member {
+    img {
+      height: 72px;
+    }
+  }
+
+  .social-icon {
+    a {
+      background: $color-green;
+      border-radius: 4px;
+      color: $white;
+      display: block;
+      height: 28px;
+      padding: 4px 8px;
+      text-align: center;
+      width: 28px;
+    }
+
+    a:hover {
+      background: darken($color-green, 4%);
+    }
+  }
+
+  .list-inline {
+    > li {
+      padding: 0;
+    }
+  }
+
+  .pricing-plan {
+    background: $white;
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    margin: 20px 10px 0;
+    padding-bottom: 20px;
+
+    li {
+      color: $pricing-plan-li-color;
+      padding: 10px 16px;
+      text-align: center;
+    }
+
+    .pricing-price {
+      span {
+        color: $color-green;
+        font-size: 30px;
+        font-weight: 700;
+      }
+    }
+
+  }
+
+  .pricing-title {
+    .label {
+      font-size: 12px;
+    }
+  }
+
+  .client {
+    background: $color-bright;
+    color: $text-light;
+    font-weight: 600;
+    margin: 0 0 20px;
+    padding: 30px 10px;
+    text-transform: uppercase;
+  }
+
+  // Esto debe ir en responsive/desktop
+  @media (max-width: 1200px) {
+
+    .heading-image {
+      display: none;
+    }
+
+    .heading {
+      text-align: center;
+
+      p {
+        &.small {
+          margin: 10px auto;
+        }
+      }
+    }
+
+    .brand-desc {
+      display: none;
+    }
+
+    .navbar {
+      .navbar-brand {
+        margin-left: 10px;
+      }
+    }
+  }
+}

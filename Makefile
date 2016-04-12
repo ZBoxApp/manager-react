@@ -18,8 +18,6 @@ install: package.json
 
 	@npm install
 
-	@touch $@
-
 build: | install test
 	@echo Building ZBox Manager Webapp
 
