@@ -18,41 +18,20 @@ export default class LoginEmail extends React.Component {
     }
     handleSubmit(e) {
         e.preventDefault();
-        var state = {};
 
         const email = this.refs.email.value.trim();
-        if (!email) {
-            state.loginError = 'El correo electrónico es obligatorio';
-            this.setState(state);
-            return;
-        }
-
         const password = this.refs.password.value.trim();
-        if (!password) {
-            state.loginError = 'La contraseña es obligatoria';
-            this.setState(state);
-            return;
-        }
-
-        state.loginError = '';
-        this.setState(state);
-
         this.props.submit(email, password);
     }
     render() {
-        let loginError;
         let errorClass = '';
         if (this.state.loginError) {
-            loginError = <label className='control-label'>{this.state.loginError}</label>;
             errorClass = ' has-error';
         }
 
         return (
             <form onSubmit={this.handleSubmit}>
                 <div className='signup__email-container'>
-                    <div className={'form-group' + errorClass}>
-                        {loginError}
-                    </div>
                     <div className={'form-group' + errorClass}>
                         <input
                             autoFocus={true}
@@ -78,9 +57,9 @@ export default class LoginEmail extends React.Component {
                     <div className='form-group'>
                         <button
                             type='submit'
-                            className='btn btn-primary'
+                            className='btn btn-success btn-block'
                         >
-                            {'Iniciar Sesión'}
+                            {'Ingresar'}
                         </button>
                     </div>
                 </div>

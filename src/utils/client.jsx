@@ -4,7 +4,8 @@
 import $ from 'jquery';
 import jszimbra from 'js-zimbra';
 import * as Utils from './utils.jsx';
-import Domain from '../zimbra/domain.jsx';
+
+// import Domain from '../zimbra/domain.jsx';
 
 let domain;
 
@@ -60,9 +61,6 @@ export function login(username, secret, success, error) {
             var e = handleError('login', err);
             return error(e);
         }
-
-        // aqui deberiamos inicializar todas las apis
-        domain = new Domain(zimbra);
 
         Utils.setCookie('token', zimbra.token, 3);
         return success(zimbra);
