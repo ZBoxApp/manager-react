@@ -1,0 +1,16 @@
+.flash {
+  .flash-error {
+    background: $bg-error-color;
+    color: $flash-error-color;
+  }
+
+  .flash-success {
+    background: $bg-success-color;
+    color: $white;
+  }
+
+  .flash-warning {
+    background: $bg-warning-color;
+    color: $white;
+  }
+}

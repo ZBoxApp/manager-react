@@ -7,21 +7,15 @@ import React from 'react';
 
 export default class NotLoggedIn extends React.Component {
     componentDidMount() {
-        $('body').attr('class', 'sticky');
-        $('#root').attr('class', 'container-fluid');
+        $('body').addClass('sticky');
+        $('#root').addClass('container-fluid');
     }
     componentWillUnmount() {
         $('body').attr('class', '');
         $('#root').attr('class', '');
     }
     render() {
-        return (
-            <div className='inner-wrap'>
-                <div className='row content'>
-                    {this.props.children}
-                </div>
-            </div>
-        );
+        return this.props.children;
     }
 }
 
