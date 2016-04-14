@@ -31,7 +31,13 @@ export default class LoginEmail extends React.Component {
 
         return (
             <form onSubmit={this.handleSubmit}>
-                <div className='signup__email-container'>
+                <div className=''>
+                    <h2
+                        className='text-center'
+                        style={{marginBottom: '50px'}}
+                    >
+                        {'Ingreso a ZBox Manager'}
+                    </h2>
                     <div className={'form-group' + errorClass}>
                         <input
                             autoFocus={true}

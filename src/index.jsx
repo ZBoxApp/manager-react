@@ -16,10 +16,10 @@ import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
 
 const notFoundParams = {
-    title: 'Page not found',
-    message: 'The page you where trying to reach does not exist',
-    link: '/logout',
-    linkmessage: 'Back to Manager'
+    title: 'Página no encontrada',
+    message: 'La página que estás intentando acceder no existe',
+    link: '/',
+    linkmessage: 'Volver a Manager'
 };
 
 function preRenderSetup(callwhendone) {

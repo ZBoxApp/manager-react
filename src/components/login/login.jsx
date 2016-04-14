@@ -6,6 +6,7 @@ import React from 'react';
 import {browserHistory} from 'react-router';
 
 import * as Client from '../../utils/client.jsx';
+import Panel from '../panel.jsx';
 import LoginEmail from './login_email.jsx';
 import MessageBar from '../message_bar.jsx';
 
@@ -88,24 +89,16 @@ export default class Login extends React.Component {
             <div className='login-container'>
                 <div className='row'>
                     <div className='col-md-12'>
-                        <div className='hpanel'>
-                            {loginError}
-                            <div
-                                className='panel-body'
-                                style={{paddingLeft: '80px', paddingRight: '80px', paddingBottom: '60px'}}
-                            >
-                                <h2
-                                    className='text-center'
-                                    style={{marginBottom: '50px'}}
-                                >
-                                    {'Ingreso a ZBox Manager'}
-                                </h2>
+                        <Panel
+                            hasHeader={false}
+                            error={loginError}
+                            children={(
                                 <LoginEmail
                                     submit={this.submit}
                                     loginError={this.state.loginError}
                                 />
-                            </div>
-                        </div>
+                            )}
+                        />
                     </div>
                 </div>
                 <div className='row'>
