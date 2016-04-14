@@ -13,7 +13,7 @@ export default class LoggedIn extends React.Component {
             <div>
                 <LoadingScreen/>
                 <Header/>
-                <Sidebar/>
+                <Sidebar location={this.props.location}/>
                 <div className='wrapper'>
                     {this.props.children}
                 </div>
@@ -29,5 +29,6 @@ LoggedIn.propTypes = {
     children: React.PropTypes.oneOfType([
         React.PropTypes.arrayOf(React.PropTypes.element),
         React.PropTypes.element
-    ])
+    ]),
+    location: React.PropTypes.object.isRequired
 };
