@@ -3,6 +3,7 @@
 
 const http = require('http');
 const fs = require('fs');
+const path = require('path');
 
 const mimes = {
     js: 'text/javascript',
@@ -21,7 +22,8 @@ const server = http.createServer((req, res) => {
     const mime = /^\/[a-zA-Z0-9\/]*\.(js|json|css|jpg|png|gif|svg|ttf|eot|woff|woff2)$/.exec(req.url.toString());
     if (mime) {
         const ext = mime[1];
-        return sendFileContent(res, 'dist/' + req.url.toString().substring(1), mimes[ext]);
+        const filename = path.join(__dirname, 'dist', req.url.toString().substring(1));
+        return sendFileContent(res, filename, mimes[ext]);
     }
     return sendFileContent(res, 'dist/index.html', 'text/html');
 });

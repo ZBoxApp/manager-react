@@ -11,6 +11,7 @@
     "jquery": "2.2.3",
     "js-zimbra": "ZBoxApp/js-zimbra#webpack",
     "keymirror": "0.1.1",
+    "nprogress": "^0.2.0",
     "object-assign": "4.0.1",
     "perfect-scrollbar": "0.6.10",
     "react": "15.0.0",
@@ -20,6 +21,7 @@
     "react-textarea-autosize": "3.3.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.7.5",
     "babel-eslint": "6.0.2",
     "babel-loader": "6.2.4",
     "babel-plugin-transform-runtime": "6.7.5",

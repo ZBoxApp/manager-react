@@ -266,9 +266,13 @@
   background-color: $color-navy-blue;
   float: left;
   height: 56px;
-  padding: 18px 10px 18px 18px;
+  padding: 5px 10px 18px 18px;
   text-align: center;
   width: $menu-width;
+
+  img {
+    width: 100px;
+  }
 
   span {
     color: $white;
@@ -610,10 +614,10 @@ a {
   float: left;
   height: 52px;
   padding: 0;
-  width: 180px;
+  width: 80%;
 
   .form-control {
-    background: none repeat scroll 0 0 $black;
+    background: none repeat scroll 0 0 $transparent;
     border: medium none;
     font-size: 13px;
     height: 52px;

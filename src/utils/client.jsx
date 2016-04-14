@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import jszimbra from 'js-zimbra';
+import UserStore from '../stores/user_store.jsx';
 import * as Utils from './utils.jsx';
 
 // import Domain from '../zimbra/domain.jsx';
@@ -34,7 +35,7 @@ function handleError(methodName, err) {
 
 export function getClientConfig(success, error) {
     return $.ajax({
-        url: 'config/config.json',
+        url: '/config/config.json',
         dataType: 'json',
         success,
         error: function onError(xhr, status, err) {
@@ -63,6 +64,10 @@ export function login(username, secret, success, error) {
         }
 
         Utils.setCookie('token', zimbra.token, 3);
+        UserStore.setCurrentUser({
+            token: zimbra.token,
+            email: username
+        });
         return success(zimbra);
     });
 }
@@ -74,6 +79,7 @@ export function logout(callback) {
     if (cookie) {
         Utils.setCookie('token', '', -1);
     }
+    UserStore.setCurrentUser(null);
 
     return callback();
 }

@@ -2,32 +2,31 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import NProgress from 'nprogress';
+import EventStore from '../stores/event_store.jsx';
 
 export default class LoadingScreen extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {};
+
+        this.onLoadingStart = this.onLoadingStart.bind(this);
+        this.onLoadingEnd = this.onLoadingEnd.bind(this);
+    }
+    componentDidMount() {
+        EventStore.addStartLoadingListener(this.onLoadingStart);
+        EventStore.addEndLoadingListener(this.onLoadingEnd);
+    }
+    componentWillUmount() {
+        EventStore.removeStartLoadingListener(this.onLoadingStart);
+        EventStore.removeEndLoadingListener(this.onLoadingEnd);
+    }
+    onLoadingStart() {
+        NProgress.start();
+    }
+    onLoadingEnd() {
+        NProgress.done();
     }
     render() {
-        return (
-            <div
-                className='loading-screen'
-                style={{position: this.props.position}}
-            >
-                <div className='loading__content'>
-                    <h3>{'Cargando'}</h3>
-                    <div className='round round-1'></div>
-                    <div className='round round-2'></div>
-                    <div className='round round-3'></div>
-                </div>
-            </div>
-        );
+        return <div/>;
     }
 }
-
-LoadingScreen.defaultProps = {
-    position: 'relative'
-};
-LoadingScreen.propTypes = {
-    position: React.PropTypes.oneOf(['absolute', 'fixed', 'relative', 'static', 'inherit'])
-};
