@@ -5,6 +5,8 @@ import keyMirror from 'keymirror';
 
 export default {
     ActionTypes: keyMirror({
+        START_LOADING: null,
+        END_LOADING: null,
         RECEIVED_ERROR: null
     }),
 

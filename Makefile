@@ -54,7 +54,7 @@ stop-server:
 	@echo Stopping ZBox Manager 2.0 Test Server
 
 	@for PROCID in $$(ps -ef | grep "[b]abel-node.*server" | awk '{ print $$2 }'); do \
-		echo stopping webpack watch $$PROCID; \
+		echo stopping server $$PROCID; \
 		kill $$PROCID; \
 	done
 

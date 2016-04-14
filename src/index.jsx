@@ -3,17 +3,20 @@
 
 import './sass/styles.scss';
 
-import $ from 'jquery';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import {Router, Route, IndexRedirect, Redirect, browserHistory} from 'react-router';
 import Root from './components/root.jsx';
 import ErrorPage from './components/error_page.jsx';
 import LoggedIn from './components/logged_in.jsx';
 import NotLoggedIn from './components/not_logged_in.jsx';
 import Login from './components/login/login.jsx';
+import Accounts from './components/accounts.jsx';
+
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
+
+import $ from 'jquery';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {Router, Route, IndexRedirect, Redirect, browserHistory} from 'react-router';
 
 const notFoundParams = {
     title: 'Página no encontrada',
@@ -53,11 +56,12 @@ function onPreLoggedIn(nextState, replace, callback) {
     });
 }
 
-function onLoggedOut() {
+function onLoggedOut(nextState, replace) {
     Client.logout(
         () => {
-            // window.location.href = '/login'
-            browserHistory.replace('/login');
+            replace({
+                pathname: '/login'
+            });
         }
     );
 }
@@ -79,6 +83,13 @@ function renderRootComponent() {
                     component={LoggedIn}
                     onEnter={onPreLoggedIn}
                 >
+                    <Route
+                        path='accounts'
+                        component={Accounts}
+                    />
+                    <Route
+                        path='search/global'
+                    />
                     <Route
                         path='logout'
                         onEnter={onLoggedOut}
