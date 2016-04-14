@@ -39,7 +39,7 @@ export default class Sidebar extends React.Component {
                                 </span>
                             </div>
                         </div>
-                        <SidebarMenu/>
+                        <SidebarMenu location={this.props.location}/>
                     </div>
                 </aside>
             );
@@ -48,3 +48,7 @@ export default class Sidebar extends React.Component {
         return <div/>;
     }
 }
+
+Sidebar.propTypes = {
+    location: React.PropTypes.object.isRequired
+};

@@ -1,10 +1,23 @@
 // Copyright (c) 2016 ZBox, Spa. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import * as GlobalActions from '../action_creators/global_actions.jsx';
+
 import React from 'react';
-import {Link} from 'react-router';
+import {browserHistory} from 'react-router';
 
 export default class SidebarMenu extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleLink = this.handleLink.bind(this);
+    }
+    handleLink(e, path) {
+        e.preventDefault();
+        if (`/${this.props.location.pathname}` !== path) {
+            GlobalActions.emitEndLoading();
+            browserHistory.push(path);
+        }
+    }
     render() {
         return (
             <ul
@@ -12,24 +25,36 @@ export default class SidebarMenu extends React.Component {
                 id='side-menu'
             >
                 <li id='sidebar-dashboards'>
-                    <Link to='/dashboards'>
+                    <a
+                        href='#'
+                        onClick={(e) => this.handleLink(e, '/dashboards')}
+                    >
                         <span className='nav-label'>{'dashboards'}</span>
-                    </Link>
+                    </a>
                 </li>
                 <li id='sidebar-accounts'>
-                    <Link to='/accounts'>
+                    <a
+                        href='#'
+                        onClick={(e) => this.handleLink(e, '/accounts')}
+                    >
                         <span className='nav-label'>{'cuentas'}</span>
-                    </Link>
+                    </a>
                 </li>
                 <li ref='sidebar-domains'>
-                    <Link to='/domains'>
+                    <a
+                        href='#'
+                        onClick={(e) => this.handleLink(e, '/domains')}
+                    >
                         <span className='nav-label'>{'dominios'}</span>
-                    </Link>
+                    </a>
                 </li>
                 <li ref='sidebar-mailboxes'>
-                    <Link to='/mailboxes'>
+                    <a
+                        href='#'
+                        onClick={(e) => this.handleLink(e, '/mailboxes')}
+                    >
                         <span className='nav-label'>{'casillas'}</span>
-                    </Link>
+                    </a>
                 </li>
                 <li>
                     <a
@@ -44,3 +69,7 @@ export default class SidebarMenu extends React.Component {
         );
     }
 }
+
+SidebarMenu.propTypes = {
+    location: React.PropTypes.object.isRequired
+};
