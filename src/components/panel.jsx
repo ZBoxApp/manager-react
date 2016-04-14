@@ -14,14 +14,22 @@ export default class Panel extends React.Component {
             );
         });
 
-        return (
-            <div className='hpanel'>
+        let panelHeader;
+        if (this.props.hasHeader) {
+            panelHeader = (
                 <div className='panel-heading hbuilt clearfix'>
                     <div className='pull-right'>{btns}</div>
                     <div className='heading-buttons'>
                         {this.props.title}
                     </div>
                 </div>
+            );
+        }
+
+        return (
+            <div className='hpanel'>
+                {panelHeader}
+                {this.props.error}
                 <div className='panel-body'>
                     {this.props.children}
                 </div>
@@ -31,12 +39,16 @@ export default class Panel extends React.Component {
 }
 
 Panel.propTypes = {
+    hasHeader: React.PropTypes.bool,
     btnsHeader: React.PropTypes.array,
     title: React.PropTypes.string,
+    error: React.PropTypes.element,
     children: React.PropTypes.any
 };
 
 Panel.defaultProps = {
+    hasHeader: true,
     btnsHeader: [],
-    title: ''
+    title: '',
+    error: null
 };
