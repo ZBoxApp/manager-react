@@ -511,7 +511,7 @@
 // Sidebar Hide
 
 body {
-  .hide-sidebar {
+  &.hide-sidebar {
     #menu {
       margin-left: -$menu-width;
     }
