@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from './link.jsx';
+import Anchor from './anchor.jsx';
 
 export default class Pagination extends React.Component {
     render() {
@@ -11,7 +11,7 @@ export default class Pagination extends React.Component {
                 <ul className={this.props.ulClasses}>
                     {this.props.linksArray.map((link, i) => {
                         return (
-                          <Link
+                          <Anchor
                               key={i}
                               url={link.url}
                               label={link.label}

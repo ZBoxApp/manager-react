@@ -2,8 +2,7 @@ import React from 'react';
 import Button from './button.jsx';
 import PanelForm from './panelForm.jsx';
 import Pagination from './pagination.jsx';
-import Alert from './alert.jsx';
-import Link from './link.jsx';
+import Anchor from './anchor.jsx';
 
 export default class Panel extends React.Component {
     constructor(props) {
@@ -11,57 +10,7 @@ export default class Panel extends React.Component {
 
         this.state = {
             loading: false,
-            data: [
-                {email: '@zbox', name: '2', type: 'Caracas', actions: [
-                    {
-                        props: {
-                            href: '/mailboxes/8758658/edit',
-                            className: 'btn btn-primary btn-xs'
-                        },
-                        label: 'Editar'
-                    },
-
-                    {
-                        props: {
-                            href: '/mailboxes/8758658/delete',
-                            className: 'btn btn-danger btn-xs'
-                        },
-                        label: 'Eliminar'
-                    }
-                ], props: {className: 'domain-row'}},
-                {email: '@Nombre', name: '2NNS', type: 'Descripción', actions: [
-                    {
-                        props: {
-                            href: '/mailboxes/86767676/edit',
-                            className: 'btn btn-danger btn-xs'
-                        },
-                        label: 'Editar'
-                    }
-                ], props: {className: 'domain-row'}},
-                {email: '@microsoft', name: '34NS', type: 'Solteros', actions: [], props: {className: 'domain-row'}},
-                {email: '@descargasnsn', name: '2NNS', type: 'Descripción', actions: [], props: {className: 'domain-row'}},
-                {email: '@Nombre', name: '2NNS', type: 'Descripción', actions: [], props: {className: 'domain-row'}},
-                {email: '@machinesoft', name: '', type: 'Hola que tal', actions: [], props: {className: 'domain-row'}},
-                {email: '@Nombre', name: '2S', type: 'Descripción', actions: [], props: {className: 'domain-row'}},
-                {email: '@getonboard', name: '45NS', type: 'Casados', actions: [], props: {className: 'domain-row'}}
-            ],
-            pagination: [
-                {url: './domains/1', label: '1', props: {className: 'active'}},
-                {url: './domains/2', label: '2'},
-                {url: './domains/3', label: '3'},
-                {url: './domains/prev', label: 'prev'},
-                {url: './domains/next', label: 'next'}
-            ],
-
-            tabs: [
-                {url: '/mailboxes', label: 'Todas (100)', props: {id: 'tab-all'}},
-                {url: '/archiving', label: 'Archiving', props: {id: 'tab-archiving'}},
-                {url: '/tab-basic', label: 'Básico', props: {style: {display: 'none'}}},
-                {url: '/professional', label: 'Professional', props: {style: {display: 'none'}}},
-                {url: '/premium', label: 'Premium', props: {style: {display: 'none'}}},
-                {url: '/unknown', label: 'Sin Plan (130)', props: {id: 'tab-unknown'}},
-                {url: '/locked', label: 'bloqueada (1)', props: {id: 'tab-locked'}}
-            ]
+            data: []
         };
     }
 
@@ -142,7 +91,7 @@ export default class Panel extends React.Component {
 
         const tab = this.state.tabs.map((li, i) => {
             return (
-                <Link
+                <Anchor
                     key={i}
                     attrs={li.props}
                     url={li.url}
@@ -163,13 +112,6 @@ export default class Panel extends React.Component {
                 className='col-md-12 panel-width-tabs mailboxes-index'
                 data-domain=''
             >
-                <Alert
-                    className='alert alert-success'
-                    withClose={true}
-                >
-                    <button>Tu datos han sido guardados! ok .</button>
-                </Alert>
-
                 <div className='hpanel'>
                     {tabs}
                     <div className='tab-content'>

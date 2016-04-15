@@ -1,7 +1,6 @@
 import React from 'react';
-import If from './if.jsx';
 
-export default class Link extends React.Component {
+export default class Anchor extends React.Component {
     render() {
         return (
             <li {...this.props.attrs}>
@@ -9,18 +8,13 @@ export default class Link extends React.Component {
                     <span className='nav-label'>
                         {this.props.label}
                     </span>
-                    <If condition={this.props.isBadge}>
-                        <span className={this.props.badgeClass}>
-                            {this.props.badgeName}
-                        </span>
-                    </If>
                 </a>
             </li>
         );
     }
 }
 
-Link.propTypes = {
+Anchor.propTypes = {
     badgeName: React.PropTypes.string,
     isBadge: React.PropTypes.bool,
     badgeClass: React.PropTypes.string,
@@ -29,7 +23,7 @@ Link.propTypes = {
     attrs: React.PropTypes.object
 };
 
-Link.defaultProps = {
+Anchor.defaultProps = {
     badgeName: '',
     isBadge: false,
     badgeClass: '',

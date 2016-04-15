@@ -27,7 +27,7 @@ export default class Panel extends React.Component {
         }
 
         return (
-            <div className='hpanel'>
+            <div className={'hpanel ' + this.props.classHeader}>
                 {panelHeader}
                 {this.props.error}
                 <div className='panel-body'>
@@ -42,6 +42,7 @@ Panel.propTypes = {
     hasHeader: React.PropTypes.bool,
     btnsHeader: React.PropTypes.array,
     title: React.PropTypes.string,
+    classHeader: React.PropTypes.string,
     error: React.PropTypes.element,
     children: React.PropTypes.any
 };
@@ -50,5 +51,6 @@ Panel.defaultProps = {
     hasHeader: true,
     btnsHeader: [],
     title: '',
-    error: null
+    error: null,
+    classHeader: ''
 };
