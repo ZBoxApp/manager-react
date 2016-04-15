@@ -3,12 +3,15 @@
 
 import './sass/styles.scss';
 
+import UserStore from './stores/user_store.jsx';
+
 import Root from './components/root.jsx';
 import ErrorPage from './components/error_page.jsx';
 import LoggedIn from './components/logged_in.jsx';
 import NotLoggedIn from './components/not_logged_in.jsx';
 import Login from './components/login/login.jsx';
 import Accounts from './components/accounts/accounts.jsx';
+import Domains from './components/domain/domains.jsx';
 
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
@@ -52,7 +55,18 @@ function onPreLoggedIn(nextState, replace, callback) {
         if (!data || !data.logged_in) {
             return browserHistory.push('/login');
         }
-        return callback();
+
+        if (UserStore.getCurrentUser()) {
+            return callback();
+        }
+
+        return Client.getMe(
+            () => {
+                return callback();
+            },
+            () => {
+                return browserHistory.push('/login');
+            });
     });
 }
 
@@ -86,6 +100,10 @@ function renderRootComponent() {
                     <Route
                         path='accounts'
                         component={Accounts}
+                    />
+                    <Route
+                        path='domains'
+                        component={Domains}
                     />
                     <Route
                         path='search/global'

@@ -541,7 +541,7 @@ body {
 }
 
 a {
-  color: $color-navy-blue;
+  color: $primary-color;
   cursor: pointer;
 
   &.list-group-item.active {
@@ -1221,8 +1221,16 @@ h6 {
 
 // Tables
 
-.table > thead > tr > th {
-  border-bottom: 0;
+.table {
+  > thead > tr > th {
+    border-bottom: 0;
+  }
+
+  td {
+    &.vertical-middle {
+      vertical-align: middle;
+    }
+  }
 }
 
 // Validation

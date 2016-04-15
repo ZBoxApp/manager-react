@@ -1,9 +1,17 @@
 // Copyright (c) 2016 ZBox, Spa. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-class UserStoreClass {
+import AppDispatcher from '../dispatcher/app_dispatcher.jsx';
+import EventEmitter from 'events';
+import Constants from '../utils/constants.jsx';
+const ActionTypes = Constants.ActionTypes;
+
+const CHANGE_EVENT = 'change';
+
+class UserStoreClass extends EventEmitter {
     constructor() {
-        this.currentUser = {};
+        super();
+        this.currentUser = null;
     }
 
     getCurrentUser() {
@@ -23,8 +31,33 @@ class UserStoreClass {
 
         return null;
     }
+
+    emitChange() {
+        this.emit(CHANGE_EVENT);
+    }
+
+    addChangeListener(callback) {
+        this.on(CHANGE_EVENT, callback);
+    }
+
+    removeChangeListener(callback) {
+        this.removeListener(CHANGE_EVENT, callback);
+    }
 }
 
-var UserStore = new UserStoreClass();
+const UserStore = new UserStoreClass();
+UserStore.setMaxListeners(0);
+
+UserStore.dispatchToken = AppDispatcher.register((payload) => {
+    var action = payload.action;
+
+    switch (action.type) {
+    case ActionTypes.USER_CHANGED:
+        UserStore.setCurrentUser(action.user);
+        UserStore.emitChange();
+        break;
+    default:
+    }
+});
 
 export {UserStore as default};

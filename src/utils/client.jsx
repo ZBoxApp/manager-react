@@ -2,16 +2,24 @@
 // See LICENSE.txt for license information.
 
 import $ from 'jquery';
-import jszimbra from 'js-zimbra';
-import UserStore from '../stores/user_store.jsx';
+import {browserHistory} from 'react-router';
+
+import ZimbraAdminApi from 'zimbra-admin-api-js';
+import ZimbraStore from '../stores/zimbra_store.jsx';
+
+import * as GlobalActions from '../action_creators/global_actions.jsx';
 import * as Utils from './utils.jsx';
+import Constants from './constants.jsx';
 
-// import Domain from '../zimbra/domain.jsx';
-
-let domain;
+// arguments.callee.name
 
 // función que maneja el error como corresponde
 function handleError(methodName, err) {
+    if (err.type && err.type === Constants.ActionTypes.NOT_LOGGED_IN) {
+        browserHistory.push('/login');
+        return err;
+    }
+
     let e = null;
     try {
         e = JSON.parse(err.responseText);
@@ -33,6 +41,31 @@ function handleError(methodName, err) {
     return error;
 }
 
+function initZimbra() {
+    return new Promise(
+        (resolve, reject) => {
+            const config = global.window.manager_config;
+            const token = Utils.getCookie('token');
+            let zimbra = ZimbraStore.getCurrent();
+
+            if (zimbra && token) {
+                return resolve(zimbra);
+            } else if (token) {
+                zimbra = new ZimbraAdminApi({
+                    url: config.zimbraUrl
+                });
+                zimbra.client.token = token;
+                ZimbraStore.setCurrent(zimbra);
+                return resolve(zimbra);
+            }
+
+            return reject({
+                type: Constants.ActionTypes.NOT_LOGGED_IN,
+                message: 'No instanciado'
+            });
+        });
+}
+
 export function getClientConfig(success, error) {
     return $.ajax({
         url: '/config/config.json',
@@ -45,41 +78,55 @@ export function getClientConfig(success, error) {
     });
 }
 
-export function login(username, secret, success, error) {
+export function getMe(success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.getInfo((err, data) => {
+                if (err) {
+                    let e = handleError('getMe', err);
+                    return error(e);
+                }
+
+                Reflect.deleteProperty(data, 'obj');
+                GlobalActions.saveUser(data);
+                return success();
+            });
+        },
+        (err) => {
+            let e = handleError('getMe', err);
+            return error(e);
+        }
+    );
+}
+
+export function login(user, password, success, error) {
     const config = global.window.manager_config;
-    const zimbra = new jszimbra.Communication({
+    const zimbra = new ZimbraAdminApi({
         url: config.zimbraUrl,
-        debug: config.debug
+        user,
+        password
     });
 
-    zimbra.auth({
-        username,
-        secret,
-        isPassword: true,
-        isAdmin: true
-    }, (err) => {
+    zimbra.client.debug = config.debug;
+
+    zimbra.login((err) => {
         if (err) {
             var e = handleError('login', err);
             return error(e);
         }
 
-        Utils.setCookie('token', zimbra.token, 3);
-        UserStore.setCurrentUser({
-            token: zimbra.token,
-            email: username
-        });
-        return success(zimbra);
+        Utils.setCookie('token', zimbra.client.token, 3);
+        ZimbraStore.setCurrent(zimbra);
+        return getMe(success, error);
     });
 }
 
 export function logout(callback) {
-    // Aqui debemos asignar como null todas aquellas clases instanciadas
-    domain = null;
     const cookie = Utils.getCookie('token');
     if (cookie) {
         Utils.setCookie('token', '', -1);
     }
-    UserStore.setCurrentUser(null);
+    GlobalActions.saveUser(null);
 
     return callback();
 }
@@ -99,18 +146,21 @@ export function isLoggedIn(callback) {
     return callback(data);
 }
 
-export function getDomain(name, by, attrs, success, error) {
-    if (domain) {
-        return domain.get(name, by, attrs,
-            (data) => {
-                return success(data);
-            },
-            (err) => {
-                var e = handleError('getDomain', err);
-                error(e);
-            });
-    }
+export function getAllDomains(success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.getAllDomains((err, data) => {
+                if (err) {
+                    let e = handleError('getAllDomains', err);
+                    return error(e);
+                }
 
-    // probablemente esto lo que deba hacer es forzar un login
-    return error({message: 'Domain not initialized'});
+                return success(data);
+            });
+        },
+        (err) => {
+            let e = handleError('getAllDomains', err);
+            return error(e);
+        }
+    );
 }

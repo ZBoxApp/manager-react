@@ -7,7 +7,9 @@ export default {
     ActionTypes: keyMirror({
         START_LOADING: null,
         END_LOADING: null,
-        RECEIVED_ERROR: null
+        USER_CHANGED: null,
+        RECEIVED_ERROR: null,
+        NOT_LOGGED_IN: null
     }),
 
     PayloadSources: keyMirror({

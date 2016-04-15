@@ -11,16 +11,20 @@ export default class Sidebar extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = this.getStateFromStores();
-    }
-    getStateFromStores() {
-        const user = UserStore.getCurrentUser();
+        this.onUserChanged = this.onUserChanged.bind(this);
 
-        // if user is null then get the user from Zimbra using the token
-
-        return {
-            user
+        this.state = {
+            user: UserStore.getCurrentUser()
         };
+    }
+    componentDidMount() {
+        UserStore.addChangeListener(this.onUserChanged);
+    }
+    componentWillUnmount() {
+        UserStore.removeChangeListener(this.onUserChanged);
+    }
+    onUserChanged() {
+        this.setState({user: UserStore.getCurrentUser()});
     }
     render() {
         if (this.state.user) {
@@ -33,7 +37,7 @@ export default class Sidebar extends React.Component {
                                     <Link
                                         to={`/mailboxes/${this.state.user.id}`}
                                     >
-                                        {this.state.user.email}
+                                        {this.state.user.name}
                                     </Link>
                                     <small className='text-muted'></small>
                                 </span>
