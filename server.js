@@ -4,6 +4,8 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const httpProxy = require('http-proxy');
+const config = require('./src/config/config.json');
 
 const mimes = {
     js: 'text/javascript',
@@ -18,13 +20,22 @@ const mimes = {
     ttf: 'application/x-font-truetype'
 };
 
+const proxy = httpProxy.createProxyServer({});
+
 const server = http.createServer((req, res) => {
-    const mime = /^\/[a-zA-Z0-9\/]*\.(js|json|css|jpg|png|gif|svg|ttf|eot|woff|woff2)$/.exec(req.url.toString());
+    const zimbraProxy = process.env.zimbra || config.zimbraProxy; //eslint-disable-line no-process-env
+
+    if (req.url.indexOf('/service') === 0) {
+        return proxy.web(req, res, {target: zimbraProxy, secure: false});
+    }
+
+    const mime = (/^\/[a-zA-Z0-9\/]*\.(js|json|css|jpg|png|gif|svg|ttf|eot|woff|woff2)$/).exec(req.url.toString());
     if (mime) {
         const ext = mime[1];
         const filename = path.join(__dirname, 'dist', req.url.toString().substring(1));
         return sendFileContent(res, filename, mimes[ext]);
     }
+
     return sendFileContent(res, 'dist/index.html', 'text/html');
 });
 
