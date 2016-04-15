@@ -16,3 +16,10 @@ export function emitEndLoading() {
         type: ActionTypes.END_LOADING
     });
 }
+
+export function saveUser(user) {
+    AppDispatcher.handleViewAction({
+        type: ActionTypes.USER_CHANGED,
+        user
+    });
+}

@@ -14,7 +14,7 @@ export default class LoggedIn extends React.Component {
                 <LoadingScreen/>
                 <Header/>
                 <Sidebar location={this.props.location}/>
-                <div className='wrapper'>
+                <div id='wrapper'>
                     {this.props.children}
                 </div>
             </div>

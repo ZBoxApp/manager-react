@@ -25,7 +25,7 @@ export default class Header extends React.Component {
         browserHistory.push(`search/global?utf8=${utf8}&query=${encodeURIComponent(term)}`);
     }
     toggleSidebar() {
-        $('body').toggleClass('hide-sidebar');
+        $('body').toggleClass('hide-sidebar').toggleClass('show-sidebar');
     }
     render() {
         return (

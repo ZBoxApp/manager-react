@@ -66,6 +66,10 @@ export default class MessageBar extends React.Component {
             case 'error':
                 icon = (<i className='fa fa fa-exclamation-circle'></i>);
                 break;
+            case 'success':
+                break;
+            case 'warning':
+                break;
             }
 
             return (

@@ -14,7 +14,7 @@ export default class SidebarMenu extends React.Component {
     handleLink(e, path) {
         e.preventDefault();
         if (`/${this.props.location.pathname}` !== path) {
-            GlobalActions.emitEndLoading();
+            GlobalActions.emitStartLoading();
             browserHistory.push(path);
         }
     }
@@ -40,7 +40,7 @@ export default class SidebarMenu extends React.Component {
                         <span className='nav-label'>{'cuentas'}</span>
                     </a>
                 </li>
-                <li ref='sidebar-domains'>
+                <li id='sidebar-domains'>
                     <a
                         href='#'
                         onClick={(e) => this.handleLink(e, '/domains')}
@@ -48,7 +48,7 @@ export default class SidebarMenu extends React.Component {
                         <span className='nav-label'>{'dominios'}</span>
                     </a>
                 </li>
-                <li ref='sidebar-mailboxes'>
+                <li id='sidebar-mailboxes'>
                     <a
                         href='#'
                         onClick={(e) => this.handleLink(e, '/mailboxes')}
