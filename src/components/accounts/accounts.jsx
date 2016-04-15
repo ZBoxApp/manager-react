@@ -4,7 +4,7 @@
 import $ from 'jquery';
 import React from 'react';
 
-import * as GlobalActions from '../action_creators/global_actions.jsx';
+import * as GlobalActions from '../../action_creators/global_actions.jsx';
 
 export default class Accounts extends React.Component {
     componentDidMount() {

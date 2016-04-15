@@ -8,7 +8,7 @@ import ErrorPage from './components/error_page.jsx';
 import LoggedIn from './components/logged_in.jsx';
 import NotLoggedIn from './components/not_logged_in.jsx';
 import Login from './components/login/login.jsx';
-import Accounts from './components/accounts.jsx';
+import Accounts from './components/accounts/accounts.jsx';
 
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';

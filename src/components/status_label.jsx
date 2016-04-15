@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default class Label extends React.Component {
+export default class StatusLabel extends React.Component {
     render() {
         return (
             <span className={this.props.classes}>
@@ -10,12 +10,12 @@ export default class Label extends React.Component {
     }
 }
 
-Label.propTypes = {
+StatusLabel.propTypes = {
     classes: React.PropTypes.string,
     children: React.PropTypes.any
 };
 
-Label.defaultProps = {
+StatusLabel.defaultProps = {
     classes: '',
     children: ''
 };
