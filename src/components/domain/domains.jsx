@@ -20,7 +20,9 @@ export default class Domains extends React.Component {
         this.handleLink = this.handleLink.bind(this);
         this.getDomains = this.getDomains.bind(this);
 
-        this.state = {};
+        this.state = {
+            data: null
+        };
     }
     handleLink(e, path) {
         e.preventDefault();
@@ -77,7 +79,7 @@ export default class Domains extends React.Component {
 
         let tableResults;
         if (this.state.data) {
-            tableResults = this.state.data.map((d) => {
+            tableResults = this.state.data.domain.map((d) => {
                 let status;
                 let statusClass = 'btn btn-sm ';
                 switch (d.attrs.zimbraDomainStatus) {
@@ -175,20 +177,32 @@ export default class Domains extends React.Component {
             </div>
         );
 
+        const pageInfo = (
+            <PageInfo
+                titlePage='Dominios'
+                descriptionPage='Dominios de correos creados'
+            />
+        );
+
+        const hasPageInfo = (this.props.children) ? '' : {pageInfo};
+
+        const viewIndex = (
+            <Panel
+                btnsHeader={addDomainButton}
+                children={panelBody}
+            />
+        );
+
+        const view = (this.props.children || viewIndex);
+
         return (
             <div>
-                <PageInfo
-                    titlePage='Dominios'
-                    descriptionPage='Dominios de correos creados'
-                />
+                {hasPageInfo}
                 {message}
                 <div className='content animate-panel'>
                     <div className='row'>
                         <div className='col-md-12 central-content'>
-                            <Panel
-                                btnsHeader={addDomainButton}
-                                children={panelBody}
-                            />
+                            {view}
                         </div>
                     </div>
                 </div>
@@ -198,5 +212,6 @@ export default class Domains extends React.Component {
 }
 
 Domains.propTypes = {
-    location: React.PropTypes.object.isRequired
+    location: React.PropTypes.object.isRequired,
+    children: React.PropTypes.any
 };

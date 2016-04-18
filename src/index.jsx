@@ -11,7 +11,14 @@ import LoggedIn from './components/logged_in.jsx';
 import NotLoggedIn from './components/not_logged_in.jsx';
 import Login from './components/login/login.jsx';
 import Accounts from './components/accounts/accounts.jsx';
+import CreateAccount from './components/accounts/create_account.jsx';
+import EditAccount from './components/accounts/edit_account.jsx';
 import Domains from './components/domain/domains.jsx';
+import CreateDomains from './components/domain/create_domain.jsx';
+import EditDomains from './components/domain/edit_domain.jsx';
+import MailBox from './components/mailbox/mailbox.jsx';
+import CreateMailBox from './components/mailbox/create_mailbox.jsx';
+import EditMailBox from './components/mailbox/edit_mailbox.jsx';
 
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
@@ -98,16 +105,50 @@ function renderRootComponent() {
                     onEnter={onPreLoggedIn}
                 >
                     <Route
-                        path='accounts'
-                        component={Accounts}
-                    />
-                    <Route
                         path='domains'
                         component={Domains}
-                    />
+                    >
+                        <Route
+                            path='new'
+                            component={CreateDomains}
+                        />
+
+                        <Route
+                            path=':id/edit'
+                            component={EditDomains}
+                        />
+                    </Route>
+
                     <Route
-                        path='search/global'
-                    />
+                        path='accounts'
+                        component={Accounts}
+                    >
+                        <Route
+                            path='new'
+                            component={CreateAccount}
+                        />
+
+                        <Route
+                            path=':id/edit'
+                            component={EditAccount}
+                        />
+                    </Route>
+
+                    <Route
+                        path='mailboxes'
+                        component={MailBox}
+                    >
+                        <Route
+                            path='new'
+                            component={CreateMailBox}
+                        />
+
+                        <Route
+                            path=':id/edit'
+                            component={EditMailBox}
+                        />
+                    </Route>
+
                     <Route
                         path='logout'
                         onEnter={onLoggedOut}
