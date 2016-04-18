@@ -1,10 +1,13 @@
 import React from 'react';
+import {browserHistory} from 'react-router';
 import Panel from '../panel.jsx';
 import Button from '../button.jsx';
 
 export default class CreateMailBox extends React.Component {
     constructor(props) {
         super(props);
+
+        this.handleClick = this.handleClick.bind(this);
 
         this.state = {
             notification: false,
@@ -17,6 +20,12 @@ export default class CreateMailBox extends React.Component {
             placeholder: 'Por favor, introduzca 3 caracteres.',
             allowClear: true
         });
+    }
+
+    handleClick(e, path) {
+        e.preventDefault();
+
+        browserHistory.push(path);
     }
 
     render() {
@@ -204,7 +213,16 @@ export default class CreateMailBox extends React.Component {
                             value='Guardar'
                             className='btn btn-primary'
                         />
-                        <Button btnAttrs={{href: './cancel', className: 'btn btn-default'}}>
+                        <Button
+                            btnAttrs={
+                            {
+                                className: 'btn btn-default',
+                                onClick: (e) => {
+                                    this.handleClick(e, '/mailboxes');
+                                }
+                            }
+                            }
+                        >
                             {'Cancelar'}
                         </Button>
                     </div>
@@ -217,21 +235,21 @@ export default class CreateMailBox extends React.Component {
                 label: 'Cancelar',
                 props: {
                     className: 'btn btn-default btn-xs',
-                    href: '/mailboxes'
+                    onClick: (e) => {
+                        this.handleClick(e, '/mailboxes');
+                    }
                 }
             }
         ];
 
         return (
-            <div className='content animate-panel'>
-                <Panel
-                    title={'Agregar Casilla'}
-                    btnsHeader={actions}
-                    classHeader={'forum-box'}
-                >
-                    {form}
-                </Panel>
-            </div>
+            <Panel
+                title={'Agregar Casilla'}
+                btnsHeader={actions}
+                classHeader={'forum-box'}
+            >
+                {form}
+            </Panel>
         );
     }
 }

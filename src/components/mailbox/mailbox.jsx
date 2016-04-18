@@ -6,16 +6,36 @@ import React from 'react';
 import {browserHistory} from 'react-router';
 import PageInfo from '../page_info.jsx';
 import Panel from '../panel.jsx';
-
+import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 
 export default class Accounts extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {};
+        this.state = {
+            data: null
+        };
 
         this.handleLink = this.handleLink.bind(this);
+        this.getMailboxes = this.getMailboxes.bind(this);
+    }
+
+    getMailboxes() {
+        Client.getAllDomains(
+            (data) => {
+                this.setState({
+                    data
+                });
+                GlobalActions.emitEndLoading();
+            },
+            (error) => {
+                this.setState({
+                    error: error.message
+                });
+                GlobalActions.emitEndLoading();
+            }
+        );
     }
 
     componentDidMount() {
@@ -34,12 +54,12 @@ export default class Accounts extends React.Component {
     }
 
     render() {
-        const addAccountButton = [{
-            label: 'Agregar Cuenta',
+        const addMailBoxButton = [{
+            label: '+ Agregar Casilla',
             props: {
                 className: 'btn btn-success',
                 onClick: (e) => {
-                    this.handleLink(e, '/accounts/new');
+                    this.handleLink(e, '/mailboxes/new');
                 }
             }
         }];
@@ -52,8 +72,8 @@ export default class Accounts extends React.Component {
 
         const pageInfo = (
             <PageInfo
-                titlePage='Cuentas'
-                descriptionPage='Las cuentas son los que pagan el servicio'
+                titlePage='Casillas'
+                descriptionPage='Las casillas ...'
             />
         );
 
@@ -61,7 +81,7 @@ export default class Accounts extends React.Component {
 
         const indexView = (
             <Panel
-                btnsHeader={addAccountButton}
+                btnsHeader={addMailBoxButton}
                 children={panelBody}
             />
         );

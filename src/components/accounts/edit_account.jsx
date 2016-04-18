@@ -1,16 +1,24 @@
 import React from 'react';
+import {browserHistory} from 'react-router';
 import Panel from '../panel.jsx';
 import Button from '../button.jsx';
-import MessageBar from '../message_bar.jsx';
 
 export default class EditAccount extends React.Component {
     constructor(props) {
         super(props);
 
+        this.handleClick = this.handleClick.bind(this);
+
         this.state = {
             notification: false,
             notificacionMsg: ''
         };
+    }
+
+    handleClick(e, path) {
+        e.preventDefault();
+
+        browserHistory.push(path);
     }
 
     render() {
@@ -79,7 +87,16 @@ export default class EditAccount extends React.Component {
                             defaulValue='Guardar'
                             className='btn btn-info'
                         />
-                        <Button btnAttrs={{href: './cancel', className: 'btn btn-default'}}>
+                        <Button
+                            btnAttrs={
+                            {
+                                className: 'btn btn-default',
+                                onClick: (e) => {
+                                    this.handleClick(e, '/accounts');
+                                }
+                            }
+                            }
+                        >
                             {'Cancelar'}
                         </Button>
                     </div>
@@ -92,32 +109,21 @@ export default class EditAccount extends React.Component {
                 label: 'Cancelar',
                 props: {
                     className: 'btn btn-default btn-xs',
-                    href: '/mailboxes'
+                    onClick: (e) => {
+                        this.handleClick(e, '/accounts');
+                    }
                 }
             }
         ];
 
         return (
-            <div className='content animate-panel'>
-                {this.state.notification && (
-                    <MessageBar
-                        message={this.state.notificacionMsg}
-                        type='error'
-                        position='relative'
-                        canClose={false}
-                    />
-                )}
-
-                <div className='col-lg-12'>
-                    <Panel
-                        title={'Editar Cuenta'}
-                        btnsHeader={actions}
-                        classHeader={'forum-box'}
-                    >
-                        {form}
-                    </Panel>
-                </div>
-            </div>
+            <Panel
+                title={'Editar Cuenta'}
+                btnsHeader={actions}
+                classHeader={'forum-box'}
+            >
+                {form}
+            </Panel>
         );
     }
 }

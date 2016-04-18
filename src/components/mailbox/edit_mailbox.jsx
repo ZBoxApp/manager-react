@@ -1,18 +1,31 @@
 //import $ from 'jquery';
 //import select2 from 'select2';
 import React from 'react';
+import {browserHistory} from 'react-router';
 import Panel from '../panel.jsx';
 import Button from '../button.jsx';
-import MessageBar from '../message_bar.jsx';
 
 export default class EditMailBox extends React.Component {
     constructor(props) {
         super(props);
 
+        this.handleClick = this.handleClick.bind(this);
+        this.handleClickDelete = this.handleClickDelete.bind(this);
+
         this.state = {
             notification: false,
             notificationMsg: ''
         };
+    }
+
+    handleClick(e, path) {
+        e.preventDefault();
+
+        browserHistory.push(path);
+    }
+
+    handleClickDelete(e) {
+        e.preventDefault();
     }
 
     render() {
@@ -175,7 +188,16 @@ export default class EditMailBox extends React.Component {
                             value='Guardar'
                             className='btn btn-primary'
                         />
-                        <Button btnAttrs={{href: './cancel', className: 'btn btn-default'}}>
+                        <Button
+                            btnAttrs={
+                            {
+                                className: 'btn btn-default',
+                                onClick: (e) => {
+                                    this.handleClick(e, '/mailboxes');
+                                }
+                            }
+                            }
+                        >
                             {'Cancelar'}
                         </Button>
                     </div>
@@ -188,39 +210,30 @@ export default class EditMailBox extends React.Component {
                 label: 'Cancelar',
                 props: {
                     className: 'btn btn-default btn-xs',
-                    href: '/mailboxes'
+                    onClick: (e) => {
+                        this.handleClick(e, '/mailboxes');
+                    }
                 }
             },
             {
                 label: 'Eliminar',
                 props: {
                     className: 'btn btn-danger btn-xs',
-                    href: '/delete'
+                    onClick: (e) => {
+                        this.handleClickDelete(e, '/mailboxes/delete/1');
+                    }
                 }
             }
         ];
 
         return (
-            <div className='content animate-panel'>
-                {this.state.notification && (
-                    <MessageBar
-                        message={this.state.notificacionMsg}
-                        type='error'
-                        position='relative'
-                        canClose={false}
-                    />
-                )}
-
-                <div className='col-lg-12'>
-                    <Panel
-                        title={'Editar Casilla'}
-                        btnsHeader={actions}
-                        classHeader={'forum-box'}
-                    >
-                        {form}
-                    </Panel>
-                </div>
-            </div>
+            <Panel
+                title={'Editar Casilla'}
+                btnsHeader={actions}
+                classHeader={'forum-box'}
+            >
+                {form}
+            </Panel>
         );
     }
 }
