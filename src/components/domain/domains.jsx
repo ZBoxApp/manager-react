@@ -11,6 +11,8 @@ import Pagination from '../pagination.jsx';
 import Panel from '../panel.jsx';
 import StatusLabel from '../status_label.jsx';
 
+import DomainStore from '../../stores/domain_store.jsx';
+
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import Constants from '../../utils/constants.jsx';
@@ -31,8 +33,11 @@ export default class Domains extends React.Component {
             offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
         };
     }
-    handleLink(e, path) {
+    handleLink(e, domain) {
         e.preventDefault();
+        DomainStore.setCurrent(domain);
+        const path = `/domains/${domain.id}`;
+
         if (`/${this.props.location.pathname}` !== path) {
             GlobalActions.emitStartLoading();
             browserHistory.push(path);
@@ -150,7 +155,7 @@ export default class Domains extends React.Component {
                             <h4>
                                 <a
                                     href='#'
-                                    onClick={(e) => this.handleLink(e, '/domains/' + d.id)}
+                                    onClick={(e) => this.handleLink(e, d)}
                                 >
                                     {d.name}
                                 </a>

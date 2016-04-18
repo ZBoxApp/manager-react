@@ -14,6 +14,7 @@ import Accounts from './components/accounts/accounts.jsx';
 import CreateAccount from './components/accounts/create_account.jsx';
 import EditAccount from './components/accounts/edit_account.jsx';
 import Domains from './components/domain/domains.jsx';
+import DomainDetails from './components/domain/domain_details.jsx';
 import CreateDomains from './components/domain/create_domain.jsx';
 import EditDomains from './components/domain/edit_domain.jsx';
 import MailBox from './components/mailbox/mailbox.jsx';
@@ -107,17 +108,19 @@ function renderRootComponent() {
                     <Route
                         path='domains'
                         component={Domains}
-                    >
-                        <Route
-                            path='new'
-                            component={CreateDomains}
-                        />
-
-                        <Route
-                            path=':id/edit'
-                            component={EditDomains}
-                        />
-                    </Route>
+                    />
+                    <Route
+                        path='domains/new'
+                        component={CreateDomains}
+                    />
+                    <Route
+                        path='domains/:id'
+                        component={DomainDetails}
+                    />
+                    <Route
+                        path='domains/:id/edit'
+                        component={EditDomains}
+                    />
 
                     <Route
                         path='accounts'

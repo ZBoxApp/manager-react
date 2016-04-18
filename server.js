@@ -23,6 +23,8 @@ const mimes = {
 const proxy = httpProxy.createProxyServer({});
 
 const server = http.createServer((req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     const zimbraProxy = process.env.zimbra || config.zimbraProxy; //eslint-disable-line no-process-env
 
     if (req.url.indexOf('/service') === 0) {

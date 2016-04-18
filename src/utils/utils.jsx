@@ -24,3 +24,7 @@ export function getCookie(cname) {
     }
     return '';
 }
+
+export function slug(str) {
+    return str.toLowerCase().replace(/ /g, '_');
+}

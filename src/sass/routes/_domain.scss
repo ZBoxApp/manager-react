@@ -1,0 +1,21 @@
+.domain-info {
+  .domain-name {
+    color: $color-green;
+    font-size: 22px;
+  }
+
+  .account-name {
+    color: $account-link-color;
+    font-size: 16px;
+
+    &:hover {
+      color: $color-blue;
+    }
+  }
+}
+
+.add-button::before {
+  content: '+';
+  font-weight: bold;
+  margin-right: 5px;
+}
