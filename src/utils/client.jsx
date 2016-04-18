@@ -14,7 +14,9 @@ import Constants from './constants.jsx';
 
 // función que maneja el error como corresponde
 function handleError(methodName, err) {
-    if (err.extra && err.extra.code === Constants.ZimbraCodes.NOT_LOGGED_IN) {
+    if (err.extra &&
+        (err.extra.code === Constants.ZimbraCodes.AUTH__REQUIRED || err.extra.code === Constants.ZimbraCodes.AUTH__REQUIRED)
+    ) {
         Utils.setCookie('token', '', -1);
         return err;
     }
@@ -150,6 +152,25 @@ export function getAllDomains(opts, success, error) {
         },
         (err) => {
             let e = handleError('getAllDomains', err);
+            return error(e);
+        }
+    );
+}
+
+export function getDomain(id, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.getDomain(id, (err, data) => {
+                if (err) {
+                    let e = handleError('getAllDomain', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            let e = handleError('getAllDomain', err);
             return error(e);
         }
     );

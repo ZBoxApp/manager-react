@@ -17,7 +17,8 @@ export default {
     }),
 
     ZimbraCodes: {
-        NOT_LOGGED_IN: 'service.AUTH_EXPIRED'
+        AUTH_EXPIRED: 'service.AUTH_EXPIRED',
+        AUTH__REQUIRED: 'service.AUTH_REQUIRED'
     },
 
     RESERVED_USERNAMES: [
