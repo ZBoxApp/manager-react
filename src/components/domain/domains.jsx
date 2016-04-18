@@ -7,11 +7,15 @@ import {browserHistory} from 'react-router';
 
 import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
+import Pagination from '../pagination.jsx';
 import Panel from '../panel.jsx';
 import StatusLabel from '../status_label.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
+import Constants from '../../utils/constants.jsx';
+
+const QueryOptions = Constants.QueryOptions;
 
 export default class Domains extends React.Component {
     constructor(props) {
@@ -20,8 +24,11 @@ export default class Domains extends React.Component {
         this.handleLink = this.handleLink.bind(this);
         this.getDomains = this.getDomains.bind(this);
 
+        const page = parseInt(this.props.location.query.page, 10) || 1;
+
         this.state = {
-            data: null
+            page,
+            offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
         };
     }
     handleLink(e, path) {
@@ -33,6 +40,10 @@ export default class Domains extends React.Component {
     }
     getDomains() {
         Client.getAllDomains(
+            {
+                limit: QueryOptions.DEFAULT_LIMIT,
+                offset: this.state.offset
+            },
             (data) => {
                 this.setState({
                     data
@@ -46,6 +57,20 @@ export default class Domains extends React.Component {
                 GlobalActions.emitEndLoading();
             }
         );
+    }
+    componentWillReceiveProps(newProps) {
+        if (this.props.location.query.page !== newProps.location.query.page) {
+            const page = parseInt(newProps.location.query.page, 10) || 1;
+
+            GlobalActions.emitStartLoading();
+
+            this.state = {
+                page,
+                offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
+            };
+
+            this.getDomains();
+        }
     }
     componentDidMount() {
         $('#sidebar-domains').addClass('active');
@@ -149,7 +174,7 @@ export default class Domains extends React.Component {
         }
 
         const panelBody = (
-            <div>
+            <div key='panelBody'>
                 <div
                     id='index-domains-table'
                     className='table-responsive'
@@ -177,32 +202,33 @@ export default class Domains extends React.Component {
             </div>
         );
 
-        const pageInfo = (
-            <PageInfo
-                titlePage='Dominios'
-                descriptionPage='Dominios de correos creados'
-            />
-        );
-
-        const hasPageInfo = (this.props.children) ? '' : {pageInfo};
-
-        const viewIndex = (
-            <Panel
-                btnsHeader={addDomainButton}
-                children={panelBody}
-            />
-        );
-
-        const view = (this.props.children || viewIndex);
+        let pagination;
+        if (this.state.offset > 0 || (this.state.data && this.state.data.more)) {
+            const totalPages = this.state.data ? Math.ceil(this.state.data.total / QueryOptions.DEFAULT_LIMIT) : 0;
+            pagination = (
+                <Pagination
+                    key='panelPagination'
+                    url='domains'
+                    currentPage={this.state.page}
+                    totalPages={totalPages}
+                />
+            );
+        }
 
         return (
             <div>
-                {hasPageInfo}
+                <PageInfo
+                    titlePage='Dominios'
+                    descriptionPage='Dominios de correos creados'
+                />
                 {message}
                 <div className='content animate-panel'>
                     <div className='row'>
                         <div className='col-md-12 central-content'>
-                            {view}
+                            <Panel
+                                btnsHeader={addDomainButton}
+                                children={[panelBody, pagination]}
+                            />
                         </div>
                     </div>
                 </div>
@@ -212,6 +238,5 @@ export default class Domains extends React.Component {
 }
 
 Domains.propTypes = {
-    location: React.PropTypes.object.isRequired,
-    children: React.PropTypes.any
+    location: React.PropTypes.object.isRequired
 };
