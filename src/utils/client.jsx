@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import $ from 'jquery';
-import {browserHistory} from 'react-router';
 
 import ZimbraAdminApi from 'zimbra-admin-api-js';
 import ZimbraStore from '../stores/zimbra_store.jsx';
@@ -15,28 +14,19 @@ import Constants from './constants.jsx';
 
 // función que maneja el error como corresponde
 function handleError(methodName, err) {
-    if (err.type && err.type === Constants.ActionTypes.NOT_LOGGED_IN) {
-        browserHistory.push('/login');
+    if (err.extra && err.extra.code === Constants.ZimbraCodes.NOT_LOGGED_IN) {
+        Utils.setCookie('token', '', -1);
         return err;
     }
 
-    let e = null;
-    try {
-        e = JSON.parse(err.responseText);
-    } catch (parseError) {
-        e = null;
-    }
-
-    console.error(methodName, e); //eslint-disable-line no-console
+    console.error(methodName, err); //eslint-disable-line no-console
 
     const error = {};
-    if (e) {
-        error.message = e.Body.Fault.Reason.Text;
+    if (err) {
+        error.message = err.extra.reason;
     } else {
         error.message = 'Ocurrio un error general';
     }
-
-    // Aqui deberiamos revisar si falta hacer login nuevamente
 
     return error;
 }
@@ -146,7 +136,7 @@ export function isLoggedIn(callback) {
     return callback(data);
 }
 
-export function getAllDomains(success, error) {
+export function getAllDomains(opts, success, error) {
     initZimbra().then(
         (zimbra) => {
             zimbra.getAllDomains((err, data) => {
@@ -156,7 +146,7 @@ export function getAllDomains(success, error) {
                 }
 
                 return success(data);
-            });
+            }, opts);
         },
         (err) => {
             let e = handleError('getAllDomains', err);

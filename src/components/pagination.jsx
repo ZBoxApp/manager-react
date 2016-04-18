@@ -1,24 +1,62 @@
 import React from 'react';
-import Anchor from './anchor.jsx';
+import {browserHistory} from 'react-router';
 
 export default class Pagination extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+    }
+    handleChange(e) {
+        e.preventDefault();
+
+        const page = parseInt(e.currentTarget.innerText, 10);
+        let pageUrl = '';
+        if (page > 1) {
+            pageUrl = `?page=${page}`;
+        }
+
+        browserHistory.push(`/${this.props.url}${pageUrl}`);
+    }
     render() {
+        const total = this.props.totalPages;
+        const current = this.props.currentPage;
+        const pages = [];
+
+        // let first;
+        // let prev;
+        // let next;
+        // let last;
+        let i = 1;
+
+        // if (current > 1 && current < total) {
+        //
+        // }
+
+        for (; i <= total; i++) {
+            if (current === i) {
+                pages.push(
+                    <li
+                        key={`page-${i}`}
+                        className='active'
+                    >
+                        <a remote='false'>{i.toString()}</a>
+                    </li>
+                );
+            } else {
+                pages.push(
+                    <li key={`page-${i}`}>
+                        <a
+                            onClick={this.handleChange}
+                        >{i.toString()}</a>
+                    </li>
+                );
+            }
+        }
+
         return (
-            <div
-                className={this.props.classes}
-                id={this.props.id}
-            >
-                <ul className={this.props.ulClasses}>
-                    {this.props.linksArray.map((link, i) => {
-                        return (
-                          <Anchor
-                              key={i}
-                              url={link.url}
-                              label={link.label}
-                              attrs={link.props}
-                          />
-                        );
-                    })}
+            <div className='pagination'>
+                <ul className='pagination'>
+                    {pages}
                 </ul>
             </div>
         );
@@ -26,15 +64,7 @@ export default class Pagination extends React.Component {
 }
 
 Pagination.propTypes = {
-    classes: React.PropTypes.string,
-    id: React.PropTypes.string,
-    ulClasses: React.PropTypes.string,
-    linksArray: React.PropTypes.array
-};
-
-Pagination.defaultProps = {
-    classes: '',
-    id: 'pagination',
-    ulClasses: 'pagination',
-    linksArray: []
+    url: React.PropTypes.string.isRequired,
+    currentPage: React.PropTypes.number.isRequired,
+    totalPages: React.PropTypes.number.isRequired
 };

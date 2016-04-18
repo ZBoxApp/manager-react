@@ -8,8 +8,7 @@ export default {
         START_LOADING: null,
         END_LOADING: null,
         USER_CHANGED: null,
-        RECEIVED_ERROR: null,
-        NOT_LOGGED_IN: null
+        RECEIVED_ERROR: null
     }),
 
     PayloadSources: keyMirror({
@@ -17,39 +16,16 @@ export default {
         VIEW_ACTION: null
     }),
 
-    RESERVED_TEAM_NAMES: [
-        'www',
-        'web',
-        'admin',
-        'support',
-        'notify',
-        'test',
-        'demo',
-        'mail',
-        'team',
-        'channel',
-        'internal',
-        'localhost',
-        'dockerhost',
-        'stag',
-        'post',
-        'cluster',
-        'api'
-    ],
+    ZimbraCodes: {
+        NOT_LOGGED_IN: 'service.AUTH_EXPIRED'
+    },
+
     RESERVED_USERNAMES: [
         'admin',
         'root'
     ],
     MONTHS: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Juio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-    KeyCodes: {
-        UP: 38,
-        DOWN: 40,
-        LEFT: 37,
-        RIGHT: 39,
-        BACKSPACE: 8,
-        ENTER: 13,
-        ESCAPE: 27,
-        SPACE: 32,
-        TAB: 9
+    QueryOptions: {
+        DEFAULT_LIMIT: 10
     }
 };
