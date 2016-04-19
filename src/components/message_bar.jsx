@@ -64,7 +64,10 @@ export default class MessageBar extends React.Component {
             let icon;
             switch (this.props.type) {
             case 'error':
-                icon = (<i className='fa fa fa-exclamation-circle'></i>);
+                icon = (<i className='fa fa-exclamation-circle'></i>);
+                break;
+            case 'info':
+                icon = (<i className='fa fa-info-circle'></i>);
                 break;
             case 'success':
                 break;
@@ -103,7 +106,7 @@ MessageBar.defaultProps = {
 
 MessageBar.propTypes = {
     message: React.PropTypes.string.isRequired,
-    type: React.PropTypes.oneOf(['success', 'error', 'warning']),
+    type: React.PropTypes.oneOf(['success', 'error', 'warning', 'info']),
     position: React.PropTypes.oneOf(['absolute', 'fixed', 'relative', 'static', 'inherit']),
     canClose: React.PropTypes.bool,
     autoclose: React.PropTypes.bool,
