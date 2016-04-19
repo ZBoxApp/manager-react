@@ -3,7 +3,6 @@
 
 import $ from 'jquery';
 import React from 'react';
-import {browserHistory} from 'react-router';
 
 import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
@@ -11,26 +10,29 @@ import PanelTab from '../panel_tab.jsx';
 import Panel from '../panel.jsx';
 import StatusLabel from '../status_label.jsx';
 
+import ToggleModalButton from '../toggle_modal_button.jsx';
+import AddAdminModal from '../add_admin_modal.jsx';
+
 import DomainStore from '../../stores/domain_store.jsx';
 
 import * as Client from '../../utils/client.jsx';
+import * as Utils from '../../utils/utils.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 
 export default class DomainDetails extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleLink = this.handleLink.bind(this);
         this.getDomain = this.getDomain.bind(this);
+        this.handleDeleteAdmin = this.handleDeleteAdmin.bind(this);
 
         this.state = {};
     }
-    handleLink(e, path) {
+    handleDeleteAdmin(e, admin) {
         e.preventDefault();
-        if (`/${this.props.location.pathname}` !== path) {
-            GlobalActions.emitStartLoading();
-            browserHistory.push(path);
-        }
+        console.log(admin); //eslint-disable-line no-console
+
+        //here we need to delete the admin and show a message of success or error
     }
     getDomain() {
         const domain = DomainStore.getCurrent();
@@ -96,7 +98,7 @@ export default class DomainDetails extends React.Component {
                 label: 'Editar',
                 props: {
                     className: 'btn btn-default btn-xs',
-                    onClick: (e) => this.handleLink(e, `/domains/${this.props.params.id}/edit`)
+                    onClick: (e) => Utils.handleLink(e, `/domains/${this.props.params.id}/edit`, this.props.location)
                 }
             }];
 
@@ -115,7 +117,7 @@ export default class DomainDetails extends React.Component {
                             <p>
                                 <a
                                     className='account-name'
-                                    onClick={(e) => this.handleLink(e, `/accounts/${domain.id_empresa}`)}
+                                    onClick={(e) => Utils.handleLink(e, `/accounts/${domain.id_empresa}`, this.props.location)}
                                 >
                                     {'Nombre de la Empresa'}
                                 </a>
@@ -154,14 +156,14 @@ export default class DomainDetails extends React.Component {
                     label: 'Ver casillas',
                     props: {
                         className: 'btn btn-default btn-xs',
-                        onClick: (e) => this.handleLink(e, `/domains/${this.props.params.id}/mailboxes`)
+                        onClick: (e) => Utils.handleLink(e, `/domains/${this.props.params.id}/mailboxes`, this.props.location)
                     }
                 },
                 {
                     label: 'Nueva Casilla',
                     props: {
                         className: 'btn btn-info add-button btn-xs',
-                        onClick: (e) => this.handleLink(e, `/domains/${this.props.params.id}/mailboxes/new`)
+                        onClick: (e) => Utils.handleLink(e, `/domains/${this.props.params.id}/mailboxes/new`, this.props.location)
                     }
                 }
             ];
@@ -204,11 +206,99 @@ export default class DomainDetails extends React.Component {
                 </table>
             );
 
-            const tab1 = (
+            const admins = []; // this should be the actual admins
+            const adminRows = admins.map((a) => {
+                return (
+                    <tr
+                        key={`admin-${a.id}`}
+                        className='user-row'
+                    >
+                        <td className='user-email'>
+                            {a.email}
+                        </td>
+                        <td className='user-name text-center'>
+                            {a.username}
+                        </td>
+                        <td className='user-type text-center'>
+                            {a.type}
+                        </td>
+                        <td className='user-actions text-center'>
+                            <ul className='list-inline list-unstyled'>
+                                <li>
+                                    <a
+                                        className='btn btn-default btn-xs'
+                                        onClick={(e) => Utils.handleLink(e, `/mailboxes/${a.id}/edit`, this.props.location)}
+                                    >
+                                        {'Editar'}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        className='btn btn-danger btn-xs'
+                                        onClick={(e) => this.handleDeleteAdmin(e, a)}
+                                    >
+                                        {'Eliminar'}
+                                    </a>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                );
+            });
+
+            let adminContent;
+            if (adminRows.length > 0) {
+                adminContent = (
+                    <div className='table-responsive'>
+                        <table
+                            id='index-users'
+                            cellPadding='1'
+                            cellSpacing='1'
+                            className='table table-condensed table-striped vertical-align'
+                        >
+                            <thead>
+                            <tr>
+                                <th>{'email'}</th>
+                                <th className='text-center'>{'Nombre'}</th>
+                                <th></th>
+                                <th className='text-center'>{'Acciones'}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {adminRows}
+                            </tbody>
+                        </table>
+                        <ToggleModalButton
+                            role='button'
+                            className='btn btn-default'
+                            dialogType={AddAdminModal}
+                            dialogProps={{domain}}
+                        >
+                            {'Agregar administrador'}
+                        </ToggleModalButton>
+                    </div>
+                );
+            } else {
+                adminContent = (
+                    <div className='empty-message'>
+                        <h4>
+                            {'No existen Administradores. '}
+                            <ToggleModalButton
+                                role='button'
+                                dialogType={AddAdminModal}
+                                dialogProps={{domain}}
+                            >
+                                {'Agregar administrador'}
+                            </ToggleModalButton>
+                        </h4>
+                    </div>
+                );
+            }
+
+            const tabAdmin = (
                 <Panel
-                    title='Información General'
-                    btnsHeader={editDomainButton}
-                    children={infoBody}
+                    hasHeader={false}
+                    children={adminContent}
                 />
             );
 
@@ -224,7 +314,7 @@ export default class DomainDetails extends React.Component {
                 <PanelTab
                     tabNames={['Administradores', 'Listas De Distribución']}
                     tabs={{
-                        administradores: tab1,
+                        administradores: tabAdmin,
                         listas_de_distribución: tab2
                     }}
                 />
