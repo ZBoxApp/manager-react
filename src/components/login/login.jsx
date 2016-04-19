@@ -5,7 +5,10 @@ import $ from 'jquery';
 import React from 'react';
 import {browserHistory} from 'react-router';
 
+import UserStore from '../../stores/user_store.jsx';
+import Constants from '../../utils/constants.jsx';
 import * as Client from '../../utils/client.jsx';
+
 import Panel from '../panel.jsx';
 import LoginEmail from './login_email.jsx';
 import MessageBar from '../message_bar.jsx';
@@ -15,9 +18,10 @@ export default class Login extends React.Component {
         super(props);
 
         this.submit = this.submit.bind(this);
+        this.onUserChange = this.onUserChange.bind(this);
 
         this.state = {
-            doneCheckLogin: false
+            user: null
         };
     }
     componentWillUmount() {
@@ -29,9 +33,17 @@ export default class Login extends React.Component {
                 browserHistory.push('/accounts');
             } else {
                 $('body').addClass('blank');
-                this.setState({doneCheckLogin: true}); //eslint-disable-line react/no-did-mount-set-state
             }
         });
+    }
+    onUserChange() {
+        const user = UserStore.getCurrentUser();
+
+        this.setState({user});
+
+        if (user) {
+            browserHistory.push('/accounts');
+        }
     }
     submit(email, password) {
         var state = this.state;
@@ -60,8 +72,8 @@ export default class Login extends React.Component {
         );
     }
     render() {
-        if (!this.state.doneCheckLogin) {
-            return <div/>;
+        if (this.state.user) {
+            return <div>Done check login</div>;
         }
 
         let loginError;
@@ -70,6 +82,15 @@ export default class Login extends React.Component {
                 <MessageBar
                     message={this.state.loginError}
                     type='error'
+                    position='relative'
+                    canClose={false}
+                />
+            );
+        } else if (this.props.location.query.error === Constants.ZimbraCodes.AUTH_EXPIRED) {
+            loginError = (
+                <MessageBar
+                    message='Tu sesión a expirado. Por favor ingresa nuevamente.'
+                    type='info'
                     position='relative'
                     canClose={false}
                 />
@@ -116,5 +137,5 @@ export default class Login extends React.Component {
 Login.defaultProps = {
 };
 Login.propTypes = {
-    params: React.PropTypes.object.isRequired
+    location: React.PropTypes.object.isRequired
 };

@@ -15,9 +15,9 @@ import Constants from './constants.jsx';
 // función que maneja el error como corresponde
 function handleError(methodName, err) {
     if (err.extra &&
-        (err.extra.code === Constants.ZimbraCodes.AUTH__REQUIRED || err.extra.code === Constants.ZimbraCodes.AUTH__REQUIRED)
+        (err.extra.code === Constants.ZimbraCodes.AUTH_EXPIRED || err.extra.code === Constants.ZimbraCodes.AUTH__REQUIRED)
     ) {
-        Utils.setCookie('token', '', -1);
+        logout();
         return err;
     }
 
@@ -118,9 +118,12 @@ export function logout(callback) {
     if (cookie) {
         Utils.setCookie('token', '', -1);
     }
+    ZimbraStore.setCurrent(null);
     GlobalActions.saveUser(null);
 
-    return callback();
+    if (callback && typeof callback === 'function') {
+        callback();
+    }
 }
 
 export function isLoggedIn(callback) {

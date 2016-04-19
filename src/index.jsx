@@ -23,6 +23,7 @@ import EditMailBox from './components/mailbox/edit_mailbox.jsx';
 
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
+import Constants from './utils/constants.jsx';
 
 import $ from 'jquery';
 import React from 'react';
@@ -72,8 +73,12 @@ function onPreLoggedIn(nextState, replace, callback) {
             () => {
                 return callback();
             },
-            () => {
-                return browserHistory.push('/login');
+            (err) => {
+                let query;
+                if (err.extra && err.extra.code === Constants.ZimbraCodes.AUTH_EXPIRED) {
+                    query = `?error=${Constants.ZimbraCodes.AUTH_EXPIRED}`;
+                }
+                browserHistory.push(`/login${query}`);
             });
     });
 }
