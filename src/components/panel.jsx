@@ -7,7 +7,7 @@ export default class Panel extends React.Component {
             return (
                 <Button
                     btnAttrs={btn.props}
-                    key={i}
+                    key={`button-${i}`}
                 >
                     {btn.label}
                 </Button>
@@ -17,7 +17,7 @@ export default class Panel extends React.Component {
         let panelHeader;
         if (this.props.hasHeader) {
             panelHeader = (
-                <div className='panel-heading hbuilt'>
+                <div className='panel-heading hbuilt clearfix'>
                     <div className='pull-right'>{btns}</div>
                     <div className='heading-buttons'>
                         {this.props.title}

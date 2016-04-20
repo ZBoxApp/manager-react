@@ -17,7 +17,7 @@ import Domains from './components/domain/domains.jsx';
 import DomainDetails from './components/domain/domain_details.jsx';
 import CreateDomains from './components/domain/create_domain.jsx';
 import EditDomains from './components/domain/edit_domain.jsx';
-import MailBox from './components/mailbox/mailbox.jsx';
+import Mailboxes from './components/mailbox/mailbox.jsx';
 import CreateMailBox from './components/mailbox/create_mailbox.jsx';
 import EditMailBox from './components/mailbox/edit_mailbox.jsx';
 
@@ -29,6 +29,8 @@ import $ from 'jquery';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router, Route, IndexRedirect, Redirect, browserHistory} from 'react-router';
+
+import ZimbraStore from './stores/zimbra_store.jsx';
 
 const notFoundParams = {
     title: 'Página no encontrada',
@@ -47,7 +49,7 @@ function preRenderSetup(callwhendone) {
             global.window.manager_config = data;
 
             if (data.debug) {
-                global.window.Zimbra = Client;
+                global.window.Client = Client;
                 global.window.Utils = Utils;
             }
         },
@@ -71,6 +73,10 @@ function onPreLoggedIn(nextState, replace, callback) {
 
         return Client.getMe(
             () => {
+                if (global.window.manager_config.debug) {
+                    global.window.Zimbra = ZimbraStore.getCurrent();
+                }
+
                 return callback();
             },
             (err) => {
@@ -144,18 +150,18 @@ function renderRootComponent() {
 
                     <Route
                         path='mailboxes'
-                        component={MailBox}
-                    >
-                        <Route
-                            path='new'
-                            component={CreateMailBox}
-                        />
+                        component={Mailboxes}
+                    />
 
-                        <Route
-                            path=':id/edit'
-                            component={EditMailBox}
-                        />
-                    </Route>
+                    <Route
+                        path='mailboxes/new'
+                        component={CreateMailBox}
+                    />
+
+                    <Route
+                        path='mailboxes/:id/edit'
+                        component={EditMailBox}
+                    />
 
                     <Route
                         path='logout'
