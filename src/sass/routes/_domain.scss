@@ -23,3 +23,34 @@
 .empty-search {
   margin-top: 10px;
 }
+
+.mbx-plan {
+  text-transform: capitalize;
+}
+
+.total-mbxs-per-domain {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.distribution-list-row {
+  td {
+    &.distribution-list-name {
+      h4 {
+        font-size: 14px;
+      }
+    }
+
+    &.distribution-list-size {
+      font-size: 14px;
+      font-weight: bold;
+      padding-top: 10px;
+      text-align: center;
+    }
+
+    &.distribution-list-actions {
+      padding-top: 10px;
+      text-align: center;
+    }
+  }
+}

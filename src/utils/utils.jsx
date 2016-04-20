@@ -5,28 +5,16 @@ import {browserHistory} from 'react-router';
 import * as GlobalActions from '../action_creators/global_actions.jsx';
 import CONSTANTS from './constants.jsx';
 
-const COOKIE_TIMEOUT = 24 * 60 * 60 * 1000;
-
-export function setCookie(cname, cvalue, exdays) {
-    const d = new Date();
-    d.setTime(d.getTime() + (exdays * COOKIE_TIMEOUT));
-    const expires = 'expires=' + d.toUTCString();
-    document.cookie = cname + '=' + cvalue + '; ' + expires;
+export function setCookie(cname, cvalue) {
+    localStorage.setItem(cname, cvalue);
 }
 
 export function getCookie(cname) {
-    var name = cname + '=';
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return '';
+    return localStorage.getItem(cname);
+}
+
+export function removeCookie(cname) {
+    return localStorage.removeItem(cname);
 }
 
 export function slug(str) {

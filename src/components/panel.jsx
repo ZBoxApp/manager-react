@@ -5,9 +5,7 @@ export default class Panel extends React.Component {
     render() {
         const btns = this.props.btnsHeader.map((btn, i) => {
             if (btn.setComponent) {
-                return (
-                    btn.setComponent
-                );
+                return btn.setComponent;
             }
             return (
                 <Button

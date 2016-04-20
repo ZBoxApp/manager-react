@@ -4,9 +4,9 @@
 import AppDispatcher from '../dispatcher/app_dispatcher.jsx';
 import EventEmitter from 'events';
 import Constants from '../utils/constants.jsx';
-const ActionTypes = Constants.ActionTypes;
 
-const CHANGE_EVENT = 'change';
+const ActionTypes = Constants.ActionTypes;
+const eventTypes = Constants.EventTypes;
 
 class UserStoreClass extends EventEmitter {
     constructor() {
@@ -33,15 +33,15 @@ class UserStoreClass extends EventEmitter {
     }
 
     emitChange() {
-        this.emit(CHANGE_EVENT);
+        this.emit(eventTypes.USER_CHANGE_EVENT);
     }
 
     addChangeListener(callback) {
-        this.on(CHANGE_EVENT, callback);
+        this.on(eventTypes.USER_CHANGE_EVENT, callback);
     }
 
     removeChangeListener(callback) {
-        this.removeListener(CHANGE_EVENT, callback);
+        this.removeListener(eventTypes.USER_CHANGE_EVENT, callback);
     }
 }
 

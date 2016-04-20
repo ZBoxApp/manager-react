@@ -75,7 +75,7 @@ export function getMe(success, error) {
         (zimbra) => {
             zimbra.getInfo((err, data) => {
                 if (err) {
-                    let e = handleError('getMe', err);
+                    const e = handleError('getMe', err);
                     return error(e);
                 }
 
@@ -85,7 +85,7 @@ export function getMe(success, error) {
             });
         },
         (err) => {
-            let e = handleError('getMe', err);
+            const e = handleError('getMe', err);
             return error(e);
         }
     );
@@ -107,7 +107,7 @@ export function login(user, password, success, error) {
             return error(e);
         }
 
-        Utils.setCookie('token', zimbra.client.token, 3);
+        Utils.setCookie('token', zimbra.client.token);
         ZimbraStore.setCurrent(zimbra);
         return getMe(success, error);
     });
@@ -116,7 +116,7 @@ export function login(user, password, success, error) {
 export function logout(callback) {
     const cookie = Utils.getCookie('token');
     if (cookie) {
-        Utils.setCookie('token', '', -1);
+        Utils.removeCookie('token');
     }
     ZimbraStore.setCurrent(null);
     GlobalActions.saveUser(null);
@@ -146,7 +146,7 @@ export function getAllDomains(opts, success, error) {
         (zimbra) => {
             zimbra.getAllDomains((err, data) => {
                 if (err) {
-                    let e = handleError('getAllDomains', err);
+                    const e = handleError('getAllDomains', err);
                     return error(e);
                 }
 
@@ -154,7 +154,7 @@ export function getAllDomains(opts, success, error) {
             }, opts);
         },
         (err) => {
-            let e = handleError('getAllDomains', err);
+            const e = handleError('getAllDomains', err);
             return error(e);
         }
     );
@@ -165,7 +165,7 @@ export function getDomain(id, success, error) {
         (zimbra) => {
             zimbra.getDomain(id, (err, data) => {
                 if (err) {
-                    let e = handleError('getAllDomain', err);
+                    const e = handleError('getAllDomain', err);
                     return error(e);
                 }
 
@@ -173,7 +173,45 @@ export function getDomain(id, success, error) {
             });
         },
         (err) => {
-            let e = handleError('getAllDomain', err);
+            const e = handleError('getAllDomain', err);
+            return error(e);
+        }
+    );
+}
+
+export function addDistributionList(name, attrs, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.createDistributionList(name, attrs, (err, data) => {
+                if (err) {
+                    const e = handleError('addDistributionList', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('addDistributionList', err);
+            return error(e);
+        }
+    );
+}
+
+export function removeDistributionList(id, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.removeDistributionList(id, (err, data) => {
+                if (err) {
+                    const e = handleError('removeDistributionList', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('removeDistributionList', err);
             return error(e);
         }
     );
@@ -184,7 +222,7 @@ export function getAllAccounts(opts, success, error) {
         (zimbra) => {
             zimbra.getAllAccounts((err, data) => {
                 if (err) {
-                    let e = handleError('getAllAccounts', err);
+                    const e = handleError('getAllAccounts', err);
                     return error(e);
                 }
 
@@ -192,7 +230,7 @@ export function getAllAccounts(opts, success, error) {
             }, opts);
         },
         (err) => {
-            let e = handleError('getAllAccounts', err);
+            const e = handleError('getAllAccounts', err);
             return error(e);
         }
     );
@@ -203,7 +241,7 @@ export function getAccount(id, success, error) {
         (zimbra) => {
             zimbra.getAccount(id, (err, data) => {
                 if (err) {
-                    let e = handleError('getAccount', err);
+                    const e = handleError('getAccount', err);
                     return error(e);
                 }
 
@@ -211,7 +249,7 @@ export function getAccount(id, success, error) {
             });
         },
         (err) => {
-            let e = handleError('getAccount', err);
+            const e = handleError('getAccount', err);
             return error(e);
         }
     );
@@ -222,7 +260,7 @@ export function createAccount(mail, passwd, attrs, success, error) {
         (zimbra) => {
             zimbra.createAccount(mail, passwd, attrs, (err, data) => {
                 if (err) {
-                    let e = handleError('createAccount', err);
+                    const e = handleError('createAccount', err);
                     return error(e);
                 }
 
@@ -230,7 +268,7 @@ export function createAccount(mail, passwd, attrs, success, error) {
             });
         },
         (err) => {
-            let e = handleError('createAccount', err);
+            const e = handleError('createAccount', err);
             return error(e);
         }
     );
@@ -241,7 +279,7 @@ export function modifyAccount(idZimbra, attrs, success, error) {
         (zimbra) => {
             zimbra.modifyAccount(idZimbra, attrs, (err, data) => {
                 if (err) {
-                    let e = handleError('modifyAccount', err);
+                    const e = handleError('modifyAccount', err);
                     return error(e);
                 }
 
@@ -249,7 +287,7 @@ export function modifyAccount(idZimbra, attrs, success, error) {
             });
         },
         (err) => {
-            let e = handleError('modifyAccount', err);
+            const e = handleError('modifyAccount', err);
             return error(e);
         }
     );
@@ -260,7 +298,7 @@ export function removeAccount(idZimbra, success, error) {
         (zimbra) => {
             zimbra.removeAccount(idZimbra, (err, data) => {
                 if (err) {
-                    let e = handleError('removeAccount', err);
+                    const e = handleError('removeAccount', err);
                     return error(e);
                 }
 
@@ -268,8 +306,59 @@ export function removeAccount(idZimbra, success, error) {
             });
         },
         (err) => {
-            let e = handleError('removeAccount', err);
+            const e = handleError('removeAccount', err);
             return error(e);
         }
     );
+}
+
+export function countAccounts(domain, success, error) {
+    return initZimbra().then(
+        (zimbra) => {
+            zimbra.countAccounts(domain, (err, data) => {
+                if (err) {
+                    const e = handleError('removeAccount', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('removeAccount', err);
+            return error(e);
+        }
+    );
+}
+
+export function getDnsInfo(domain, success, error) {
+    $.ajax({
+        url: `${global.window.manager_config.dnsApiUrl}/dns`,
+        type: 'POST',
+        contentType: ' application/json',
+        dataType: 'json',
+        data: JSON.stringify({domain}),
+        success: (data) => {
+            const result = {
+                exists: true,
+                mx: 'No asignado'
+            };
+            if (data.byTypes.length === 0) {
+                result.exists = false;
+            } else {
+                data.byTypes.some((b) => {
+                    if (b.type === 'MX') {
+                        result.mx = b.data[0].exchange;
+                        return true;
+                    }
+
+                    return false;
+                });
+            }
+            success(result);
+        },
+        error: function onError() {
+            error('No pudimos obtener el registro MX del dominio.');
+        }
+    });
 }

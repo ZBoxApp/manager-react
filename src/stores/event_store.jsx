@@ -4,34 +4,33 @@
 import AppDispatcher from '../dispatcher/app_dispatcher.jsx';
 import EventEmitter from 'events';
 import Constants from '../utils/constants.jsx';
-const ActionTypes = Constants.ActionTypes;
 
-const START_LOADING_EVENT = 'start_loading';
-const END_LOADING_EVENT = 'end_loading';
+const eventTypes = Constants.EventTypes;
+const ActionTypes = Constants.ActionTypes;
 
 class EventStoreClass extends EventEmitter {
     emitStartLoading() {
-        this.emit(START_LOADING_EVENT);
+        this.emit(eventTypes.START_LOADING_EVENT);
     }
 
     addStartLoadingListener(callback) {
-        this.on(START_LOADING_EVENT, callback);
+        this.on(eventTypes.START_LOADING_EVENT, callback);
     }
 
     removeStartLoadingListener(callback) {
-        this.removeListener(START_LOADING_EVENT, callback);
+        this.removeListener(eventTypes.START_LOADING_EVENT, callback);
     }
 
     emitEndLoading() {
-        this.emit(END_LOADING_EVENT);
+        this.emit(eventTypes.END_LOADING_EVENT);
     }
 
     addEndLoadingListener(callback) {
-        this.on(END_LOADING_EVENT, callback);
+        this.on(eventTypes.END_LOADING_EVENT, callback);
     }
 
     removeEndLoadingListener(callback) {
-        this.removeListener(END_LOADING_EVENT, callback);
+        this.removeListener(eventTypes.END_LOADING_EVENT, callback);
     }
 }
 
