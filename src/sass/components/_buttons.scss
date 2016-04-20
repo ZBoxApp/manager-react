@@ -1257,8 +1257,8 @@ fieldset {
   }
 }
 
-.panel-heading {
-  .btn {
-    margin-left: 5px;
+.hpanel {
+  .btn:not(:last-child) {
+    margin-right: 5px;
   }
 }
