@@ -16,6 +16,14 @@ export default {
         VIEW_ACTION: null
     }),
 
+    EventTypes: keyMirror({
+        DOMAIN_ADMINS_CHANGE_EVENT: null,
+        DOMAIN_DLS_CHANGE_EVENT: null,
+        START_LOADING_EVENT: null,
+        END_LOADING_EVENT: null,
+        USER_CHANGE_EVENT: null
+    }),
+
     ZimbraCodes: {
         AUTH_EXPIRED: 'service.AUTH_EXPIRED',
         AUTH__REQUIRED: 'service.AUTH_REQUIRED'

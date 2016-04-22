@@ -1,5 +1,12 @@
 {
     "debug": true,
     "zimbraUrl": "http://zimbra.zboxapp.dev:8000/service/admin/soap",
-    "zimbraProxy": "https://127.0.0.1:7071"
+    "zimbraProxy": "https://zimbra.zboxapp.dev:7071",
+    "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
+    "plans": {
+        "basic": true,
+        "premium": true,
+        "professional": true,
+        "default": false
+    }
 }

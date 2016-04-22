@@ -1,10 +1,13 @@
 // Copyright (c) 2016 ZBox, Spa. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import * as GlobalActions from '../action_creators/global_actions.jsx';
-import * as Utils from '../utils/utils.jsx';
+import DomainStore from '../../stores/domain_store.jsx';
 
-import StatusLabel from '../components/status_label.jsx';
+import * as GlobalActions from '../../action_creators/global_actions.jsx';
+import * as Client from '../../utils/client.jsx';
+import * as Utils from '../../utils/utils.jsx';
+
+import StatusLabel from '../status_label.jsx';
 
 import {Modal} from 'react-bootstrap';
 
@@ -27,9 +30,35 @@ export default class AddAdminModal extends React.Component {
 
         const query = this.refs.searchUser.value.trim();
 
-        GlobalActions.emitStartLoading();
         if (query) {
-            this.setState({users: []});
+            GlobalActions.emitStartLoading();
+            Client.getAllAccounts(
+                {
+                    query: `mail=*${query}*`,
+                    domain: this.props.domain.name
+                },
+                (data) => {
+                    const admins = DomainStore.getAdmins(this.props.domain);
+                    let users = [];
+                    if (admins) {
+                        data.account.forEach((u) => {
+                            if (!admins.hasOwnProperty(u.id)) {
+                                users.push(u);
+                            }
+                        });
+                    } else {
+                        users = data.account;
+                    }
+                    this.setState({users});
+                    GlobalActions.emitEndLoading();
+                },
+                (error) => {
+                    this.setState({
+                        error: error.message
+                    });
+                    GlobalActions.emitEndLoading();
+                }
+            );
         } else {
             this.setState({users: null});
         }
@@ -37,6 +66,7 @@ export default class AddAdminModal extends React.Component {
     handleAddAdmin(e, user) {
         e.preventDefault();
         console.log(user); //eslint-disable-line no-console
+        DomainStore.addAdmin(user);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -73,7 +103,19 @@ export default class AddAdminModal extends React.Component {
                 );
             } else {
                 const rows = users.map((u) => {
-                    const statusClass = 'mailbox-active'; //esto debe ser dependiendo del status que tenga el usuario
+                    let status = u.attrs.zimbraAccountStatus;
+                    let statusClass = '';
+                    switch (status) {
+                    case 'locked':
+                        statusClass = 'label label-warning';
+                        status = 'Bloqueada';
+                        break;
+                    default:
+                        statusClass = 'label label-success';
+                        status = 'Activa';
+                        break;
+                    }
+
                     return (
                         <tr
                             key={`user-${u.id}`}
@@ -81,8 +123,8 @@ export default class AddAdminModal extends React.Component {
                         >
                             <td className='mailbox-status'>
                                 <StatusLabel
-                                    classes={`label-mailbox ${statusClass}`}
-                                    children={u.status}
+                                    classes={statusClass}
+                                    children={status}
                                 />
                             </td>
                             <td className='mailbox-name'>
@@ -92,11 +134,11 @@ export default class AddAdminModal extends React.Component {
                                         Utils.handleLink(e, `/mailboxes/${u.id}`);
                                     }}
                                 >
-                                    {u.email}
+                                    {u.name}
                                 </a>
                             </td>
                             <td className='mailbox-displayname'>
-                                {u.givenName}
+                                {u.attrs.givenName}
                             </td>
                             <td className='text-center'>
                                 <a

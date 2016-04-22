@@ -3,7 +3,6 @@
 
 import $ from 'jquery';
 import React from 'react';
-import {browserHistory} from 'react-router';
 
 import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
@@ -14,6 +13,7 @@ import StatusLabel from '../status_label.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
 
 import * as Client from '../../utils/client.jsx';
+import * as Utils from '../../utils/utils.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import Constants from '../../utils/constants.jsx';
 
@@ -23,7 +23,6 @@ export default class Domains extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleLink = this.handleLink.bind(this);
         this.getDomains = this.getDomains.bind(this);
 
         const page = parseInt(this.props.location.query.page, 10) || 1;
@@ -33,27 +32,33 @@ export default class Domains extends React.Component {
             offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
         };
     }
-    handleLink(e, domain) {
-        e.preventDefault();
-        DomainStore.setCurrent(domain);
-        const path = `/domains/${domain.id}`;
-
-        if (`/${this.props.location.pathname}` !== path) {
-            GlobalActions.emitStartLoading();
-            browserHistory.push(path);
-        }
-    }
     getDomains() {
+        const self = this;
         Client.getAllDomains(
             {
                 limit: QueryOptions.DEFAULT_LIMIT,
                 offset: this.state.offset
             },
             (data) => {
-                this.setState({
-                    data
+                const domains = data.domain;
+                const plans = domains.map((d) => {
+                    return self.getPlans(d);
                 });
-                GlobalActions.emitEndLoading();
+
+                Promise.all(plans).then(
+                    () => {
+                        self.setState({
+                            data
+                        });
+                        GlobalActions.emitEndLoading();
+                    },
+                    () => {
+                        this.setState({
+                            error: 'No se obtuvieron los planes de las cuentas'
+                        });
+                        GlobalActions.emitEndLoading();
+                    }
+                );
             },
             (error) => {
                 this.setState({
@@ -62,6 +67,19 @@ export default class Domains extends React.Component {
                 GlobalActions.emitEndLoading();
             }
         );
+    }
+    getPlans(domain) {
+        return new Promise((resolve, reject) => {
+            Client.countAccounts(domain.name,
+                (info) => {
+                    domain.plans = info;
+                    resolve();
+                },
+                () => {
+                    reject();
+                }
+            );
+        });
     }
     componentWillReceiveProps(newProps) {
         if (this.props.location.query.page !== newProps.location.query.page) {
@@ -102,13 +120,14 @@ export default class Domains extends React.Component {
             props: {
                 className: 'btn btn-success',
                 onClick: (e) => {
-                    this.handleLink(e, '/domains/new');
+                    Utils.handleLink(e, '/domains/new');
                 }
             }
         }];
 
         let tableResults;
         if (this.state.data) {
+            const configPlans = global.window.manager_config.plans;
             tableResults = this.state.data.domain.map((d) => {
                 let status;
                 let statusClass = 'btn btn-sm ';
@@ -128,14 +147,20 @@ export default class Domains extends React.Component {
                 }
 
                 let mailboxes;
-                if (d.mailboxes) {
-                    const types = d.mailboxes.types.map((t, i) => {
-                        return (<li key={`mailbox-${d.id}-${i}`}>{t.count} {t.type}</li>);
+                if (d.plans) {
+                    let total = 0;
+                    const types = [];
+                    Object.keys(d.plans).forEach((key) => {
+                        if (d.plans.hasOwnProperty(key) && configPlans[key]) {
+                            const plan = d.plans[key];
+                            total += plan.used;
+                            types.push(<li key={`domain-plan-${key}`}>{plan.used} {key}</li>);
+                        }
                     });
 
                     mailboxes = (
                         <td className='vertical-middle text-center'>
-                            <span className='total-mbxs-per-domain'>d.mailboxes.total</span>
+                            <span className='total-mbxs-per-domain'>{total}</span>
                             <ul className='list-inline'>
                                 {types}
                             </ul>
@@ -155,7 +180,10 @@ export default class Domains extends React.Component {
                             <h4>
                                 <a
                                     href='#'
-                                    onClick={(e) => this.handleLink(e, d)}
+                                    onClick={(e) => {
+                                        DomainStore.setCurrent(d);
+                                        Utils.handleLink(e, `/domains/${d.id}`);
+                                    }}
                                 >
                                     {d.name}
                                 </a>
@@ -193,7 +221,7 @@ export default class Domains extends React.Component {
                         <thead>
                         <tr>
                             <th>{'Nombre'}</th>
-                            <th className='td-mbxs'>{'Casillas Usadas'}</th>
+                            <th className='text-center'>{'Casillas Usadas'}</th>
                             <th className='text-center'>{'Descripción'}</th>
                             <th className='text-center'>{'Estado'}</th>
                         </tr>
