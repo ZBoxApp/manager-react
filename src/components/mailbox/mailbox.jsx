@@ -29,6 +29,7 @@ export default class Mailboxes extends React.Component {
         this.handleAddMailbox = this.handleAddMailbox.bind(this);
         this.handleExportAsCSV = this.handleExportAsCSV.bind(this);
         this.handleTabChanged = this.handleTabChanged.bind(this);
+        this.handleWatchInfo = this.handleWatchInfo.bind(this);
 
         const page = parseInt(this.props.location.query.page, 10) || 1;
 
@@ -36,6 +37,10 @@ export default class Mailboxes extends React.Component {
             page,
             offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
         };
+    }
+
+    handleWatchInfo(e, path, location) {
+        Utils.handleLink(e, path, location);
     }
 
     getMailboxes() {
@@ -151,7 +156,16 @@ export default class Mailboxes extends React.Component {
                     >
                         <td className={'mailbox-name'}>
                             <statusLabel className={statusClass}>{status}</statusLabel>
-                            {attrs.mail}
+                            <Button
+                                btnAttrs={{
+                                    className: 'mailbox-link',
+                                    onClick: (e) => {
+                                        this.handleWatchInfo(e, `mailboxes/${mail.id}`, location);
+                                    }
+                                }}
+                            >
+                                {attrs.mail}
+                            </Button>
                         </td>
 
                         <td className={'mailbox-displayname'}>
@@ -168,7 +182,7 @@ export default class Mailboxes extends React.Component {
                                     {
                                         className: 'btn btn-xs btn-default',
                                         onClick: (e) => {
-                                            this.handleEdit(e, '/mailboxes/' + attrs.mail + '/edit');
+                                            this.handleEdit(e, '/mailboxes/' + mail.id + '/edit');
                                         }
                                     }
                                 }

@@ -3,6 +3,7 @@
 
 import {browserHistory} from 'react-router';
 import * as GlobalActions from '../action_creators/global_actions.jsx';
+import CONSTANTS from './constants.jsx';
 
 const COOKIE_TIMEOUT = 24 * 60 * 60 * 1000;
 
@@ -213,4 +214,18 @@ export function toggleStatusButtons(classNames, isDisabled) {
             }
         }
     }
+}
+
+export function dateFormatted(dateString) {
+    if (typeof dateString === 'string') {
+        const date = dateString.substr(0, 8);
+        const year = date.substr(0, 4);
+        const month = parseInt(date.substr(4, 2), 10);
+        const day = date.substr(6, 2);
+        const dateFormattedString = `${day} de ${CONSTANTS.MONTHS[month - 1]} de ${year}`;
+
+        return dateFormattedString;
+    }
+
+    return false;
 }
