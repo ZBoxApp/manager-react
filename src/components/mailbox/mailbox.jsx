@@ -15,8 +15,10 @@ import statusLabel from '../status_label.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
-import Constants from '../../utils/constants.jsx';
 import * as Utils from '../../utils/utils.jsx';
+import Constants from '../../utils/constants.jsx';
+
+import DomainStore from '../../stores/domain_store.jsx';
 
 const QueryOptions = Constants.QueryOptions;
 
@@ -30,6 +32,7 @@ export default class Mailboxes extends React.Component {
         this.handleExportAsCSV = this.handleExportAsCSV.bind(this);
         this.handleTabChanged = this.handleTabChanged.bind(this);
         this.handleWatchInfo = this.handleWatchInfo.bind(this);
+        this.domainInfo = this.domainInfo.bind(this);
 
         const page = parseInt(this.props.location.query.page, 10) || 1;
 
@@ -39,15 +42,38 @@ export default class Mailboxes extends React.Component {
         };
     }
 
+    domainInfo(domainId) {
+        return new Promise(
+            (resolve, reject) => {
+                const domain = DomainStore.getCurrent();
+                if (domain && domainId === domain.id) {
+                    return resolve();
+                }
+
+                return Client.getDomain(
+                    domainId,
+                    (data) => {
+                        DomainStore.setCurrent(data);
+                        return resolve();
+                    },
+                    () => {
+                        return reject();
+                    }
+                );
+            }
+        );
+    }
+
     handleWatchInfo(e, path, location) {
         Utils.handleLink(e, path, location);
     }
 
-    getMailboxes() {
+    getAccounts(domainName) {
         Client.getAllAccounts(
             {
                 limit: QueryOptions.DEFAULT_LIMIT,
-                offset: this.state.offset
+                offset: this.state.offset,
+                domain: domainName
             },
             (data) => {
                 this.setState({
@@ -62,6 +88,20 @@ export default class Mailboxes extends React.Component {
                 GlobalActions.emitEndLoading();
             }
         );
+    }
+
+    getMailboxes() {
+        const domainId = this.props.params.domain_id;
+        if (domainId) {
+            return this.domainInfo(domainId).then(
+                () => {
+                    const domain = DomainStore.getCurrent();
+                    this.getAccounts(domain.name);
+                }
+            );
+        }
+
+        return this.getAccounts();
     }
 
     handleAddMailbox(e, path) {
@@ -127,7 +167,7 @@ export default class Mailboxes extends React.Component {
 
         let tableResults;
         let total = 0;
-        let arrLocked = [];
+        const arrLocked = [];
 
         if (this.state.data) {
             total = this.state.data.account.length;
@@ -250,11 +290,11 @@ export default class Mailboxes extends React.Component {
             const icon = (
                 <div>
                     <i className='/fa fa-download'/>
-                    <span>Exportar</span>
+                    <span>{'Exportar'}</span>
                 </div>
             );
 
-            let tab1 = (
+            const tab1 = (
                 <div>
                     <Panel
                         title=''
@@ -283,28 +323,28 @@ export default class Mailboxes extends React.Component {
                 </div>
             );
 
-            let tab2 = (
+            const tab2 = (
                 <Panel
                     title='Casillas tab2'
                     children={[panelBody, pagination]}
                 />
             );
 
-            let tab3 = (
+            const tab3 = (
                 <Panel
                     title='Casillas tb3'
                     children={panelBody}
                 />
             );
 
-            let tab4 = (
+            const tab4 = (
                 <Panel
                     title='Casillas tab4'
                     children={panelBody}
                 />
             );
 
-            let arrTabs = {};
+            const arrTabs = {};
             arrTabs[Utils.slug(todas)] = tab1;
             arrTabs[Utils.slug(archiving)] = tab2;
             arrTabs[Utils.slug(noPlan)] = tab3;
@@ -322,10 +362,26 @@ export default class Mailboxes extends React.Component {
 
         const content = panelTabs || '';
 
+        let title = 'Casillas';
+        const domain = DomainStore.getCurrent();
+        if (this.props.params.domain_id && domain) {
+            title = (
+                <div>
+                    {'Casillas del dominio: '}
+                    <a
+                        href='#'
+                        onClick={(e) => Utils.handleLink(e, `/domains/${domain.id}`)}
+                    >
+                        {`@${domain.name}`}
+                    </a>
+                </div>
+            );
+        }
+
         return (
             <div>
                 <PageInfo
-                    titlePage='Casillas'
+                    titlePage={title}
                     descriptionPage='Usuarios de correo electrónico'
                 />
 
@@ -344,5 +400,6 @@ export default class Mailboxes extends React.Component {
 }
 
 Mailboxes.propTypes = {
-    location: React.PropTypes.object.isRequired
+    location: React.PropTypes.object.isRequired,
+    params: React.PropTypes.object.isRequired
 };

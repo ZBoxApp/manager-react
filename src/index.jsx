@@ -133,6 +133,10 @@ function renderRootComponent() {
                         path='domains/:id/edit'
                         component={EditDomains}
                     />
+                    <Route
+                        path='domains/:domain_id/mailboxes'
+                        component={Mailboxes}
+                    />
 
                     <Route
                         path='accounts'
