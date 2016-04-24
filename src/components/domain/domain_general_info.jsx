@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import moment from 'moment';
 
 import Panel from '../panel.jsx';
 import StatusLabel from '../status_label.jsx';
@@ -14,9 +15,11 @@ export default class DomainGeneralInfo extends React.Component {
         super(props);
 
         this.getMXRecord = this.getMXRecord.bind(this);
+        this.renovationDate = this.renovationDate.bind(this);
 
         this.state = {
-            mx: null
+            mx: null,
+            date: this.renovationDate()
         };
     }
     componentWillMount() {
@@ -36,6 +39,16 @@ export default class DomainGeneralInfo extends React.Component {
                 });
             }
         );
+    }
+    renovationDate() {
+        const timestamp = moment(this.props.domain.attrs.zimbraCreateTimestamp);
+        const now = moment();
+        timestamp.year(now.year());
+        if (timestamp.isBefore(now)) {
+            timestamp.add(1, 'year');
+        }
+
+        return timestamp.format('DD/MM/YYYY');
     }
     render() {
         const domain = this.props.domain;
@@ -66,7 +79,7 @@ export default class DomainGeneralInfo extends React.Component {
                             </li>
                             <li>
                                 <strong>{'Próxima renovación: '}</strong>
-                                {'19/10/2016'}
+                                {this.state.date}
                             </li>
                             <li>
                             </li>
