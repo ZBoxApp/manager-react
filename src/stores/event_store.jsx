@@ -32,6 +32,18 @@ class EventStoreClass extends EventEmitter {
     removeEndLoadingListener(callback) {
         this.removeListener(eventTypes.END_LOADING_EVENT, callback);
     }
+
+    emitMessage(attrs) {
+        this.emit(eventTypes.NEW_MESSAGE_EVENT, attrs);
+    }
+
+    addMessageListener(callback) {
+        this.on(eventTypes.NEW_MESSAGE_EVENT, callback);
+    }
+
+    removeMessageListener(callback) {
+        this.removeListener(eventTypes.NEW_MESSAGE_EVENT, callback);
+    }
 }
 
 var EventStore = new EventStoreClass();
@@ -46,6 +58,9 @@ EventStore.dispatchToken = AppDispatcher.register((payload) => {
         break;
     case ActionTypes.END_LOADING:
         EventStore.emitEndLoading();
+        break;
+    case ActionTypes.NEW_MESSAGE:
+        EventStore.emitMessage(action.attrs);
         break;
     default:
     }

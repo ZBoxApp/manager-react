@@ -17,6 +17,13 @@ export function emitEndLoading() {
     });
 }
 
+export function emitMessage(attrs) {
+    AppDispatcher.handleViewAction({
+        type: ActionTypes.NEW_MESSAGE,
+        attrs
+    });
+}
+
 export function saveUser(user) {
     AppDispatcher.handleViewAction({
         type: ActionTypes.USER_CHANGED,

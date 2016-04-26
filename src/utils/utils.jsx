@@ -204,16 +204,26 @@ export function toggleStatusButtons(classNames, isDisabled) {
     }
 }
 
-export function dateFormatted(dateString) {
+export function dateFormatted(dateString, isShortDate, separator) {
     if (typeof dateString === 'string') {
         const date = dateString.substr(0, 8);
         const year = date.substr(0, 4);
-        const month = parseInt(date.substr(4, 2), 10);
+        const month = (isShortDate) ? date.substr(4, 2) : parseInt(date.substr(4, 2), 10);
         const day = date.substr(6, 2);
-        const dateFormattedString = `${day} de ${CONSTANTS.MONTHS[month - 1]} de ${year}`;
+        let dateFormattedString = `${day} de ${CONSTANTS.MONTHS[month - 1]} de ${year}`;
+
+        if (isShortDate) {
+            dateFormattedString = `${day}${separator}${month}${separator}${year}`;
+        }
 
         return dateFormattedString;
     }
 
     return false;
+}
+
+export function removeIndexFromArray(array, index, pos) {
+    array.splice(index, pos || 1);
+
+    return array;
 }

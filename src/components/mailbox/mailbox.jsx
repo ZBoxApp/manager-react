@@ -204,7 +204,7 @@ export default class Mailboxes extends React.Component {
                                     }
                                 }}
                             >
-                                {attrs.mail}
+                                {mail.name}
                             </Button>
                         </td>
 
