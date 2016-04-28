@@ -1272,7 +1272,7 @@ label {
     .panel-body {
       padding: 0;
 
-      .btn {
+      .btn:not(.pending_actions) {
         margin: 0;
       }
     }

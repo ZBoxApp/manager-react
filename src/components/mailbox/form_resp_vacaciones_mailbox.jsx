@@ -30,12 +30,12 @@ export default class FormVacacionesMailbox extends React.Component {
 
         Client.modifyAccount(data.id, attrs, () => {
             GlobalActions.emitMessage({
-                message: 'Se ha modificado con éxito',
+                error: 'Se ha modificado su respuesta de vacaciones con éxito.',
                 type: messageType.SUCCESS
             });
         }, (error) => {
             GlobalActions.emitMessage({
-                message: error.message,
+                error: error.message,
                 type: messageType.ERROR
             });
         });

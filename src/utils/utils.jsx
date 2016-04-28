@@ -227,3 +227,172 @@ export function removeIndexFromArray(array, index, pos) {
 
     return array;
 }
+
+export function exportAsCSV(data, title, hasLabel) {
+    const info = (typeof data === 'object') ? data : JSON.parse(data);
+
+    let CSV = '';
+
+    CSV += title + '\r\n\n';
+
+    if (hasLabel) {
+        let row = '';
+
+        for (const index in info[0]) {
+            if (info[0].hasOwnProperty(index)) {
+                row += index + ',';
+            }
+        }
+
+        row = row.slice(0, row.length - 1);
+
+        CSV += row + '\r\n';
+    }
+
+    for (var i = 0; i < info.length; i++) {
+        let row = '';
+
+        for (var index in info[i]) {
+            if (info[i].hasOwnProperty(index)) {
+                row += '\'' + info[i][index] + '\',';
+            }
+        }
+
+        row = row.slice(0, -1);
+
+        CSV += row + '\r\n';
+    }
+
+    if (CSV === '') {
+        return;
+    }
+
+    const fileName = title.replace(/ /g, '_') + new Date().getTime();
+
+    const uri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV);
+
+    if (isSafari()) {
+        const time = 500;
+        var close = window.open('data:attachment/csv;charset=utf-8,' + encodeURIComponent(CSV), '_blank', 'width=1,height=1');
+        setTimeout(() => {
+            close.close();
+        }, time);
+
+        return;
+    }
+
+    const link = document.createElement('a');
+    link.href = uri;
+
+    link.style = 'visibility:hidden';
+    link.download = fileName + '.csv';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+export function isChrome() {
+    if (navigator.userAgent.indexOf('Chrome') > -1) {
+        return true;
+    }
+    return false;
+}
+
+export function isSafari() {
+    if (navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1) {
+        return true;
+    }
+    return false;
+}
+
+export function isIosChrome() {
+    // https://developer.chrome.com/multidevice/user-agent
+    return navigator.userAgent.indexOf('CriOS') !== -1;
+}
+
+export function isFirefox() {
+    return navigator && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+}
+
+export function isIE() {
+    if (window.navigator && window.navigator.userAgent) {
+        var ua = window.navigator.userAgent;
+
+        return ua.indexOf('Trident/7.0') > 0 || ua.indexOf('Trident/6.0') > 0;
+    }
+
+    return false;
+}
+
+export function isEdge() {
+    return window.navigator && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf('edge') > -1;
+}
+
+export function addOrRemoveAlias(account, params) {
+    let promises = [];
+
+    for (const label in params) {
+        if (params.hasOwnProperty(label)) {
+            if (label === 'add') {
+                const length = params[label].length;
+                for (let i = 0; i < length; i++) {
+                    let mypromise = new Promise((resolve) => {
+                        account.addAccountAlias(params[label][i], (response) => {
+                            if (response) {
+                                resolve({
+                                    resolved: false,
+                                    err: response,
+                                    item: params[label][i],
+                                    action: 'add'
+                                });
+                            } else {
+                                resolve({
+                                    resolved: true,
+                                    action: 'add'
+                                });
+                            }
+                        });
+                    });
+
+                    promises.push(mypromise);
+                }
+            }
+
+            if (label === 'remove') {
+                const length = params[label].length;
+                for (let i = 0; i < length; i++) {
+                    let mypromise = new Promise((resolve) => {
+                        account.removeAccountAlias(params[label][i], (response) => {
+                            if (response) {
+                                resolve({
+                                    resolved: false,
+                                    err: response,
+                                    item: params[label][i],
+                                    action: 'remove'
+                                });
+                            } else {
+                                resolve({
+                                    resolved: true,
+                                    action: 'remove'
+                                });
+                            }
+                        });
+                    });
+
+                    promises.push(mypromise);
+                }
+            }
+        }
+    }
+
+    return Promise.all(promises);
+}
+
+export function bytesToMegas(bytes) {
+    if (bytes) {
+        return ((bytes / 1024) / 1024).toFixed(2) + ' MB';
+    }
+
+    return 0 + 'Bytes';
+}
