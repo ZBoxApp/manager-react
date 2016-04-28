@@ -4,6 +4,10 @@
 import $ from 'jquery';
 import React from 'react';
 
+import Constants from '../utils/constants.jsx';
+
+const messageType = Constants.MessageType;
+
 export default class MessageBar extends React.Component {
     constructor(props) {
         super(props);
@@ -60,18 +64,20 @@ export default class MessageBar extends React.Component {
                 );
             }
 
-            const alertClass = `alert flash-${this.props.type} ${dismissible}`;
+            const alertClass = `alert flash-${this.props.type.toLowerCase()} ${dismissible}`;
             let icon;
             switch (this.props.type) {
-            case 'error':
+            case messageType.ERROR:
                 icon = (<i className='fa fa-exclamation-circle'></i>);
                 break;
-            case 'info':
+            case messageType.INFO:
                 icon = (<i className='fa fa-info-circle'></i>);
                 break;
-            case 'success':
+            case messageType.SUCCESS:
+                icon = (<i className='fa fa-check-circle'></i>);
                 break;
-            case 'warning':
+            case messageType.WARNING:
+                icon = (<i className='fa fa-exclamation-triangle'></i>);
                 break;
             }
 
@@ -106,7 +112,7 @@ MessageBar.defaultProps = {
 
 MessageBar.propTypes = {
     message: React.PropTypes.string.isRequired,
-    type: React.PropTypes.oneOf(['success', 'error', 'warning', 'info']),
+    type: React.PropTypes.oneOf(['SUCCESS', 'ERROR', 'WARNING', 'INFO']),
     position: React.PropTypes.oneOf(['absolute', 'fixed', 'relative', 'static', 'inherit']),
     canClose: React.PropTypes.bool,
     autoclose: React.PropTypes.bool,

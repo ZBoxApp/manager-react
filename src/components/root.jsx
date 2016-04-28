@@ -21,7 +21,7 @@ export default class Root extends React.Component {
                 if (!data || !data.logged_in) {
                     browserHistory.push('/login');
                 } else {
-                    browserHistory.push('/accounts');
+                    browserHistory.push('/companies');
                 }
             });
         }

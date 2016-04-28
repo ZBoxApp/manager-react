@@ -7,8 +7,12 @@ import moment from 'moment';
 import Panel from '../panel.jsx';
 import StatusLabel from '../status_label.jsx';
 
-import {getDnsInfo} from '../../utils/client.jsx';
+import CompanyStore from '../../stores/company_store.jsx';
+
+import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
+
+import Constant from '../../utils/constants.jsx';
 
 export default class DomainGeneralInfo extends React.Component {
     constructor(props) {
@@ -16,6 +20,7 @@ export default class DomainGeneralInfo extends React.Component {
 
         this.getMXRecord = this.getMXRecord.bind(this);
         this.renovationDate = this.renovationDate.bind(this);
+        this.getCompany = this.getCompany.bind(this);
 
         this.state = {
             mx: null,
@@ -23,22 +28,49 @@ export default class DomainGeneralInfo extends React.Component {
         };
     }
     componentWillMount() {
-        this.getMXRecord();
+        const domain = this.props.domain;
+        this.getMXRecord(domain.name);
+        this.getCompany(domain.attrs.businessCategory);
     }
-    getMXRecord() {
-        getDnsInfo(
-            this.props.domain.name,
+    getMXRecord(name) {
+        const self = this;
+
+        Client.getDnsInfo(
+            name,
             (data) => {
-                this.setState({
+                self.setState({
                     mx: data.mx
                 });
             },
             (err) => {
-                this.setState({
+                self.setState({
                     mx: err
                 });
             }
         );
+    }
+    getCompany(id) {
+        const company = CompanyStore.getCompanyById(id);
+        if (company) {
+            this.setState({
+                company: company.name
+            });
+        } else {
+            Client.getCompany(id).
+            then((data) => {
+                this.setState({
+                    company: data.name
+                });
+            }).
+            catch((error) => {
+                this.setState({
+                    error: {
+                        message: error.message,
+                        type: Constant.MessageType.ERROR
+                    }
+                });
+            });
+        }
     }
     renovationDate() {
         const timestamp = moment(this.props.domain.attrs.zimbraCreateTimestamp);
@@ -69,7 +101,7 @@ export default class DomainGeneralInfo extends React.Component {
                                 className='account-name'
                                 onClick={(e) => Utils.handleLink(e, `/accounts/${domain.id_empresa}`, this.props.location)}
                             >
-                                {'Nombre de la Empresa'}
+                                {this.state.company}
                             </a>
                         </p>
                         <ul className='list-unstyled'>

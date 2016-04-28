@@ -23,13 +23,23 @@ class UserStoreClass extends EventEmitter {
     }
 
     getCurrentId() {
-        var user = this.getCurrentUser();
+        const user = this.getCurrentUser();
 
         if (user) {
             return user.id;
         }
 
         return null;
+    }
+
+    isGlobalAdmin() {
+        const user = this.getCurrentUser();
+
+        if (user) {
+            return user.attrs._attrs.zimbraIsAdminAccount === 'TRUE'; //eslint-disable-line no-underscore-dangle
+        }
+
+        return false;
     }
 
     emitChange() {

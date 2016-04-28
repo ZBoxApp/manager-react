@@ -21,6 +21,7 @@ import Constants from '../../utils/constants.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
 
 const QueryOptions = Constants.QueryOptions;
+const messageType = Constants.MessageType;
 
 export default class Mailboxes extends React.Component {
     constructor(props) {
@@ -159,7 +160,7 @@ export default class Mailboxes extends React.Component {
             message = (
                 <MessageBar
                     message={this.state.error}
-                    type='success'
+                    type={messageType.SUCCESS}
                     autoclose={true}
                 />
             );

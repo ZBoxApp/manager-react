@@ -10,9 +10,8 @@ import ErrorPage from './components/error_page.jsx';
 import LoggedIn from './components/logged_in.jsx';
 import NotLoggedIn from './components/not_logged_in.jsx';
 import Login from './components/login/login.jsx';
-import Accounts from './components/accounts/accounts.jsx';
-import CreateAccount from './components/accounts/create_account.jsx';
-import EditAccount from './components/accounts/edit_account.jsx';
+import Companies from './components/companies/companies.jsx';
+import Company from './components/companies/company_details.jsx';
 import Domains from './components/domain/domains.jsx';
 import DomainDetails from './components/domain/domain_details.jsx';
 import CreateDomains from './components/domain/create_domain.jsx';
@@ -139,19 +138,13 @@ function renderRootComponent() {
                     />
 
                     <Route
-                        path='accounts'
-                        component={Accounts}
-                    >
-                        <Route
-                            path='new'
-                            component={CreateAccount}
-                        />
-
-                        <Route
-                            path=':id/edit'
-                            component={EditAccount}
-                        />
-                    </Route>
+                        path='companies'
+                        component={Companies}
+                    />
+                    <Route
+                        path='companies/:id'
+                        component={Company}
+                    />
 
                     <Route
                         path='mailboxes'

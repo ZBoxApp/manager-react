@@ -9,7 +9,8 @@ export default {
         END_LOADING: null,
         USER_CHANGED: null,
         RECEIVED_ERROR: null,
-        NEW_MESSAGE: null
+        NEW_MESSAGE: null,
+        NEW_TOAST: null
     }),
 
     PayloadSources: keyMirror({
@@ -23,13 +24,15 @@ export default {
         START_LOADING_EVENT: null,
         END_LOADING_EVENT: null,
         USER_CHANGE_EVENT: null,
-        NEW_MESSAGE_EVENT: null
+        NEW_MESSAGE_EVENT: null,
+        NEW_TOAST_EVENT: null
     }),
 
     MessageType: keyMirror({
         SUCCESS: null,
         WARNING: null,
-        ERROR: null
+        ERROR: null,
+        INFO: null
     }),
 
     ZimbraCodes: {

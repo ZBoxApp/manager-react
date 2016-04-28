@@ -1,5 +1,5 @@
 {
-    "debug": false,
+    "debug": true,
     "zimbraUrl": "http://zimbra.zboxapp.dev:8000/service/admin/soap",
     "zimbraProxy": "https://zimbra.zboxapp.dev:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
@@ -8,5 +8,10 @@
         "premium": true,
         "professional": true,
         "default": false
+    },
+    "companiesEndPoints": {
+        "list": "http://zimbra.zboxapp.dev:8001/list",
+        "detail": "http://zimbra.zboxapp.dev:8001/company/{id}",
+        "invoices": "http://zimbra.zboxapp.dev:8001/company/{id}/invoices"
     }
 }

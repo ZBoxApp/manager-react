@@ -18,6 +18,7 @@ import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import Constants from '../../utils/constants.jsx';
 
 const QueryOptions = Constants.QueryOptions;
+const messageType = Constants.MessageType;
 
 export default class Domains extends React.Component {
     constructor(props) {
@@ -36,7 +37,7 @@ export default class Domains extends React.Component {
         const self = this;
         Client.getAllDomains(
             {
-                limit: QueryOptions.DEFAULT_LIMIT,
+                limit: 200,
                 offset: this.state.offset
             },
             (data) => {
@@ -109,7 +110,7 @@ export default class Domains extends React.Component {
             message = (
                 <MessageBar
                     message={this.state.error}
-                    type='success'
+                    type={messageType.WARNING}
                     autoclose={true}
                 />
             );
