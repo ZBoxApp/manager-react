@@ -53,6 +53,7 @@ export default class Companies extends React.Component {
 
             return Promise.all(domains).then((comps) => {
                 CompaniesStore.setCompanies(comps);
+
                 self.setState({
                     companies: comps
                 });
@@ -102,7 +103,7 @@ export default class Companies extends React.Component {
                             return rej(err);
                         }
 
-                        d.admins = admins;
+                        d.admins = admins.account;
                         return solve(d);
                     });
                 });

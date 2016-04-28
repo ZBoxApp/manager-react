@@ -98,8 +98,7 @@ export default class CompaniesDetails extends React.Component {
                         if (err) {
                             return rej(err);
                         }
-
-                        d.admins = admins;
+                        d.admins = admins.account;
                         return solve(d);
                     });
                 });

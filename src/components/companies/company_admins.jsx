@@ -23,7 +23,9 @@ export default class CompanyAdmins extends React.Component {
 
         if (domains) {
             domains.forEach((d) => {
-                Reflect.apply(Array.prototype.push, admins, d.admins);
+                if (d.admins) {
+                    Reflect.apply(Array.prototype.push, admins, d.admins);
+                }
             });
         }
 

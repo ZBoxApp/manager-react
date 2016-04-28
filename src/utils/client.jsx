@@ -11,8 +11,6 @@ import * as GlobalActions from '../action_creators/global_actions.jsx';
 import * as Utils from './utils.jsx';
 import Constants from './constants.jsx';
 
-// arguments.callee.name
-
 // función que maneja el error como corresponde
 function handleError(methodName, err) {
     if (err.extra &&
@@ -470,6 +468,27 @@ export function search(query, success, error) {
         },
         (err) => {
             const e = handleError('search', err);
+            return error(e);
+        }
+    );
+}
+
+export function batchRequest(requestArray, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.makeBatchRequest(
+                requestArray,
+                (err, data) => {
+                    if (err) {
+                        const e = handleError('batchRequest', err);
+                        return error(e);
+                    }
+
+                    return success(data);
+                });
+        },
+        (err) => {
+            const e = handleError('batchRequest', err);
             return error(e);
         }
     );
