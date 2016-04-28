@@ -8,6 +8,10 @@ import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 
+import Constants from '../../utils/constants.jsx';
+
+const messageType = Constants.MessageType;
+
 export default class CreateMailBox extends React.Component {
     constructor(props) {
         super(props);
@@ -37,7 +41,7 @@ export default class CreateMailBox extends React.Component {
                     this.setState(
                         {
                             error: `Su cuenta ${data.name} ha sido creada con èxito.`,
-                            typeError: 'success'
+                            typeError: messageType.SUCCESS
                         }
                     );
                 },
@@ -45,7 +49,7 @@ export default class CreateMailBox extends React.Component {
                     this.setState(
                         {
                             error: error.message,
-                            typeError: 'warning'
+                            typeError: messageType.WARNING
                         }
                     );
                 }

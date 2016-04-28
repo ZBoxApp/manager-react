@@ -13,6 +13,8 @@ import Panel from '../panel.jsx';
 import LoginEmail from './login_email.jsx';
 import MessageBar from '../message_bar.jsx';
 
+const messageTypes = Constants.MessageType;
+
 export default class Login extends React.Component {
     constructor(props) {
         super(props);
@@ -30,7 +32,7 @@ export default class Login extends React.Component {
     componentDidMount() {
         Client.isLoggedIn((data) => {
             if (data && data.logged_in) {
-                browserHistory.push('/accounts');
+                browserHistory.push('/companies');
             } else {
                 $('body').addClass('blank');
             }
@@ -42,7 +44,7 @@ export default class Login extends React.Component {
         this.setState({user});
 
         if (user) {
-            browserHistory.push('/accounts');
+            browserHistory.push('/companies');
         }
     }
     submit(email, password) {
@@ -64,7 +66,7 @@ export default class Login extends React.Component {
 
         Client.login(email, password,
             () => {
-                browserHistory.push('/accounts');
+                browserHistory.push('/companies');
             },
             (err) => {
                 this.setState({loginError: err.message});
@@ -81,7 +83,7 @@ export default class Login extends React.Component {
             loginError = (
                 <MessageBar
                     message={this.state.loginError}
-                    type='error'
+                    type={messageTypes.ERROR}
                     position='relative'
                     canClose={false}
                 />
@@ -90,7 +92,7 @@ export default class Login extends React.Component {
             loginError = (
                 <MessageBar
                     message='Tu sesión a expirado. Por favor ingresa nuevamente.'
-                    type='info'
+                    type={messageTypes.INFO}
                     position='relative'
                     canClose={false}
                 />
@@ -99,7 +101,7 @@ export default class Login extends React.Component {
             loginError = (
                 <MessageBar
                     message='Necesitas iniciar sesión o registrarte para continuar.'
-                    type='error'
+                    type={messageTypes.ERROR}
                     position='relative'
                     canClose={false}
                 />

@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import $ from 'jquery';
+import Promise from 'bluebird';
 
 import ZimbraAdminApi from 'zimbra-admin-api-js';
 import ZimbraStore from '../stores/zimbra_store.jsx';
@@ -23,7 +24,10 @@ function handleError(methodName, err) {
 
     console.error(methodName, err); //eslint-disable-line no-console
 
-    const error = {};
+    const error = {
+        type: Constants.MessageType.ERROR
+    };
+
     if (err) {
         error.message = err.extra.reason;
     } else {
@@ -139,6 +143,53 @@ export function isLoggedIn(callback) {
     }
 
     return callback(data);
+}
+
+export function getAllCompanies() {
+    const url = global.window.manager_config.companiesEndPoints.list;
+
+    return new Promise((resolve, reject) => {
+        return $.ajax({
+            url,
+            dataType: 'json',
+            success: function onSuccess(data) {
+                resolve(data);
+            },
+            error: function onError(xhr, status, err) {
+                reject(err);
+            }
+        });
+    });
+}
+
+export function getCompany(id) {
+    const url = global.window.manager_config.companiesEndPoints.detail.replace('{id}', id);
+
+    return new Promise((resolve, reject) => {
+        return $.ajax({
+            url,
+            dataType: 'json',
+            success: function onSuccess(data) {
+                resolve(data);
+            },
+            error: function onError(xhr, status, err) {
+                reject(err);
+            }
+        });
+    });
+}
+
+export function getInvoices(id, success, error) {
+    const url = global.window.manager_config.companiesEndPoints.invoices.replace('{id}', id);
+
+    return $.ajax({
+        url,
+        dataType: 'json',
+        success,
+        error: function onError(xhr, status, err) {
+            error(err);
+        }
+    });
 }
 
 export function getAllDomains(opts, success, error) {
@@ -331,6 +382,25 @@ export function countAccounts(domain, success, error) {
     );
 }
 
+export function batchCountAccount(domains, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.batchCountAccounts(domains, (err, data) => {
+                if (err) {
+                    const e = handleError('batchCountAccount', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('batchCountAccount', err);
+            return error(e);
+        }
+    );
+}
+
 export function getDnsInfo(domain, success, error) {
     $.ajax({
         url: `${global.window.manager_config.dnsApiUrl}/dns`,
@@ -377,6 +447,29 @@ export function addAccountAlias(alias, success, error) {
         },
         (err) => {
             const e = handleError('addAccountAlias', err);
+            return error(e);
+        }
+    );
+}
+
+export function search(query, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.directorySearch(
+                {
+                    query
+                },
+                (err, data) => {
+                    if (err) {
+                        const e = handleError('search', err);
+                        return error(e);
+                    }
+
+                    return success(data);
+                });
+        },
+        (err) => {
+            const e = handleError('search', err);
             return error(e);
         }
     );

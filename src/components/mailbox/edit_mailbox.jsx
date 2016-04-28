@@ -11,6 +11,10 @@ import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Utils from '../../utils/utils.jsx';
 
+import Constants from '../../utils/constants.jsx';
+
+const messageType = Constants.MessageType;
+
 export default class EditMailBox extends React.Component {
     constructor(props) {
         super(props);
@@ -45,7 +49,7 @@ export default class EditMailBox extends React.Component {
                     this.setState(
                         {
                             error: `Su cuenta ${data.name} ha sido modificada con èxito.`,
-                            typeError: 'success',
+                            typeError: messageType.SUCCESS,
                             data: data
                         }
                     );
@@ -54,7 +58,7 @@ export default class EditMailBox extends React.Component {
                     this.setState(
                         {
                             error: error.message,
-                            typeError: 'warning'
+                            typeError: messageType.WARNING
                         }
                     );
                     Utils.toggleStatusButtons('.action-button', false);

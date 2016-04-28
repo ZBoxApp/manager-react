@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const Promise = require('bluebird');
 const _ = require('lodash');
+const moment = require('moment');
 
 const port = normalizePort(process.env.PORT || '8001'); //eslint-disable-line no-process-env
 
@@ -53,7 +54,35 @@ app.get('/company/:id', (req, res) => {
 });
 
 app.get('/company/:id/invoices', (req, res) => {
-    return res.json([]);
+    return res.json([
+        {
+            number: 355,
+            link: 'http://google.com',
+            date: moment('2016-01-01').toJSON(),
+            total: '$ 54.490',
+            status: 1
+        },
+        {
+            number: 356,
+            link: 'http://google.com',
+            date: moment('2016-02-01').toJSON(),
+            total: '$ 54.490',
+            status: 2
+        },
+        {
+            number: 357,
+            date: moment('2016-02-01').toJSON(),
+            total: '$ 54.490',
+            status: 3
+        },
+        {
+            number: 358,
+            link: 'http://google.com',
+            date: moment('2016-03-01').toJSON(),
+            total: '$ 54.490',
+            status: 0
+        }
+    ]);
 });
 
 // catch 404 and forward to error handler

@@ -44,6 +44,18 @@ class EventStoreClass extends EventEmitter {
     removeMessageListener(callback) {
         this.removeListener(eventTypes.NEW_MESSAGE_EVENT, callback);
     }
+
+    emitToast(message) {
+        this.emit(eventTypes.NEW_TOAST_EVENT, message);
+    }
+
+    addToastListener(callback) {
+        this.on(eventTypes.NEW_TOAST_EVENT, callback);
+    }
+
+    removeToastListener(callback) {
+        this.removeListener(eventTypes.NEW_TOAST_EVENT, callback);
+    }
 }
 
 var EventStore = new EventStoreClass();
@@ -61,6 +73,9 @@ EventStore.dispatchToken = AppDispatcher.register((payload) => {
         break;
     case ActionTypes.NEW_MESSAGE:
         EventStore.emitMessage(action.attrs);
+        break;
+    case ActionTypes.NEW_TOAST:
+        EventStore.emitToast(action.message);
         break;
     default:
     }

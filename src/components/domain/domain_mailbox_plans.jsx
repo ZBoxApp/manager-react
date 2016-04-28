@@ -127,8 +127,8 @@ export default class DomainMailboxPlans extends React.Component {
                 <thead>
                 <tr>
                     <th style={{width: '50%'}}></th>
-                    <th className='text-center'>Límite</th>
-                    <th className='text-center'>Usadas</th>
+                    <th className='text-center'>{'Límite'}</th>
+                    <th className='text-center'>{'Usadas'}</th>
                 </tr>
                 </thead>
                 <tbody>

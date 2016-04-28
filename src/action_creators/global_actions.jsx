@@ -30,3 +30,11 @@ export function saveUser(user) {
         user
     });
 }
+
+export function showAlert(message) {
+    AppDispatcher.handleViewAction({
+        type: ActionTypes.NEW_TOAST,
+        message
+    });
+}
+

@@ -9,7 +9,6 @@ import Panel from '../panel.jsx';
 import ToggleModalButton from '../toggle_modal_button.jsx';
 import AddAdminModal from './add_admin_modal.jsx';
 
-// import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 
 export default class DomainAdminList extends React.Component {

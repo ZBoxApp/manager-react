@@ -227,3 +227,57 @@ export function removeIndexFromArray(array, index, pos) {
 
     return array;
 }
+
+export function getPlansFromDomains(domains) {
+    const configPlans = global.window.manager_config.plans;
+    const plans = {};
+
+    for (const key in configPlans) {
+        if (configPlans.hasOwnProperty(key) && configPlans[key]) {
+            plans[key] = {
+                used: 0,
+                limit: 0
+            };
+        }
+    }
+
+    domains.forEach((d) => {
+        const pls = d.plans;
+        for (const key in pls) {
+            if (pls.hasOwnProperty(key) && plans.hasOwnProperty(key)) {
+                plans[key].used += pls[key].used;
+                plans[key].limit += (pls[key].limit || 0);
+            }
+        }
+    });
+
+    return plans;
+}
+
+export function getPlansFromDomain(domain) {
+    const configPlans = global.window.manager_config.plans;
+    const plans = {};
+
+    for (const key in configPlans) {
+        if (configPlans.hasOwnProperty(key) && configPlans[key]) {
+            plans[key] = {
+                used: 0,
+                limit: 0
+            };
+        }
+    }
+
+    const pls = domain.plans;
+    for (const key in pls) {
+        if (pls.hasOwnProperty(key) && plans.hasOwnProperty(key)) {
+            plans[key].used += pls[key].used;
+            plans[key].limit += (pls[key].limit || 0);
+        }
+    }
+
+    return plans;
+}
+
+export function titleCase(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
