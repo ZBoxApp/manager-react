@@ -30,7 +30,7 @@ export default class DomainDetails extends React.Component {
     getDomain() {
         const domain = DomainStore.getCurrent();
 
-        if (domain) {
+        if (domain && domain.id === this.props.params.id) {
             GlobalActions.emitEndLoading();
             this.setState({
                 domain
@@ -39,6 +39,7 @@ export default class DomainDetails extends React.Component {
             Client.getDomain(
                 this.props.params.id,
                 (data) => {
+                    DomainStore.setCurrent(data);
                     this.setState({
                         domain: data
                     });

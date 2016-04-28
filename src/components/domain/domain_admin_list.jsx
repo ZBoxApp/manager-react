@@ -5,11 +5,14 @@ import React from 'react';
 
 import DomainStore from '../../stores/domain_store.jsx';
 
+import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
 import ToggleModalButton from '../toggle_modal_button.jsx';
 import AddAdminModal from './add_admin_modal.jsx';
 
 import * as Utils from '../../utils/utils.jsx';
+
+import Constants from '../../utils/constants.jsx';
 
 export default class DomainAdminList extends React.Component {
     constructor(props) {
@@ -29,7 +32,7 @@ export default class DomainAdminList extends React.Component {
     getAdmins() {
         const domain = this.props.domain;
         domain.getAdmins((err, data) => {
-            const admins = data.account;
+            const admins = data.account || [];
             DomainStore.setAdmins(domain, admins);
             this.setState({admins});
         });
@@ -38,7 +41,21 @@ export default class DomainAdminList extends React.Component {
         e.preventDefault();
         if (confirm(`¿Seguro quieres eliminar a ${admin.name} como administrador del dominio?`)) { //eslint-disable-line no-alert
             // previo a esto hay que remover el usuario como admin del dominio
-            DomainStore.removeAdmin(admin.id);
+            this.props.domain.removeAdmin(
+                admin.name,
+                (error) => {
+                    if (error) {
+                        return this.setState({
+                            error: {
+                                message: error.extra.reason,
+                                type: Constants.MessageType.ERROR
+                            }
+                        });
+                    }
+
+                    return DomainStore.removeAdmin(admin.id);
+                }
+            );
         }
     }
     onAdminsChange() {
@@ -64,6 +81,20 @@ export default class DomainAdminList extends React.Component {
             return <div/>;
         }
 
+        let messageBar;
+        if (this.state.error) {
+            const error = this.state.error;
+            messageBar = (
+                <MessageBar
+                    message={error.message}
+                    type={error.type}
+                    canClose={true}
+                    autoclose={true}
+                    autocloseInSecs={5}
+                />
+            );
+        }
+
         const domain = this.props.domain;
         const adminRows = this.state.admins.map((a) => {
             return (
@@ -75,7 +106,7 @@ export default class DomainAdminList extends React.Component {
                         {a.name}
                     </td>
                     <td className='user-name text-center'>
-                        {a.attrs.givenName}
+                        {a.attrs.displayName}
                     </td>
                     <td className='user-type text-center'>
                     </td>
@@ -156,6 +187,7 @@ export default class DomainAdminList extends React.Component {
             <Panel
                 hasHeader={false}
                 children={adminContent}
+                error={messageBar}
             />
         );
     }
