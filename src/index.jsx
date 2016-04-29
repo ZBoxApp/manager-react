@@ -77,7 +77,17 @@ function onPreLoggedIn(nextState, replace, callback) {
                     global.window.Zimbra = ZimbraStore.getCurrent();
                 }
 
-                return callback();
+                const cos = ZimbraStore.getAllCos();
+                if (cos) {
+                    return callback();
+                }
+
+                return Client.getAllCos(
+                    (cosData) => {
+                        ZimbraStore.setAllCos(cosData);
+                        return callback();
+                    }
+                );
             },
             (err) => {
                 let query;
@@ -144,6 +154,10 @@ function renderRootComponent() {
                     <Route
                         path='companies/:id'
                         component={Company}
+                    />
+                    <Route
+                        path='companies/:id/domains/new'
+                        component={CreateDomains}
                     />
 
                     <Route

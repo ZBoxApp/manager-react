@@ -5,10 +5,12 @@ import $ from 'jquery';
 import React from 'react';
 import Promise from 'bluebird';
 
+import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
 import Panel from '../panel.jsx';
 
 import CompaniesStore from '../../stores/company_store.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
@@ -27,7 +29,6 @@ export default class Companies extends React.Component {
         this.getCompanies = this.getCompanies.bind(this);
         this.getDomains = this.getDomains.bind(this);
         this.getPlans = this.getPlans.bind(this);
-        this.getAdmins = this.getAdmins.bind(this);
         this.gotoCompany = this.gotoCompany.bind(this);
     }
 
@@ -47,8 +48,8 @@ export default class Companies extends React.Component {
         }
 
         return Client.getAllCompanies().then((data) => {
-            const domains = data.map((d) => {
-                return self.getDomains(d);
+            const domains = data.map((company) => {
+                return self.getDomains(company);
             });
 
             return Promise.all(domains).then((comps) => {
@@ -80,42 +81,21 @@ export default class Companies extends React.Component {
                 },
                 (data) => {
                     const domains = data.domain;
-                    Promise.all([self.getPlans(domains), self.getAdmins(domains)]).
-                    then(() => {
-                        company.domains = domains;
+                    if (domains) {
+                        self.getPlans(domains).then(() => {
+                            company.domains = domains;
+                            resolve(company);
+                        }).catch((error) => {
+                            reject(error);
+                        });
+                    } else {
+                        company.domains = [];
                         resolve(company);
-                    }).catch((error) => {
-                        reject(error);
-                    });
+                    }
                 },
                 (error) => {
                     reject(error);
                 });
-        });
-    }
-
-    getAdmins(domains) {
-        return new Promise((resolve, reject) => {
-            const promises = domains.map((d) => {
-                return new Promise((solve, rej) => {
-                    return d.getAdmins((err, admins) => {
-                        if (err) {
-                            return rej(err);
-                        }
-
-                        d.admins = admins.account;
-                        return solve(d);
-                    });
-                });
-            });
-
-            Promise.all(promises).
-            then((doms) => {
-                resolve(doms);
-            }).
-            catch((error) => {
-                reject(error);
-            });
         });
     }
 
@@ -155,6 +135,7 @@ export default class Companies extends React.Component {
         }
 
         let panelBody;
+        let noLimitError;
         if (this.state.companies.length === 0) {
             panelBody = (
                 <div className='center-block text-center'>
@@ -168,17 +149,43 @@ export default class Companies extends React.Component {
             );
         } else {
             const rows = this.state.companies.map((c) => {
-                const plans = Utils.getPlansFromDomains(c.domains);
+                const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
                 const plansString = [];
-                const totalBought = Object.keys(plans).reduce((prev, current) => {
-                    const limit = plans[current].limit;
+                const domains = c.domains;
+                const planKeys = Object.keys(cos).map((cosKey) => {
+                    return cos[cosKey];
+                });
+                const plans = {};
 
-                    plansString.push(`${limit} ${Utils.titleCase(current.slice(0, 3))}`); //eslint-disable-line no-undefined
+                planKeys.forEach((key) => {
+                    plans[key] = 0;
+                });
 
-                    if (plans[prev]) {
-                        return plans[prev].limit + limit;
+                domains.forEach((d) => {
+                    const domainCos = d.maxAccountsByCos();
+                    if (domainCos) {
+                        Object.keys(domainCos).forEach((id) => {
+                            const limit = domainCos[id];
+                            plans[cos[id]] += limit;
+                        });
+                    } else if (!noLimitError) {
+                        noLimitError = (
+                            <MessageBar
+                                message='Existen dominios sin límites asignados'
+                                type='WARNING'
+                                autoclose={true}
+                            />
+                        );
                     }
-                    return limit;
+                });
+
+                let totalBought = 0;
+                planKeys.forEach((key) => {
+                    const limit = plans[key];
+
+                    plansString.push(`${limit} ${Utils.titleCase(key.slice(0, 3))}`); //eslint-disable-line no-undefined
+
+                    totalBought += limit;
                 });
                 return (
                     <tr key={c.id}>
@@ -203,6 +210,7 @@ export default class Companies extends React.Component {
                     </tr>
                 );
             });
+
             panelBody = (
                 <div className='table-responsive'>
                     <div className='table-responsive'>
@@ -232,6 +240,7 @@ export default class Companies extends React.Component {
                     titlePage='Empresas'
                     descriptionPage='Las empresas son los que pagan el servicio'
                 />
+                {noLimitError}
                 <div className='content animate-panel'>
                     <div className='row'>
                         <div className='col-md-12 central-content'>

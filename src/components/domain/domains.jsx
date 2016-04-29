@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import Promise from 'bluebird';
 
 import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
@@ -42,42 +43,51 @@ export default class Domains extends React.Component {
             },
             (data) => {
                 const domains = data.domain;
-                const plans = domains.map((d) => {
-                    return self.getPlans(d);
+                this.getPlans(domains).
+                then(() => {
+                    self.setState({
+                        data
+                    });
+                }).
+                catch(() => {
+                    this.setState({
+                        error: {
+                            message: 'No se obtuvieron los planes de las cuentas',
+                            type: messageType.ERROR
+                        }
+                    });
+                }).
+                finally(() => {
+                    GlobalActions.emitEndLoading();
                 });
-
-                Promise.all(plans).then(
-                    () => {
-                        self.setState({
-                            data
-                        });
-                        GlobalActions.emitEndLoading();
-                    },
-                    () => {
-                        this.setState({
-                            error: 'No se obtuvieron los planes de las cuentas'
-                        });
-                        GlobalActions.emitEndLoading();
-                    }
-                );
             },
             (error) => {
                 this.setState({
-                    error: error.message
+                    error: {
+                        message: error.message,
+                        type: messageType.ERROR
+                    }
                 });
                 GlobalActions.emitEndLoading();
             }
         );
     }
-    getPlans(domain) {
+    getPlans(domains) {
+        const names = domains.map((d) => {
+            return d.name;
+        });
+
         return new Promise((resolve, reject) => {
-            Client.countAccounts(domain.name,
-                (info) => {
-                    domain.plans = info;
-                    resolve();
+            return Client.batchCountAccount(
+                names,
+                (data) => {
+                    domains.forEach((d, i) => {
+                        d.plans = data[i];
+                    });
+                    resolve(domains);
                 },
-                () => {
-                    reject();
+                (error) => {
+                    reject(error);
                 }
             );
         });
@@ -105,12 +115,13 @@ export default class Domains extends React.Component {
     }
 
     render() {
+        const error = this.state.error;
         let message;
-        if (this.state.error) {
+        if (error) {
             message = (
                 <MessageBar
-                    message={this.state.error}
-                    type={messageType.WARNING}
+                    message={error.message}
+                    type={error.type}
                     autoclose={true}
                 />
             );

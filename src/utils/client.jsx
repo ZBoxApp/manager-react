@@ -228,6 +228,25 @@ export function getDomain(id, success, error) {
     );
 }
 
+export function createDomain(domain, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.createDomain(domain.name, domain.attrs, (err, data) => {
+                if (err) {
+                    const e = handleError('createDomain', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('createDomain', err);
+            return error(e);
+        }
+    );
+}
+
 export function addDistributionList(name, attrs, success, error) {
     initZimbra().then(
         (zimbra) => {
@@ -500,7 +519,9 @@ export function getAllCos(success, error) {
             zimbra.getAllCos((err, data) => {
                 if (err) {
                     const e = handleError('getAllCos', err);
-                    return error(e);
+                    if (error) {
+                        return error(e);
+                    }
                 }
 
                 return success(data);
@@ -508,7 +529,11 @@ export function getAllCos(success, error) {
         },
         (err) => {
             const e = handleError('getAllCos', err);
-            return error(e);
+            if (error) {
+                return error(e);
+            }
+
+            return null;
         }
     );
 }

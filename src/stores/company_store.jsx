@@ -51,6 +51,66 @@ class CompanyStoreClass {
     setCurrent(company) {
         this.current = company;
     }
+
+    addDomain(companyId, domain) {
+        const currentCompany = this.getCurrent();
+        const company = this.getCompanyById(companyId);
+
+        if (currentCompany && currentCompany.id === companyId) {
+            currentCompany.domains.push(domain);
+
+            if (company) {
+                this.companies[companyId] = currentCompany;
+            }
+        } else if (company) {
+            company.domains.push(domain);
+        }
+    }
+
+    addDomainAdmins(companyId, domain) {
+        function findDomain(company) {
+            const domains = company.domains;
+            let index = -1;
+
+            if (domains) {
+                domains.forEach((d, i) => {
+                    if (d.id === domain.id) {
+                        index = i;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
+            return index;
+        }
+
+        function replaceDomain(company, index) {
+            if (index >= 0) {
+                company.domains[index] = domain;
+            } else {
+                company.domains.push(domain);
+            }
+        }
+
+        const currentCompany = this.getCurrent();
+        const company = this.getCompanyById(companyId);
+        let index = -1;
+
+        if (currentCompany && currentCompany.id === companyId) {
+            index = findDomain(currentCompany);
+
+            replaceDomain(currentCompany, index);
+
+            if (company) {
+                this.companies[companyId] = currentCompany;
+            }
+        } else if (company) {
+            index = findDomain(company);
+
+            replaceDomain(company, index);
+        }
+    }
 }
 
 const CompanyStore = new CompanyStoreClass();

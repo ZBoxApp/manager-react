@@ -4,6 +4,7 @@
 class ZimbraStoreClass {
     constructor() {
         this.zimbra = null;
+        this.cos = null;
     }
 
     getCurrent() {
@@ -12,6 +13,14 @@ class ZimbraStoreClass {
 
     setCurrent(zimbra) {
         this.zimbra = zimbra;
+    }
+
+    setAllCos(cos) {
+        this.cos = cos;
+    }
+
+    getAllCos() {
+        return this.cos;
     }
 }
 

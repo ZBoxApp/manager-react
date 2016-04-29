@@ -103,7 +103,7 @@ export default class MessageBar extends React.Component {
 
 MessageBar.defaultProps = {
     message: null,
-    type: 'error',
+    type: 'ERROR',
     position: 'relative',
     canClose: true,
     autoclose: false,
