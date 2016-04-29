@@ -72,11 +72,13 @@ class DomainStoreClass extends EventEmitter {
 
         const admins = {};
 
-        adminsArray.forEach((a) => {
-            admins[a.id] = a;
-        });
+        if (adminsArray) {
+            adminsArray.forEach((a) => {
+                admins[a.id] = a;
+            });
 
-        this.current.admins = admins;
+            this.current.admins = admins;
+        }
     }
 
     addAdmin(user) {

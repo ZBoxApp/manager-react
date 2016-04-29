@@ -7,6 +7,8 @@ import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 
+import Constants from '../../utils/constants.jsx';
+
 import StatusLabel from '../status_label.jsx';
 
 import {Modal} from 'react-bootstrap';
@@ -34,18 +36,19 @@ export default class AddAdminModal extends React.Component {
             GlobalActions.emitStartLoading();
             Client.getAllAccounts(
                 {
-                    query: `mail=*${query}*`,
-                    domain: this.props.domain.name
+                    query: `mail=*${query}*`
                 },
                 (data) => {
                     const admins = DomainStore.getAdmins(this.props.domain);
                     let users = [];
                     if (admins) {
-                        data.account.forEach((u) => {
-                            if (!admins.hasOwnProperty(u.id)) {
-                                users.push(u);
-                            }
-                        });
+                        if (data.account) {
+                            data.account.forEach((u) => {
+                                if (!admins.hasOwnProperty(u.id)) {
+                                    users.push(u);
+                                }
+                            });
+                        }
                     } else {
                         users = data.account;
                     }
@@ -65,8 +68,22 @@ export default class AddAdminModal extends React.Component {
     }
     handleAddAdmin(e, user) {
         e.preventDefault();
-        console.log(user); //eslint-disable-line no-console
-        DomainStore.addAdmin(user);
+
+        this.props.domain.addAdmin(
+            user.name,
+            (error) => {
+                if (error) {
+                    return this.setState({
+                        error: {
+                            message: error.extra.reason,
+                            type: Constants.MessageType.ERROR
+                        }
+                    });
+                }
+
+                return DomainStore.addAdmin(user);
+            }
+        );
     }
 
     shouldComponentUpdate(nextProps, nextState) {

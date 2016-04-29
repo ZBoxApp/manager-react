@@ -68,9 +68,6 @@ var config = {
             }
         ]
     },
-    sassLoader: {
-        includePaths: ['node_modules/compass-mixins/lib']
-    },
     plugins: [
         new CopyWebpackPlugin([
             {from: 'src/config', to: 'config'}

@@ -171,8 +171,9 @@ export default class Mailboxes extends React.Component {
         const arrLocked = [];
 
         if (this.state.data) {
-            total = this.state.data.account.length;
-            tableResults = this.state.data.account.map((mail) => {
+            const accounts = this.state.data.account || [];
+            total = accounts.length;
+            tableResults = accounts.map((mail) => {
                 let attrs = mail.attrs;
                 let statusClass = '';
                 let status = attrs.zimbraAccountStatus;
