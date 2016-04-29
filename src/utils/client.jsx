@@ -493,3 +493,22 @@ export function batchRequest(requestArray, success, error) {
         }
     );
 }
+
+export function getAllCos(success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.getAllCos((err, data) => {
+                if (err) {
+                    const e = handleError('getAllCos', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('getAllCos', err);
+            return error(e);
+        }
+    );
+}
