@@ -281,3 +281,17 @@ export function getPlansFromDomain(domain) {
 export function titleCase(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+export function getEnabledPlansByCos(cosArray) {
+    const configPlans = global.window.manager_config.plans;
+    const plans = {};
+
+    cosArray.forEach((cos) => {
+        const key = cos.name;
+        if (configPlans.hasOwnProperty(key) && configPlans[key]) {
+            plans[key] = cos.id;
+        }
+    });
+
+    return plans;
+}
