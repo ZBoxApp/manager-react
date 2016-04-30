@@ -69,12 +69,16 @@ export default class CreateDomain extends React.Component {
     handleSubmit(e) {
         e.preventDefault();
         GlobalActions.emitStartLoading();
+
+        const elementList = document.querySelectorAll('.has-error');
+        Array.from(elementList).forEach((el) => el.classList.remove('has-error'));
+
         Utils.validateInputRequired(this.refs).
         then(() => {
             const plans = Object.keys(this.state.plans);
             const zimbraDomainCOSMaxAccounts = [];
             const name = this.refs.domainName.value.trim();
-            const businessCategory = this.refs.account.value.trim();
+            const businessCategory = this.refs.company.value.trim();
 
             plans.forEach((p) => {
                 zimbraDomainCOSMaxAccounts.push(`${this.refs[`plan-${p}`].getAttribute('data-id')}:${this.refs[`plan-${p}`].value || 0}`);
@@ -105,6 +109,7 @@ export default class CreateDomain extends React.Component {
             GlobalActions.emitEndLoading();
             error.refs = true;
             error.type = error.typeError;
+            error.node.closest('.form-group').classList.add('has-error');
             return this.setState({error});
         });
     }
@@ -124,11 +129,7 @@ export default class CreateDomain extends React.Component {
             }
 
             let errorBar;
-            let formClass = 'simple_form form-horizontal mailbox-form';
             if (error) {
-                if (error.refs) {
-                    formClass += ' has-error';
-                }
                 errorBar = (
                     <MessageBar
                         message={error.message}
@@ -187,7 +188,7 @@ export default class CreateDomain extends React.Component {
 
             const form = (
                 <form
-                    className={formClass}
+                    className='simple_form form-horizontal mailbox-form'
                     onSubmit={this.handleSubmit}
                 >
                     <div className='form-group string required'>
@@ -211,15 +212,15 @@ export default class CreateDomain extends React.Component {
                     <div className='form-group string'>
                         <label className='string required col-sm-3 control-label'>
                             <abbr title='requerido'>{'*'}</abbr>
-                            {'Cuenta'}
+                            {'Empresa'}
                         </label>
 
                         <div className='col-sm-8'>
                             <select
                                 className='form-control select required'
                                 data-required='true'
-                                data-message='Debe especificar a que cuenta corresponde el dominio'
-                                ref='account'
+                                data-message='Debe especificar a que empresa corresponde el dominio'
+                                ref='company'
                                 defaultValue={this.state.companyId}
                             >
                                 {companiesOptions}
