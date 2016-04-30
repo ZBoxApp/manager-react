@@ -247,6 +247,25 @@ export function createDomain(domain, success, error) {
     );
 }
 
+export function modifyDomain(domain, success, error) {
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.modifyDomain(domain.id, domain.attrs, (err, data) => {
+                if (err) {
+                    const e = handleError('modifyDomain', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('modifyDomain', err);
+            return error(e);
+        }
+    );
+}
+
 export function addDistributionList(name, attrs, success, error) {
     initZimbra().then(
         (zimbra) => {

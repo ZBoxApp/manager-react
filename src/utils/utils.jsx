@@ -170,7 +170,7 @@ export function validateInputRequired(refs) {
         }
 
         for (const ref in refs) {
-            if (refs.hasOwnProperty(ref)) {
+            if (refs.hasOwnProperty(ref) && refs[ref].hasAttribute) {
                 if (refs[ref].hasAttribute('data-required') && refs[ref].getAttribute('data-required') === 'true' && refs[ref].value === '') {
                     let message;
                     if (refs[ref].getAttribute('data-message') && refs[ref].getAttribute('data-message').length > 0) {

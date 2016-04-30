@@ -67,49 +67,71 @@ class CompanyStoreClass {
         }
     }
 
+    modifyDomain(prevCompanyId, domain) {
+        if (this.companies) {
+            const domainCompanyId = domain.attrs.businessCategory;
+            const prevCompany = this.companies[prevCompanyId];
+            const newCompany = this.companies[domainCompanyId];
+
+            if (prevCompanyId !== domainCompanyId) {
+                if (newCompany) {
+                    this.addDomain(newCompany.id, domain);
+                }
+
+                if (prevCompany) {
+                    const index = findDomain(prevCompany, domain);
+                    prevCompany.domains.splice(index, 1);
+                }
+            } else if (prevCompany) {
+                const index = findDomain(prevCompany, domain);
+                replaceDomain(prevCompany, domain, index);
+            }
+        }
+    }
+
     addDomainAdmins(companyId, domain) {
-        function findDomain(company) {
-            const domains = company.domains;
-            let index = -1;
-
-            if (domains) {
-                domains.forEach((d, i) => {
-                    if (d.id === domain.id) {
-                        index = i;
-                        return false;
-                    }
-                    return true;
-                });
-            }
-
-            return index;
-        }
-
-        function replaceDomain(company, index) {
-            if (index >= 0) {
-                company.domains[index] = domain;
-            } else {
-                company.domains.push(domain);
-            }
-        }
-
         const currentCompany = this.getCurrent();
         const company = this.getCompanyById(companyId);
         let index = -1;
 
         if (currentCompany && currentCompany.id === companyId) {
-            index = findDomain(currentCompany);
+            index = findDomain(currentCompany, domain);
 
-            replaceDomain(currentCompany, index);
+            replaceDomain(currentCompany, domain, index);
 
             if (company) {
                 this.companies[companyId] = currentCompany;
             }
         } else if (company) {
-            index = findDomain(company);
+            index = findDomain(company, domain);
 
-            replaceDomain(company, index);
+            replaceDomain(company, domain, index);
         }
+    }
+}
+
+function findDomain(company, domain) {
+    const domains = company.domains;
+    let index = -1;
+
+    if (domains) {
+        domains.forEach((d, i) => {
+            if (d.id === domain.id) {
+                index = i;
+                return false;
+            }
+            return true;
+        });
+    }
+
+    return index;
+}
+
+function replaceDomain(company, domain, index) {
+    if (index >= 0) {
+        company.domains[index] = domain;
+    } else {
+        company.domains.push(domain);
     }
 }
 
