@@ -4,6 +4,7 @@
 import React from 'react';
 
 import UserStore from '../../stores/user_store.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 import Panel from '../panel.jsx';
 import StatusLabel from '../status_label.jsx';
@@ -21,7 +22,7 @@ export default class CompanyDomains extends React.Component {
                 label: 'Agregar Dominio',
                 props: {
                     className: 'btn btn-default btn-xs',
-                    onClick: (e) => Utils.handleLink(e, '/domains/new', this.props.location)
+                    onClick: (e) => Utils.handleLink(e, `/companies/${this.props.company.id}/domains/new`, this.props.location)
                 }
             }];
         }
@@ -47,15 +48,30 @@ export default class CompanyDomains extends React.Component {
                 }
 
                 let totalAccounts = 0;
-                const plans = Utils.getPlansFromDomain(d);
+                const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
+                const planKeys = Object.keys(cos).map((cosKey) => {
+                    return cos[cosKey];
+                });
+                const plans = {};
+                planKeys.forEach((key) => {
+                    plans[key] = 0;
+                });
 
-                const plansArray = Object.keys(plans).map((p) => {
-                    const limit = plans[p].limit;
+                const domainCos = d.maxAccountsByCos();
+                if (domainCos) {
+                    Object.keys(domainCos).forEach((id) => {
+                        const limit = domainCos[id];
+                        plans[cos[id]] += limit;
+                    });
+                }
+
+                const plansArray = planKeys.map((key) => {
+                    const limit = plans[key];
                     totalAccounts += limit;
 
                     return (
-                        <li key={`domain-${d.id}-${p}`}>
-                            {limit} {Utils.titleCase(p.slice(0, 3))}
+                        <li key={`domain-${d.id}-${key}`}>
+                            {limit} {Utils.titleCase(key.slice(0, 3))}
                         </li>
                     );
                 });

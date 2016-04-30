@@ -6,6 +6,8 @@ import React from 'react';
 import {browserHistory} from 'react-router';
 
 import UserStore from '../../stores/user_store.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
+
 import Constants from '../../utils/constants.jsx';
 import * as Client from '../../utils/client.jsx';
 
@@ -66,7 +68,12 @@ export default class Login extends React.Component {
 
         Client.login(email, password,
             () => {
-                browserHistory.push('/companies');
+                return Client.getAllCos(
+                    (cosData) => {
+                        ZimbraStore.setAllCos(cosData);
+                        browserHistory.push('/companies');
+                    }
+                );
             },
             (err) => {
                 this.setState({loginError: err.message});
