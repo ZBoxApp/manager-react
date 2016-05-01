@@ -3,7 +3,10 @@
 
 import React from 'react';
 
+import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
+
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 import * as Utils from '../../utils/utils.jsx';
 
@@ -61,15 +64,56 @@ export default class DomainMailboxPlans extends React.Component {
         ];
 
         const mailboxPlans = [];
-        const plans = this.state.plans;
-        const configPlans = global.window.manager_config.plans;
+        const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
+        const planKeys = Object.keys(cos).map((c) => {
+            return cos[c];
+        });
+
+        const domain = this.props.domain;
+        const domainCos = domain.maxAccountsByCos();
+        const domainPlans = Utils.getPlansFromDomain(domain);
+        const plans = {};
+        let noLimitError;
         let totalUsed = 0;
         let totalLimit = 0;
+
+        planKeys.forEach((key) => {
+            plans[key] = {
+                limit: 0,
+                used: 0
+            };
+        });
+
+        let used = 0;
+        if (domainCos) {
+            Object.keys(domainCos).forEach((id) => {
+                const limit = domainCos[id];
+                used = domainPlans[cos[id]].used;
+                plans[cos[id]].limit += limit;
+                plans[cos[id]].used += used;
+            });
+        }
+
         for (const key in plans) {
-            if (plans.hasOwnProperty(key) && configPlans[key]) {
+            if (plans.hasOwnProperty(key)) {
                 const plan = plans[key];
                 totalUsed += plan.used;
-                totalLimit += plan.limit || 0;
+                if (plan.limit === 0) {
+                    totalLimit = '\u221e';
+
+                    if (!noLimitError) {
+                        noLimitError = (
+                            <MessageBar
+                                message='Existen dominios sin límites asignados'
+                                type='WARNING'
+                                autoclose={true}
+                            />
+                        );
+                    }
+                } else {
+                    totalLimit += plan.limit;
+                }
+
                 mailboxPlans.push(
                     <tr key={`plan-${key}`}>
                         <td className='mbx-plan'
@@ -105,7 +149,7 @@ export default class DomainMailboxPlans extends React.Component {
                     className='text-center'
                     style={{borderTop: 0}}
                 >
-                    <strong>{totalLimit || '\u221e'}</strong>
+                    <strong>{totalLimit}</strong>
                 </td>
                 <td
                     className='text-center'
@@ -141,6 +185,7 @@ export default class DomainMailboxPlans extends React.Component {
             <Panel
                 title='Casillas'
                 btnsHeader={headerButtons}
+                error={noLimitError}
                 children={panelBody}
             />
         );

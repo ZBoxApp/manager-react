@@ -3,7 +3,10 @@
 
 import React from 'react';
 
+import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
+
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 import * as Utils from '../../utils/utils.jsx';
 
@@ -29,8 +32,55 @@ export default class CompanyMailboxPlans extends React.Component {
         ];
 
         const mailboxPlans = [];
+        const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
+        const planKeys = Object.keys(cos).map((c) => {
+            return cos[c];
+        });
+
         const domains = company.domains;
-        const plans = Utils.getPlansFromDomains(domains);
+
+        const plans = {};
+        let noLimitError;
+
+        planKeys.forEach((key) => {
+            plans[key] = {
+                limit: 0,
+                used: 0,
+                free: 0,
+                noLimit: false
+            };
+        });
+
+        domains.forEach((d) => {
+            const domainCos = d.maxAccountsByCos();
+            const domainPlans = Utils.getPlansFromDomain(d);
+            let used = 0;
+            if (domainCos) {
+                Object.keys(domainCos).forEach((id) => {
+                    const limit = domainCos[id];
+                    used = domainPlans[cos[id]].used;
+                    plans[cos[id]].limit += limit;
+                    plans[cos[id]].used += used;
+                    plans[cos[id]].free += (limit - used);
+                });
+            } else {
+                if (!noLimitError) {
+                    noLimitError = (
+                        <MessageBar
+                            message='Existen dominios sin límites asignados'
+                            type='WARNING'
+                            autoclose={true}
+                        />
+                    );
+                }
+
+                Object.keys(domainPlans).forEach((id) => {
+                    used = domainPlans[id].used;
+                    plans[id].noLimit = true;
+                    plans[id].used += used;
+                });
+            }
+        });
 
         for (const key in plans) {
             if (plans.hasOwnProperty(key)) {
@@ -42,12 +92,12 @@ export default class CompanyMailboxPlans extends React.Component {
                 const plan = plans[key];
                 limit = plan.limit;
                 used = plan.used;
-                if (limit) {
-                    free = limit - used;
-                    percent = Math.round((used * 100) / limit);
-                } else {
+                if (plan.noLimit) {
                     limit = free = '\u221e';
                     percent = 100;
+                } else {
+                    free = limit - used;
+                    percent = Math.round((used * 100) / limit);
                 }
 
                 if (percent <= 10) {
@@ -112,6 +162,7 @@ export default class CompanyMailboxPlans extends React.Component {
             <Panel
                 title='Casillas'
                 btnsHeader={headerButtons}
+                error={noLimitError}
                 children={panelBody}
             />
         );

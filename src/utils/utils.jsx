@@ -3,7 +3,9 @@
 
 import {browserHistory} from 'react-router';
 import * as GlobalActions from '../action_creators/global_actions.jsx';
-import CONSTANTS from './constants.jsx';
+import Constants from './constants.jsx';
+
+const messageType = Constants.MessageType;
 
 export function setCookie(cname, cvalue) {
     localStorage.setItem(cname, cvalue);
@@ -168,7 +170,7 @@ export function validateInputRequired(refs) {
         }
 
         for (const ref in refs) {
-            if (refs.hasOwnProperty(ref)) {
+            if (refs.hasOwnProperty(ref) && refs[ref].hasAttribute) {
                 if (refs[ref].hasAttribute('data-required') && refs[ref].getAttribute('data-required') === 'true' && refs[ref].value === '') {
                     let message;
                     if (refs[ref].getAttribute('data-message') && refs[ref].getAttribute('data-message').length > 0) {
@@ -178,7 +180,7 @@ export function validateInputRequired(refs) {
                     }
                     const Error = {
                         message,
-                        typeError: 'warning',
+                        typeError: messageType.ERROR,
                         node: refs[ref]
                     };
 
@@ -210,7 +212,7 @@ export function dateFormatted(dateString, isShortDate, separator) {
         const year = date.substr(0, 4);
         const month = (isShortDate) ? date.substr(4, 2) : parseInt(date.substr(4, 2), 10);
         const day = date.substr(6, 2);
-        let dateFormattedString = `${day} de ${CONSTANTS.MONTHS[month - 1]} de ${year}`;
+        let dateFormattedString = `${day} de ${Constants.MONTHS[month - 1]} de ${year}`;
 
         if (isShortDate) {
             dateFormattedString = `${day}${separator}${month}${separator}${year}`;
@@ -290,6 +292,20 @@ export function getEnabledPlansByCos(cosArray) {
         const key = cos.name;
         if (configPlans.hasOwnProperty(key) && configPlans[key]) {
             plans[key] = cos.id;
+        }
+    });
+
+    return plans;
+}
+
+export function getEnabledPlansByCosId(cosArray) {
+    const configPlans = global.window.manager_config.plans;
+    const plans = {};
+
+    cosArray.forEach((cos) => {
+        const key = cos.name;
+        if (configPlans.hasOwnProperty(key) && configPlans[key]) {
+            plans[cos.id] = key;
         }
     });
 

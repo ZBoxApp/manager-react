@@ -32,7 +32,6 @@ export default class CompaniesDetails extends React.Component {
 
         this.getCompany = this.getCompany.bind(this);
         this.getDomains = this.getDomains.bind(this);
-        this.getAdmins = this.getAdmins.bind(this);
         this.getPlans = this.getPlans.bind(this);
     }
 
@@ -76,7 +75,7 @@ export default class CompaniesDetails extends React.Component {
                 },
                 (data) => {
                     const domains = data.domain;
-                    Promise.all([self.getPlans(domains), self.getAdmins(domains)]).
+                    self.getPlans(domains).
                     then(() => {
                         company.domains = domains;
                         resolve(company);
@@ -87,30 +86,6 @@ export default class CompaniesDetails extends React.Component {
                 (error) => {
                     reject(error);
                 });
-        });
-    }
-
-    getAdmins(domains) {
-        return new Promise((resolve, reject) => {
-            const promises = domains.map((d) => {
-                return new Promise((solve, rej) => {
-                    return d.getAdmins((err, admins) => {
-                        if (err) {
-                            return rej(err);
-                        }
-                        d.admins = admins.account;
-                        return solve(d);
-                    });
-                });
-            });
-
-            Promise.all(promises).
-            then((doms) => {
-                resolve(doms);
-            }).
-            catch((error) => {
-                reject(error);
-            });
         });
     }
 
