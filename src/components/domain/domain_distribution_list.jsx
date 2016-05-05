@@ -23,6 +23,7 @@ export default class DomainDistributionList extends React.Component {
     }
     getStateFromStores() {
         const lists = DomainStore.getDistributionLists(this.props.domain);
+
         return {
             lists
         };
@@ -107,7 +108,7 @@ export default class DomainDistributionList extends React.Component {
                     <td className='distribution-list-actions'>
                         <a
                             href='#'
-                            onClick={(e) => Utils.handleLink(e, `/distribution_lists/${dl.id}`)}
+                            onClick={(e) => Utils.handleLink(e, `/domains/${domain.id}/distribution_lists/${dl.id}`)}
                         >
                             {'Ver'}
                         </a>
