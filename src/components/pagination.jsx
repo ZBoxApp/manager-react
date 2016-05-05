@@ -123,7 +123,7 @@ export default class Pagination extends React.Component {
 
         return (
             <div id='pagination'>
-                <ul className='pagination'>
+                <ul className='pagination pagination-sm'>
                     {first}
                     {prev}
                     {pages}

@@ -36,7 +36,10 @@ export default class ConfirmDeleteModal extends React.Component {
                     message: 'Su contraseña se ha sido cambiada éxitosamente.',
                     typeError: 'text-success'
                 });
-                this.forceLogout('/logout');
+
+                if (this.props.data.name === this.state.currentUser.name) {
+                    this.forceLogout('/logout');
+                }
             }, (error) => {
                 this.setState({
                     alert: true,
