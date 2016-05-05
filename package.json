@@ -62,7 +62,7 @@
   },
   "scripts": {
     "check": "eslint --ext \".jsx\" --ignore-pattern node_modules --quiet .",
-    "build": "webpack",
+    "build": "NODE_ENV=production webpack",
     "run": "webpack --progress --watch",
     "run-fullmap": "webpack --progress --watch",
     "companies-service": "babel-node companies-service.js",
