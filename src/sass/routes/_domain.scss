@@ -59,3 +59,46 @@
   font-size: 22px;
   font-weight: 600;
 }
+
+.layout-back {
+  overflow: hidden;
+  position: relative;
+
+  .hpanel {
+    .panel-body {
+      background: transparent;
+      border-bottom-color: transparent;
+    }
+
+    .panel-heading {
+      background: transparent;
+    }
+  }
+
+  .backstage {
+    height: 100%;
+    margin-top: -25px;
+    overflow: hidden;
+    padding: 0 15px;
+    position: absolute;
+    width: 50%;
+
+    &.back-left {
+      left: 0;
+    }
+
+    &.back-right {
+      right: 0;
+    }
+
+    .backbg {
+      background: $white;
+      border-bottom: 1px solid $color-new-fields;
+      border-left: 1px solid $color-new-fields;
+      border-right: 1px solid $color-new-fields;
+      height: 100%;
+      position: relative;
+      width: 100%;
+    }
+  }
+}

@@ -29,6 +29,7 @@ export default class EditMailBox extends React.Component {
         this.getMailbox = this.getMailbox.bind(this);
         this.fillForm = this.fillForm.bind(this);
         this.showMessage = this.showMessage.bind(this);
+        this.handleRenameAccount = this.handleRenameAccount.bind(this);
 
         this.state = {};
     }
@@ -44,26 +45,119 @@ export default class EditMailBox extends React.Component {
         this.refs.zimbraCOSId.value = val;
     }
 
+    handleEnabledRename() {
+        const selfButton = this.refs.rename;
+        const inputs = document.querySelectorAll('.action-rename');
+        const email = inputs[0];
+        const domain = inputs[1];
+
+        if (selfButton.hasAttribute('data-rename')) {
+            selfButton.removeAttribute('data-rename');
+            selfButton.innerHTML = 'Actualizar';
+            Utils.toggleStatusButtons('.action-rename', false);
+            return false;
+        }
+
+        if (domain.value === '') {
+            GlobalActions.emitMessage({
+                message: 'El dominio es requerido, verifique por favor.',
+                typeError: messageType.ERROR
+            });
+
+            domain.focus();
+
+            return false;
+        }
+
+        if (email.value === '') {
+            GlobalActions.emitMessage({
+                message: 'El campo mail es requerido, verifique por favor.',
+                typeError: messageType.ERROR
+            });
+
+            email.focus();
+
+            return false;
+        }
+
+        const mail = email.value + '@' + domain.value;
+        const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (!isEmail.test(mail)) {
+            GlobalActions.emitMessage({
+                message: 'El email no tiene el formato correcto, verifique por favor.',
+                typeError: messageType.ERROR
+            });
+
+            return false;
+        }
+
+        this.handleRenameAccount(mail);
+    }
+
+    handleRenameAccount(email) {
+        const account = MailboxStore.getCurrent();
+
+        if (account) {
+            const oldName = this.refs.rename.innerHTML;
+            this.refs.rename.innerHTML = 'Actualizando';
+            Utils.toggleStatusButtons('.change-email', true);
+
+            return account.rename(email, (error, success) => {
+                if (error) {
+                    this.setState({
+                        data: account
+                    });
+
+                    this.refs.rename.innerHTML = oldName;
+                    Utils.toggleStatusButtons('.change-email', false);
+
+                    return GlobalActions.emitMessage({
+                        message: error.extra.reason,
+                        typeError: messageType.ERROR
+                    });
+                }
+
+                let newAccount = MailboxStore.changeAccount(success);
+
+                if (!newAccount) {
+                    newAccount = success;
+                }
+
+                this.setState({
+                    data: newAccount
+                });
+
+                this.refs.rename.innerHTML = 'Renombrar';
+                this.refs.rename.setAttribute('data-rename', 'true');
+                Utils.toggleStatusButtons('.change-email', false);
+
+                return GlobalActions.emitMessage({
+                    message: 'Se ha modificado el nombre de su cuenta éxitosamente',
+                    typeError: messageType.SUCCESS
+                });
+            });
+        }
+
+        GlobalActions.emitMessage({
+            message: 'Error, no existe instancia de la casilla.',
+            typeError: messageType.ERROR
+        });
+    }
+
+    componentDidUpdate() {
+        const button = this.refs.rename;
+
+        if (button.hasAttribute('data-rename')) {
+            Utils.toggleStatusButtons('.action-rename', true);
+        }
+    }
+
     handleEdit(e) {
         e.preventDefault();
         Utils.toggleStatusButtons('.action-button', true);
 
         Utils.validateInputRequired(this.refs).then(() => {
-            const domain = document.querySelector('input[list=\'domain\']');
-
-            if (domain.value === '') {
-                GlobalActions.emitMessage({
-                    message: 'El dominio es requerido, verifique por favor.',
-                    typeError: messageType.ERROR
-                });
-
-                domain.focus();
-
-                return false;
-            }
-
-            const email = this.refs.mail.value + '@' + domain.value;
-
             // fill new attrs
             const attrs = {
                 givenName: this.refs.givenName.value,
@@ -89,29 +183,7 @@ export default class EditMailBox extends React.Component {
             }).then((account) => {
                 MailboxStore.changeAccount(account);
 
-                account.rename(email, (error, success) => {
-                    if (error) {
-                        this.setState({
-                            data: account
-                        });
-
-                        return GlobalActions.emitMessage({
-                            error: error.message,
-                            typeError: messageType.ERROR
-                        });
-                    }
-
-                    const newAccount = MailboxStore.changeAccount(success);
-
-                    this.setState({
-                        data: newAccount
-                    });
-
-                    return GlobalActions.emitMessage({
-                        message: `Su cuenta ${account.name} ha sido modificada con èxito.`,
-                        typeError: messageType.SUCCESS
-                    });
-                });
+                Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
             }).catch((error) => {
                 GlobalActions.emitMessage({
                     message: error.message,
@@ -166,6 +238,7 @@ export default class EditMailBox extends React.Component {
             promises.push(domains, cos);
 
             Promise.all(promises).then((result) => {
+                MailboxStore.setCurrent(data);
                 this.setState({
                     data,
                     domains: result.shift().domain,
@@ -174,7 +247,7 @@ export default class EditMailBox extends React.Component {
                 Utils.toggleStatusButtons('.action-save', false);
             }).catch((error) => {
                 GlobalActions.emitMessage({
-                    error: error.message,
+                    message: error.message,
                     typeError: error.type
                 });
             }).finally(() => {
@@ -218,15 +291,19 @@ export default class EditMailBox extends React.Component {
             promises.push(mailbox, doms, cos);
 
             Promise.all(promises).then((result) => {
+                const account = result.shift();
+
                 this.setState({
-                    data: result.shift(),
+                    data: account,
                     domains: result.shift().domain,
                     cos: Utils.getEnabledPlansByCos(result.shift())
                 });
+
                 Utils.toggleStatusButtons('.action-save', false);
+                MailboxStore.setCurrent(account);
             }).catch((error) => {
                 GlobalActions.emitMessage({
-                    error: error.message,
+                    message: error.message,
                     typeError: error.type
                 });
             }).finally(() => {
@@ -355,7 +432,7 @@ export default class EditMailBox extends React.Component {
                 <DataList
                     list='domain'
                     options={domains}
-                    className='form-control'
+                    className='form-control action-rename'
                     placeholder='Dominio'
                     initialFilter={currentDomain}
                 />
@@ -382,13 +459,25 @@ export default class EditMailBox extends React.Component {
                                 <div className='input-group'>
                                     <input
                                         type='text'
-                                        className='form-control'
+                                        className='form-control action-rename'
                                         ref='mail'
-                                        data-required='true'
                                         placeholder='Mail'
                                     />
                                     <span className='input-group-addon'>{'@'}</span>
                                     {datalist}
+                                    <span className='input-group-btn'>
+                                        <button
+                                            className='btn btn-default change-email'
+                                            type='button'
+                                            ref='rename'
+                                            data-rename='true'
+                                            onClick={() => {
+                                                this.handleEnabledRename();
+                                            }}
+                                        >
+                                            Renombrar
+                                        </button>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -504,7 +593,7 @@ export default class EditMailBox extends React.Component {
                 props: {
                     className: 'btn btn-default btn-xs action-button',
                     onClick: (e) => {
-                        Utils.handleLink(e, '/mailboxes', this.props.location);
+                        Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
                     }
                 }
             },

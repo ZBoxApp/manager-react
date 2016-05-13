@@ -30,18 +30,23 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         this.date = Utils.dateFormatted(this.props.data.attrs.zimbraCreateTimestamp);
 
         switch (this.props.data.attrs.zimbraAccountStatus) {
-        case 'inactive':
-            this.status = 'Desactivada';
-            this.className = 'btn-default mailbox-status';
+        case 'lockedout':
+            this.status = 'Bloqueada';
+            this.className = 'label-locked mailbox-status';
+            break;
+        case 'active':
+            this.status = 'Activa';
+            this.className = 'label-success mailbox-status';
+            break;
+        case 'closed':
+            this.status = 'Cerrada';
+            this.className = 'label-default mailbox-status';
             break;
         case 'locked':
-            this.status = 'Bloqueada';
-            this.className = 'btn-primary2 mailbox-status';
+            this.status = 'Inactiva';
+            this.className = 'label-warning mailbox-status';
             break;
         default:
-            this.status = 'Activa';
-            this.className = 'btn-info mailbox-status';
-            break;
         }
 
         if (this.props.data.attrs.zimbraLastLogonTimestamp) {
@@ -90,7 +95,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
                     <div className='col-xs-6'>
                         <div>
                             <p>
-                                <span className='center-block'>Últimas Conexión</span>
+                                <span className='center-block'>Última Conexión</span>
                                 <strong>{this.lastConection}</strong>
                             </p>
                         </div>

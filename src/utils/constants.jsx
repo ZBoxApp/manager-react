@@ -7,6 +7,8 @@ export default {
     ActionTypes: keyMirror({
         START_LOADING: null,
         END_LOADING: null,
+        START_TASK_LOADING: null,
+        END_TASK_LOADING: null,
         USER_CHANGED: null,
         RECEIVED_ERROR: null,
         NEW_MESSAGE: null,
@@ -24,9 +26,12 @@ export default {
         ACCOUNT_CHANGE_EVENT: null,
         START_LOADING_EVENT: null,
         END_LOADING_EVENT: null,
+        START_TASK_LOADING_EVENT: null,
+        END_TASK_LOADING_EVENT: null,
         USER_CHANGE_EVENT: null,
         NEW_MESSAGE_EVENT: null,
-        NEW_TOAST_EVENT: null
+        NEW_TOAST_EVENT: null,
+        MAILBOX_ADD_MASSIVE_EVENT: null
     }),
 
     MessageType: keyMirror({

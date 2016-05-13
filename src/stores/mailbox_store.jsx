@@ -2,6 +2,9 @@
 // See LICENSE.txt for license information.
 
 import EventEmitter from 'events';
+import Constants from '../utils/constants.jsx';
+
+const eventTypes = Constants.EventTypes;
 
 let mailboxesArray = null;
 
@@ -152,6 +155,20 @@ class MailboxStoreClass extends EventEmitter {
         }
 
         return false;
+    }
+
+    // Declare here all events that fired when something happens
+
+    emitAddMassive() {
+        this.emit(eventTypes.MAILBOX_ADD_MASSIVE_EVENT);
+    }
+
+    addListenerAddMassive(callback) {
+        this.on(eventTypes.MAILBOX_ADD_MASSIVE_EVENT, callback);
+    }
+
+    removeListenerAddMassive(callback) {
+        this.removeListener(eventTypes.MAILBOX_ADD_MASSIVE_EVENT, callback);
     }
 
 }

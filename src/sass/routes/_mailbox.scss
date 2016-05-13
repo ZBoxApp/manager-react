@@ -25,3 +25,10 @@
 .label-locked {
   background: $color-violet;
 }
+
+.passwd-field {
+  + meter {
+    margin-top: 5px;
+    width: 100%;
+  }
+}
