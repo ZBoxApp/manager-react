@@ -7,33 +7,62 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         this.date = null;
         this.status = null;
         this.className = null;
-        this.lastConection = 'no se ha conectado';
+        this.lastConection = 'No se ha conectado';
+        this.getMailSize = this.getMailSize.bind(this);
+
+        this.state = {};
+    }
+
+    getMailSize() {
+        this.props.data.getMailboxSize((err, bytes) => {
+            let currentSize = '0 MB';
+            if (bytes) {
+                currentSize = Utils.bytesToMegas(bytes);
+            }
+
+            this.setState({
+                size: currentSize
+            });
+        });
     }
 
     componentWillMount() {
         this.date = Utils.dateFormatted(this.props.data.attrs.zimbraCreateTimestamp);
 
         switch (this.props.data.attrs.zimbraAccountStatus) {
-        case 'inactive':
-            this.status = 'Desactivada';
-            this.className = 'btn btn-md btn-default';
+        case 'lockedout':
+            this.status = 'Bloqueada';
+            this.className = 'label-locked mailbox-status';
+            break;
+        case 'active':
+            this.status = 'Activa';
+            this.className = 'label-success mailbox-status';
+            break;
+        case 'closed':
+            this.status = 'Cerrada';
+            this.className = 'label-default mailbox-status';
             break;
         case 'locked':
-            this.status = 'Bloqueada';
-            this.className = 'btn btn-md btn-primary2';
+            this.status = 'Inactiva';
+            this.className = 'label-warning mailbox-status';
             break;
         default:
-            this.status = 'Activa';
-            this.className = 'btn btn-md btn-info';
-            break;
         }
 
         if (this.props.data.attrs.zimbraLastLogonTimestamp) {
             this.lastConection = Utils.dateFormatted(this.props.data.attrs.zimbraLastLogonTimestamp);
         }
+
+        this.getMailSize();
     }
 
     render() {
+        let size = null;
+
+        if (this.state.size) {
+            size = this.state.size;
+        }
+
         return (
             <div>
                 <div className='row'>
@@ -59,14 +88,14 @@ export default class BlockGeneralInfoMailbox extends React.Component {
                         <div>
                             <p>
                                 <span className='center-block'>Espacio Usado</span>
-                                <strong>0 Bytes</strong>
+                                <strong>{size}</strong>
                             </p>
                         </div>
                     </div>
                     <div className='col-xs-6'>
                         <div>
                             <p>
-                                <span className='center-block'>Últimas Conexión</span>
+                                <span className='center-block'>Última Conexión</span>
                                 <strong>{this.lastConection}</strong>
                             </p>
                         </div>

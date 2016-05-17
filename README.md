@@ -27,7 +27,7 @@ The is a configuration file under `config/config.json` with the following struct
 
 * **debug**: Use in development environmet to recieve messages in the javascript console.
 * **zimbraUrl**: The URL where the zimbra admin services are running.
-* **zimbraProxy**: The URL of a proxy server to allow CORS between the webapp and the Zimbra admin service.
+* **zimbraProxy**: The URL of a proxy server to allow CORS between the webapp and the Zimbra admin service. (Only needed in **development** environment for the server)
 * **dnsApiUrl**: URL of the DNS api to get DNS information ( [zDNS](https://github.com/ZBoxApp/zDNS) ).
 * **plans**: Object with the available mailboxes plans, set to *true* if enabled or *false* to disable it.
 * **companiesEndPoints**: This are the enpoints to get information about companies and invoices. (Checkout the companies endpoint specifications below).
@@ -98,6 +98,20 @@ Posible status are:
 |    1     | Pagada    |
 |    2     | Vencida   |
 |    3     | Anulada   |
+
+## Deployment
+
+You'll need to build the sources ready for production by running
+```
+$ make build
+```
+
+This will generate a folder called `dist` which holds all the necessary files for deploying the website.
+This files have to be copied to your server running `NGINX`.
+
+Copy the files to `NGINX` html folder and you're done.
+
+A sample for the `NGINX` configuration can be found [here](nginx/nginx.conf).
 
 ## TODO
 

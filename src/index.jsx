@@ -20,6 +20,8 @@ import Mailboxes from './components/mailbox/mailbox.jsx';
 import MailboxDetails from './components/mailbox/mailbox_details.jsx';
 import CreateMailBox from './components/mailbox/create_mailbox.jsx';
 import EditMailBox from './components/mailbox/edit_mailbox.jsx';
+import DistributionLists from './components/distribution/distribution_lists.jsx';
+import EditDistributionList from './components/distribution/edit_distribution_lists.jsx';
 
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
@@ -77,12 +79,7 @@ function onPreLoggedIn(nextState, replace, callback) {
                     global.window.Zimbra = ZimbraStore.getCurrent();
                 }
 
-                const cos = ZimbraStore.getAllCos();
-                if (cos) {
-                    return callback();
-                }
-
-                return Client.getAllCos(
+                Client.getAllCos(
                     (cosData) => {
                         ZimbraStore.setAllCos(cosData);
                         return callback();
@@ -111,41 +108,53 @@ function onLoggedOut(nextState, replace) {
 
 function renderRootComponent() {
     ReactDOM.render((
-        <Router
-            history={browserHistory}
-        >
-            <Route
-                path='/'
-                component={Root}
+            <Router
+                history={browserHistory}
             >
                 <Route
-                    path='error'
-                    component={ErrorPage}
-                />
-                <Route
-                    component={LoggedIn}
-                    onEnter={onPreLoggedIn}
+                    path='/'
+                    component={Root}
                 >
                     <Route
-                        path='domains'
-                        component={Domains}
+                        path='error'
+                        component={ErrorPage}
                     />
                     <Route
-                        path='domains/new'
-                        component={CreateDomains}
-                    />
-                    <Route
-                        path='domains/:id'
-                        component={DomainDetails}
-                    />
-                    <Route
-                        path='domains/:id/edit'
-                        component={EditDomains}
-                    />
-                    <Route
-                        path='domains/:domain_id/mailboxes'
-                        component={Mailboxes}
-                    />
+                        component={LoggedIn}
+                        onEnter={onPreLoggedIn}
+                    >
+                        <Route
+                            path='domains'
+                            component={Domains}
+                        />
+                        <Route
+                            path='domains/new'
+                            component={CreateDomains}
+                        />
+                        <Route
+                            path='domains/:id'
+                            component={DomainDetails}
+                        />
+                        <Route
+                            path='domains/:id/mailboxes/new'
+                            component={CreateMailBox}
+                        />
+                        <Route
+                            path='domains/:id/edit'
+                            component={EditDomains}
+                        />
+                        <Route
+                            path='domains/:domain_id/mailboxes'
+                            component={Mailboxes}
+                        />
+                        <Route
+                            path='domains/:domain_id/distribution_lists/:id'
+                            component={DistributionLists}
+                        />
+                        <Route
+                            path='domains/:domain_id/distribution_lists/:id/edit'
+                            component={EditDistributionList}
+                        />
 
                     <Route
                         path='companies'
@@ -160,46 +169,46 @@ function renderRootComponent() {
                         component={CreateDomains}
                     />
 
-                    <Route
-                        path='mailboxes'
-                        component={Mailboxes}
-                    />
+                        <Route
+                            path='mailboxes'
+                            component={Mailboxes}
+                        />
 
-                    <Route
-                        path='mailboxes/new'
-                        component={CreateMailBox}
-                    />
+                        <Route
+                            path='mailboxes/new'
+                            component={CreateMailBox}
+                        />
 
-                    <Route
-                        path='mailboxes/:id/edit'
-                        component={EditMailBox}
-                    />
+                        <Route
+                            path='mailboxes/:id/edit'
+                            component={EditMailBox}
+                        />
 
-                    <Route
-                        path='mailboxes/:id'
-                        component={MailboxDetails}
-                    />
+                        <Route
+                            path='mailboxes/:id'
+                            component={MailboxDetails}
+                        />
 
-                    <Route
-                        path='logout'
-                        onEnter={onLoggedOut}
-                    />
+                        <Route
+                            path='logout'
+                            onEnter={onLoggedOut}
+                        />
+                    </Route>
+                    <Route component={NotLoggedIn}>
+                        <IndexRedirect to='login'/>
+                        <Route
+                            path='login'
+                            component={Login}
+                        />
+                        <Redirect
+                            from='*'
+                            to='/error'
+                            query={notFoundParams}
+                        />
+                    </Route>
                 </Route>
-                <Route component={NotLoggedIn}>
-                    <IndexRedirect to='login'/>
-                    <Route
-                        path='login'
-                        component={Login}
-                    />
-                    <Redirect
-                        from='*'
-                        to='/error'
-                        query={notFoundParams}
-                    />
-                </Route>
-            </Route>
-        </Router>
-    ),
+            </Router>
+        ),
         document.getElementById('root'));
 }
 

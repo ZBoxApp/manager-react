@@ -8,10 +8,14 @@ import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
 import PanelTab from '../panel_tab.jsx';
 
+import Button from '../button.jsx';
 import DomainGeneralInfo from './domain_general_info.jsx';
 import DomainMailboxPlans from './domain_mailbox_plans.jsx';
 import DomainAdmins from './domain_admin_list.jsx';
 import DomainDistributionList from './domain_distribution_list.jsx';
+import ToggleModalButton from '../toggle_modal_button.jsx';
+import MultipleTaskModal from './multiple_task_modal.jsx';
+import AntiSpamComponent from './antispam.jsx';
 
 import DomainStore from '../../stores/domain_store.jsx';
 
@@ -93,12 +97,42 @@ export default class DomainDetails extends React.Component {
                 />
             );
 
+            const tabTareasMasivas = (
+                <div>
+                    <ul className='list-inline'>
+                        <li>
+                            <ToggleModalButton
+                                role='button'
+                                className=''
+                                dialogType={MultipleTaskModal}
+                                dialogProps={{
+                                    data: domain
+                                }}
+                                key='change-passwd-import'
+                            >
+                                {'Mensaje fuera de Oficina'}
+                            </ToggleModalButton>
+                        </li>
+                    </ul>
+                </div>
+            );
+
+            const tabAntiSpam = (
+                <div>
+                    <AntiSpamComponent
+                        data={this.state.domain}
+                    />
+                </div>
+            );
+
             const panelTabs = (
                 <PanelTab
-                    tabNames={['Administradores', 'Listas De Distribución']}
+                    tabNames={['Administradores', 'AntiSpam', 'Listas De Distribución', 'Tareas Masivas']}
                     tabs={{
                         administradores: tabAdmin,
-                        listas_de_distribución: tabDistribution
+                        antispam: tabAntiSpam,
+                        listas_de_distribución: tabDistribution,
+                        tareas_masivas: tabTareasMasivas
                     }}
                     location={this.props.location}
                 />
@@ -113,19 +147,27 @@ export default class DomainDetails extends React.Component {
                     {message}
                     <div className='content animate-panel'>
                         <div className='row'>
-                            <div className='col-md-6 central-content'>
-                                <DomainGeneralInfo
-                                    domain={domain}
-                                    location={this.props.location}
-                                    params={this.props.params}
-                                />
-                            </div>
-                            <div className='col-md-6 central-content'>
-                                <DomainMailboxPlans
-                                    domain={domain}
-                                    location={this.props.location}
-                                    params={this.props.params}
-                                />
+                            <div className='layout-back clearfix'>
+                                <div className='back-left backstage'>
+                                    <div className='backbg'></div>
+                                </div>
+                                <div className='back-right backstage'>
+                                    <div className='backbg'></div>
+                                </div>
+                                <div className='col-md-6 central-content'>
+                                    <DomainGeneralInfo
+                                        domain={domain}
+                                        location={this.props.location}
+                                        params={this.props.params}
+                                    />
+                                </div>
+                                <div className='col-md-6 central-content'>
+                                    <DomainMailboxPlans
+                                        domain={domain}
+                                        location={this.props.location}
+                                        params={this.props.params}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className='row'>

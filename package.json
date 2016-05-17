@@ -20,11 +20,12 @@
     "react-bootstrap-datetimepicker": "0.0.22",
     "react-datalist": "^3.0.0",
     "react-dom": "15.0.1",
+    "react-password-strength-meter": "^1.0.5",
     "react-router": "2.3.0",
     "react-textarea-autosize": "4.0.0",
     "react-toastr": "^2.6.0",
     "toastr": "^2.1.2",
-    "zimbra-admin-api-js": "ZBoxApp/zimbra-admin-api-js#master"
+    "zimbra-admin-api-js": "ZBoxApp/zimbra-admin-api-js"
   },
   "devDependencies": {
     "babel-cli": "^6.7.5",
@@ -62,7 +63,7 @@
   },
   "scripts": {
     "check": "eslint --ext \".jsx\" --ignore-pattern node_modules --quiet .",
-    "build": "webpack",
+    "build": "NODE_ENV=production webpack",
     "run": "webpack --progress --watch",
     "run-fullmap": "webpack --progress --watch",
     "companies-service": "babel-node companies-service.js",

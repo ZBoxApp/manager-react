@@ -71,7 +71,8 @@ export default class AddAdminModal extends React.Component {
 
         this.props.domain.addAdmin(
             user.name,
-            (error) => {
+            (error, success) => {
+                console.log(error, success);
                 if (error) {
                     return this.setState({
                         error: {

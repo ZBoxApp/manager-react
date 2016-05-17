@@ -311,3 +311,236 @@ export function getEnabledPlansByCosId(cosArray) {
 
     return plans;
 }
+
+export function getMembers(members, label) {
+    let tag = label;
+    if (Array.isArray(members)) {
+        if (members.length === 1) {
+            tag = tag.slice(0, -1);
+        }
+        return members.length + ' ' + tag;
+    }
+
+    throw new Error('El tipo de members no es un arreglo : ' + typeof members);
+}
+
+export function bytesToMegas(bytes) {
+    let size = '0 MB';
+    if (bytes && typeof bytes === 'number') {
+        size = bytes;
+        const mb = 1024;
+        size = ((size / mb) / mb).toFixed(2) + 'MB';
+    }
+
+    return size;
+}
+
+export function getDomainFromString(string, otherwise) {
+    let domain = otherwise || 'Dominio Invalido';
+    if (typeof string === 'string' && string.lastIndexOf('@') > -1) {
+        domain = string.split('@');
+        domain = domain.pop();
+    }
+
+    return domain;
+}
+
+export function exportAsCSV(data, title, hasLabel) {
+    const info = (typeof data === 'object') ? data : JSON.parse(data);
+
+    let CSV = '';
+
+    CSV += title + '\r\n\n';
+
+    if (hasLabel) {
+        let row = '';
+
+        for (const index in info[0]) {
+            if (info[0].hasOwnProperty(index)) {
+                row += index + ',';
+            }
+        }
+
+        row = row.slice(0, row.length - 1);
+
+        CSV += row + '\r\n';
+    }
+
+    for (var i = 0; i < info.length; i++) {
+        let row = '';
+
+        for (var index in info[i]) {
+            if (info[i].hasOwnProperty(index)) {
+                row += '\'' + info[i][index] + '\',';
+            }
+        }
+
+        row = row.slice(0, -1);
+
+        CSV += row + '\r\n';
+    }
+
+    if (CSV === '') {
+        return;
+    }
+
+    const fileName = title.replace(/ /g, '_') + new Date().getTime();
+
+    const uri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV);
+
+    if (isSafari()) {
+        const time = 500;
+        var close = window.open('data:attachment/csv;charset=utf-8,' + encodeURIComponent(CSV), '_blank', 'width=1,height=1');
+        setTimeout(() => {
+            close.close();
+        }, time);
+
+        return;
+    }
+
+    const link = document.createElement('a');
+    link.href = uri;
+
+    link.style = 'visibility:hidden';
+    link.download = fileName + '.csv';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+export function isChrome() {
+    if (navigator.userAgent.indexOf('Chrome') > -1) {
+        return true;
+    }
+    return false;
+}
+
+export function isSafari() {
+    if (navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1) {
+        return true;
+    }
+    return false;
+}
+
+export function isIosChrome() {
+    // https://developer.chrome.com/multidevice/user-agent
+    return navigator.userAgent.indexOf('CriOS') !== -1;
+}
+
+export function isFirefox() {
+    return navigator && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+}
+
+export function isIE() {
+    if (window.navigator && window.navigator.userAgent) {
+        var ua = window.navigator.userAgent;
+
+        return ua.indexOf('Trident/7.0') > 0 || ua.indexOf('Trident/6.0') > 0;
+    }
+
+    return false;
+}
+
+export function isEdge() {
+    return window.navigator && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf('edge') > -1;
+}
+
+export function addOrRemoveAlias(account, params) {
+    let promises = [];
+
+    for (const label in params) {
+        if (params.hasOwnProperty(label)) {
+            if (label === 'add') {
+                const length = params[label].length;
+                for (let i = 0; i < length; i++) {
+                    let mypromise = new Promise((resolve) => {
+                        account.addAccountAlias(params[label][i], (response) => {
+                            if (response) {
+                                resolve({
+                                    resolved: false,
+                                    err: response,
+                                    item: params[label][i],
+                                    action: 'add'
+                                });
+                            } else {
+                                resolve({
+                                    resolved: true,
+                                    action: 'add'
+                                });
+                            }
+                        });
+                    });
+
+                    promises.push(mypromise);
+                }
+            }
+
+            if (label === 'remove') {
+                const length = params[label].length;
+                for (let i = 0; i < length; i++) {
+                    let mypromise = new Promise((resolve) => {
+                        account.removeAccountAlias(params[label][i], (response) => {
+                            if (response) {
+                                resolve({
+                                    resolved: false,
+                                    err: response,
+                                    item: params[label][i],
+                                    action: 'remove'
+                                });
+                            } else {
+                                resolve({
+                                    resolved: true,
+                                    action: 'remove'
+                                });
+                            }
+                        });
+                    });
+
+                    promises.push(mypromise);
+                }
+            }
+        }
+    }
+
+    return Promise.all(promises);
+}
+
+export function getEnabledPlansObjectByCos(cosArray, cosID) {
+    const configPlans = global.window.manager_config.plans;
+    const plans = {};
+    const id = cosID || false;
+
+    cosArray.forEach((cos) => {
+        const key = cos.name;
+        if (configPlans.hasOwnProperty(key) && configPlans[key]) {
+            if (id) {
+                if (cos.id === id) {
+                    plans.name = key;
+                    plans.id = cos.id;
+                    plans.attrs = cos.attrs;
+                }
+            } else {
+                plans[key] = {};
+                plans[key].id = cos.id;
+                plans[key].attrs = cos.attrs;
+            }
+        }
+    });
+
+    return plans;
+}
+
+export function getOwners(owners) {
+    if (Array.isArray(owners)) {
+        const limit = owners.length;
+        const ownersArray = [];
+        for (let i = 0; i < limit; i++) {
+            ownersArray.push(owners[i].name);
+        }
+
+        return ownersArray;
+    }
+
+    throw Error('Owners array no es un arreglo :' + typeof owners);
+}

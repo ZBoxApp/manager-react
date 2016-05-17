@@ -1,14 +1,16 @@
 {
-    "debug": true,
+    "debug": false,
     "zimbraUrl": "http://zimbra.zboxapp.dev:8000/service/admin/soap",
     "zimbraProxy": "https://zimbra.zboxapp.dev:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
+    "webMailUrl": "https://zimbra.zboxapp.dev",
     "plans": {
         "basic": true,
         "premium": true,
         "professional": true,
         "default": false
     },
+    "webmailLifetime": 3600,
     "companiesEndPoints": {
         "list": "http://zimbra.zboxapp.dev:8001/list",
         "detail": "http://zimbra.zboxapp.dev:8001/company/{id}",

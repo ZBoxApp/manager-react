@@ -5,6 +5,9 @@ import {browserHistory} from 'react-router';
 import {Modal} from 'react-bootstrap';
 import * as Utils from './../../utils/utils.jsx';
 import * as Client from './../../utils/client.jsx';
+import Promise from 'bluebird';
+import * as GlobalActions from '../../action_creators/global_actions.jsx';
+import MailboxStore from '../../stores/mailbox_store.jsx';
 
 import React from 'react';
 
@@ -30,31 +33,45 @@ export default class ConfirmDeleteModal extends React.Component {
     }
 
     handleDelete() {
-        Client.removeAccount(
-            this.props.data.id,
-            () => {
-                this.setState(
-                    {
-                        alert: true,
-                        message: `Su cuenta ${this.props.data.attrs.mail}, ha sido eliminada éxitosamente. Sera redirigido en ${this.state.timeToRedirect} seg`,
-                        typeError: 'text-success'
-                    }
-                );
-                this.redirect();
-            },
-            () => {
-                this.setState(
-                    {
-                        alert: true,
-                        message: `Hubo un error, al intentar eliminar su cuenta : ${this.props.data.attrs.mail}`,
-                        typeError: 'text-danger'
-                    }
-                );
-            }
-        );
+        new Promise((resolve, reject) => {
+            //  start loading
+            GlobalActions.emitStartLoading();
+
+            Client.removeAccount(
+                this.props.data.id,
+                () => {
+                    return resolve(true);
+                },
+                (error) => {
+                    return reject(error);
+                }
+            );
+        }).then(() => {
+            MailboxStore.removeAccount(this.props.data);
+            this.setState(
+                {
+                    alert: true,
+                    message: `Su cuenta ${this.props.data.attrs.mail}, ha sido eliminada éxitosamente. Sera redirigido en ${this.state.timeToRedirect} seg`,
+                    typeError: 'text-warning'
+                }
+            );
+            Utils.toggleStatusButtons('.close-modal', true);
+            this.redirect();
+        }).catch((error) => {
+            this.setState(
+                {
+                    alert: true,
+                    message: error.message,
+                    typeError: 'text-edanger'
+                }
+            );
+        }).finally(() => {
+            GlobalActions.emitEndLoading();
+        });
     }
 
     redirect() {
+        const redirectAt = 1000;
         setTimeout(() => {
             if (this.timetoRedict-- < 1) {
                 browserHistory.replace('/mailboxes');
@@ -65,7 +82,7 @@ export default class ConfirmDeleteModal extends React.Component {
 
                 this.redirect();
             }
-        }, 1000);
+        }, redirectAt);
     }
 
     handleKeyUp() {
@@ -120,7 +137,7 @@ export default class ConfirmDeleteModal extends React.Component {
                 <Modal.Footer>
                     <button
                         type='button'
-                        className='btn btn-default'
+                        className='btn btn-default close-modal'
                         onClick={this.props.onHide}
                     >
                         {'Cancelar'}

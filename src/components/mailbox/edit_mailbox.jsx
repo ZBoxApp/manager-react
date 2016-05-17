@@ -6,10 +6,15 @@ import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
 import ConfirmDeleteModal from './confirm_delete_modal.jsx';
 import ToggleModalButton from '../toggle_modal_button.jsx';
+import DataList from 'react-datalist';
+import UserStore from '../../stores/user_store.jsx';
+import Promise from 'bluebird';
+import MailboxStore from '../../stores/mailbox_store.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Utils from '../../utils/utils.jsx';
+import EventStore from '../../stores/event_store.jsx';
 
 import Constants from '../../utils/constants.jsx';
 
@@ -23,12 +28,129 @@ export default class EditMailBox extends React.Component {
         this.handleRadioChanged = this.handleRadioChanged.bind(this);
         this.getMailbox = this.getMailbox.bind(this);
         this.fillForm = this.fillForm.bind(this);
+        this.showMessage = this.showMessage.bind(this);
+        this.handleRenameAccount = this.handleRenameAccount.bind(this);
 
         this.state = {};
     }
 
+    showMessage(attrs) {
+        this.setState({
+            error: attrs.message,
+            typeError: attrs.typeError
+        });
+    }
+
     handleRadioChanged(val) {
-        this.refs.plan.value = val;
+        this.refs.zimbraCOSId.value = val;
+    }
+
+    handleEnabledRename() {
+        const selfButton = this.refs.rename;
+        const inputs = document.querySelectorAll('.action-rename');
+        const email = inputs[0];
+        const domain = inputs[1];
+
+        if (selfButton.hasAttribute('data-rename')) {
+            selfButton.removeAttribute('data-rename');
+            selfButton.innerHTML = 'Actualizar';
+            Utils.toggleStatusButtons('.action-rename', false);
+            return false;
+        }
+
+        if (domain.value === '') {
+            GlobalActions.emitMessage({
+                message: 'El dominio es requerido, verifique por favor.',
+                typeError: messageType.ERROR
+            });
+
+            domain.focus();
+
+            return false;
+        }
+
+        if (email.value === '') {
+            GlobalActions.emitMessage({
+                message: 'El campo mail es requerido, verifique por favor.',
+                typeError: messageType.ERROR
+            });
+
+            email.focus();
+
+            return false;
+        }
+
+        const mail = email.value + '@' + domain.value;
+        const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (!isEmail.test(mail)) {
+            GlobalActions.emitMessage({
+                message: 'El email no tiene el formato correcto, verifique por favor.',
+                typeError: messageType.ERROR
+            });
+
+            return false;
+        }
+
+        this.handleRenameAccount(mail);
+    }
+
+    handleRenameAccount(email) {
+        const account = MailboxStore.getCurrent();
+
+        if (account) {
+            const oldName = this.refs.rename.innerHTML;
+            this.refs.rename.innerHTML = 'Actualizando';
+            Utils.toggleStatusButtons('.change-email', true);
+
+            return account.rename(email, (error, success) => {
+                if (error) {
+                    this.setState({
+                        data: account
+                    });
+
+                    this.refs.rename.innerHTML = oldName;
+                    Utils.toggleStatusButtons('.change-email', false);
+
+                    return GlobalActions.emitMessage({
+                        message: error.extra.reason,
+                        typeError: messageType.ERROR
+                    });
+                }
+
+                let newAccount = MailboxStore.changeAccount(success);
+
+                if (!newAccount) {
+                    newAccount = success;
+                }
+
+                this.setState({
+                    data: newAccount
+                });
+
+                this.refs.rename.innerHTML = 'Renombrar';
+                this.refs.rename.setAttribute('data-rename', 'true');
+                Utils.toggleStatusButtons('.change-email', false);
+
+                return GlobalActions.emitMessage({
+                    message: 'Se ha modificado el nombre de su cuenta éxitosamente',
+                    typeError: messageType.SUCCESS
+                });
+            });
+        }
+
+        GlobalActions.emitMessage({
+            message: 'Error, no existe instancia de la casilla.',
+            typeError: messageType.ERROR
+        });
+    }
+
+    componentDidUpdate() {
+        const button = this.refs.rename;
+
+        if (button.hasAttribute('data-rename')) {
+            Utils.toggleStatusButtons('.action-rename', true);
+        }
     }
 
     handleEdit(e) {
@@ -36,41 +158,46 @@ export default class EditMailBox extends React.Component {
         Utils.toggleStatusButtons('.action-button', true);
 
         Utils.validateInputRequired(this.refs).then(() => {
-            let attrs = {
+            // fill new attrs
+            const attrs = {
                 givenName: this.refs.givenName.value,
-                sn: this.refs.sn.value
+                sn: this.refs.sn.value,
+                description: this.refs.description.value,
+                zimbraCOSId: this.refs.zimbraCOSId.value,
+                zimbraAccountStatus: this.refs.zimbraAccountStatus.value
             };
 
-            Client.modifyAccount(
-                this.state.data.id,
-                attrs,
-                (data) => {
-                    Utils.toggleStatusButtons('.action-button', false);
-                    this.setState(
-                        {
-                            error: `Su cuenta ${data.name} ha sido modificada con èxito.`,
-                            typeError: messageType.SUCCESS,
-                            data: data
-                        }
-                    );
-                },
-                (error) => {
-                    this.setState(
-                        {
-                            error: error.message,
-                            typeError: messageType.WARNING
-                        }
-                    );
-                    Utils.toggleStatusButtons('.action-button', false);
-                }
-            );
+            GlobalActions.emitStartLoading();
+
+            return new Promise((resolve, reject) => {
+                Client.modifyAccount(
+                    this.props.params.id,
+                    attrs,
+                    (account) => {
+                        return resolve(account);
+                    },
+                    (error) => {
+                        return reject(error);
+                    }
+                );
+            }).then((account) => {
+                MailboxStore.changeAccount(account);
+
+                Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
+            }).catch((error) => {
+                GlobalActions.emitMessage({
+                    message: error.message,
+                    typeError: messageType.ERROR
+                });
+            }).finally(() => {
+                GlobalActions.emitEndLoading();
+                Utils.toggleStatusButtons('.action-button', false);
+            });
         }).catch((err) => {
-            this.setState(
-                {
-                    error: err.message,
-                    typeError: err.typeError
-                }
-            );
+            GlobalActions.emitMessage({
+                message: err.message,
+                typeError: messageType.ERROR
+            });
 
             err.node.focus();
             Utils.toggleStatusButtons('.action-button', false);
@@ -78,43 +205,156 @@ export default class EditMailBox extends React.Component {
     }
 
     getMailbox(id) {
-        Client.getAccount(
-            id,
-            (data) => {
-                this.setState({
-                    data
+        const promises = [];
+        let data = null;
+        const max = 200;
+        Utils.toggleStatusButtons('.action-save', true);
+
+        if (MailboxStore.hasMailboxes()) {
+            data = MailboxStore.getMailboxById(id);
+
+            const domains = new Promise((resolve, reject) => {
+                Client.getAllDomains(
+                    {
+                        limit: max
+                    },
+                    (dataDomains) => {
+                        return resolve(dataDomains);
+                    },
+                    (error) => {
+                        return reject(error);
+                    }
+                );
+            });
+
+            const cos = new Promise((resolve, reject) => {
+                Client.getAllCos((success) => {
+                    resolve(success);
+                }, (error) => {
+                    reject(error);
                 });
-                GlobalActions.emitEndLoading();
-            },
-            (error) => {
+            });
+
+            promises.push(domains, cos);
+
+            Promise.all(promises).then((result) => {
+                MailboxStore.setCurrent(data);
                 this.setState({
-                    error: error.message
+                    data,
+                    domains: result.shift().domain,
+                    cos: Utils.getEnabledPlansByCos(result.shift())
                 });
+                Utils.toggleStatusButtons('.action-save', false);
+            }).catch((error) => {
+                GlobalActions.emitMessage({
+                    message: error.message,
+                    typeError: error.type
+                });
+            }).finally(() => {
                 GlobalActions.emitEndLoading();
-            }
-        );
+            });
+        } else {
+            const mailbox = new Promise((resolve, reject) => {
+                Client.getAccount(
+                    id,
+                    (resultMailbox) => {
+                        return resolve(resultMailbox);
+                    },
+                    (error) => {
+                        return reject(error);
+                    }
+                );
+            });
+
+            const doms = new Promise((resolve, reject) => {
+                Client.getAllDomains(
+                    {
+                        limit: max
+                    },
+                    (domain) => {
+                        return resolve(domain);
+                    },
+                    (error) => {
+                        return reject(error);
+                    }
+                );
+            });
+
+            const cos = new Promise((resolve, reject) => {
+                Client.getAllCos((success) => {
+                    resolve(success);
+                }, (error) => {
+                    reject(error);
+                });
+            });
+
+            promises.push(mailbox, doms, cos);
+
+            Promise.all(promises).then((result) => {
+                const account = result.shift();
+
+                this.setState({
+                    data: account,
+                    domains: result.shift().domain,
+                    cos: Utils.getEnabledPlansByCos(result.shift())
+                });
+
+                Utils.toggleStatusButtons('.action-save', false);
+                MailboxStore.setCurrent(account);
+            }).catch((error) => {
+                GlobalActions.emitMessage({
+                    message: error.message,
+                    typeError: error.type
+                });
+            }).finally(() => {
+                GlobalActions.emitEndLoading();
+            });
+        }
     }
 
     componentDidMount() {
+        /*Client.renameAccount('nuevomodificado@zboxapp.dev', (exito) => {
+            console.log('exito', exito);
+        }, (fallo) => {
+            console.log('fallo', fallo);
+        });*/
         $('#sidebar-mailboxes').addClass('active');
-        GlobalActions.emitEndLoading();
+        EventStore.addMessageListener(this.showMessage);
         this.getMailbox(this.props.params.id);
     }
 
     componentWillUnmount() {
+        EventStore.removeMessageListener(this.showMessage);
         $('#sidebar-mailboxes').removeClass('active');
     }
 
-    fillForm() {
-        let attrs = this.state.data.attrs;
-        this.refs.mail.value = this.state.data.name;
+    fillForm(data) {
+        const attrs = data.attrs;
+        this.refs.mail.value = data.name.split('@').shift();
         this.refs.givenName.value = attrs.givenName || '';
         this.refs.sn.value = attrs.sn;
         this.refs.description.value = attrs.description || '';
+        this.refs.zimbraCOSId.value = attrs.zimbraCOSId || '';
+        this.refs.zimbraAccountStatus.value = attrs.zimbraAccountStatus;
     }
 
     render() {
         let message;
+        let data;
+        let actions;
+        let form;
+        const domains = [];
+        let buttonDelete = null;
+        let currentDomain = '';
+        const cosElements = [];
+        let datalist = (
+            <input
+                type='text'
+                className='form-control'
+                placeholder='Dominio'
+            />
+        );
+
         if (this.state.error) {
             message = (
                 <MessageBar
@@ -125,13 +365,78 @@ export default class EditMailBox extends React.Component {
             );
         }
 
-        let data;
-        let actions;
-        let form;
-
         if (this.state.data) {
             data = this.state.data;
-            this.fillForm();
+            const doms = this.state.domains;
+            const cos = this.state.cos;
+            currentDomain = data.name.split('@').pop();
+
+            buttonDelete = (
+                <ToggleModalButton
+                    role='button'
+                    className='btn btn-xs btn-danger action-button'
+                    dialogType={ConfirmDeleteModal}
+                    dialogProps={{data}}
+                    key='delete-mailbox'
+                >
+                    {'Eliminar'}
+                </ToggleModalButton>
+            );
+
+            const length = doms.length;
+            for (let i = 0; i < length; i++) {
+                domains.push(doms[i].name);
+            }
+
+            for (let cosName in cos) {
+                if (cos.hasOwnProperty(cosName)) {
+                    let isChecked = false;
+                    const id = data.attrs.zimbraCOSId;
+
+                    if (id) {
+                        if (cos[cosName] === id) {
+                            isChecked = 'checked';
+                        }
+                    }
+
+                    const checkbox = (
+                        <label
+                            key={cos[cosName]}
+                            className='radio radio-info radio-inline pretty-input'
+                        >
+                            <div className='pretty-radio'>
+                                <input
+                                    type='radio'
+                                    className='pretty'
+                                    name='mailbox'
+                                    defaultChecked={isChecked}
+                                    onChange={() => {
+                                        this.handleRadioChanged(cos[cosName]);
+                                    }}
+                                />
+                                <span></span>
+                            </div>
+                            {cosName}
+                        </label>
+                    );
+                    cosElements.push(checkbox);
+                }
+            }
+
+            if (UserStore.getCurrentUser().name === data.name) {
+                buttonDelete = null;
+            }
+
+            this.fillForm(data);
+            datalist = (
+                <DataList
+                    list='domain'
+                    options={domains}
+                    className='form-control action-rename'
+                    placeholder='Dominio'
+                    initialFilter={currentDomain}
+                />
+            );
         }
 
         form = (
@@ -150,24 +455,29 @@ export default class EditMailBox extends React.Component {
 
                     <div className='col-sm-8'>
                         <div className='row'>
-                            <div className='col-xs-6'>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    ref='mail'
-                                    data-required='true'
-                                    data-message='El campo direccion es requerido, verifique por favor.'
-                                />
-                            </div>
-                            <div className='col-xs-6'>
+                            <div className='col-xs-12'>
                                 <div className='input-group'>
+                                    <input
+                                        type='text'
+                                        className='form-control action-rename'
+                                        ref='mail'
+                                        placeholder='Mail'
+                                    />
                                     <span className='input-group-addon'>{'@'}</span>
-                                    <select
-                                        className='form-control'
-                                        id='selectDomains'
-                                        ref='domain'
-                                    >
-                                    </select>
+                                    {datalist}
+                                    <span className='input-group-btn'>
+                                        <button
+                                            className='btn btn-default change-email'
+                                            type='button'
+                                            ref='rename'
+                                            data-rename='true'
+                                            onClick={() => {
+                                                this.handleEnabledRename();
+                                            }}
+                                        >
+                                            Renombrar
+                                        </button>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -217,60 +527,34 @@ export default class EditMailBox extends React.Component {
                 </div>
 
                 <div className='form-group string'>
+                    <label className='string col-sm-3 control-label'>
+                        {'Status'}
+                    </label>
+
+                    <div className='col-sm-8'>
+                        <select
+                            className='form-control'
+                            ref='zimbraAccountStatus'
+                        >
+                            <option value='active'>Activa</option>
+                            <option value='closed'>Cerrada</option>
+                            <option value='locked'>Bloqueada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className='form-group string'>
                     <label className='string required col-sm-3 control-label'>
                         <abbr title='Requerido'>{'*'}</abbr>
                         {'Tipo de casilla'}
                     </label>
 
                     <div className='col-sm-8'>
-                        <label className='radio radio-info radio-inline pretty-input'>
-                            <div className='pretty-radio'>
-                                <input
-                                    type='radio'
-                                    className='pretty'
-                                    name='mailbox'
-                                    onChange={() => {
-                                        this.handleRadioChanged('basica');
-                                    }}
-                                />
-                                <span></span>
-                            </div>
-                            {'Básica'}
-                        </label>
-
-                        <label className='radio radio-info radio-inline pretty-input'>
-                            <div className='pretty-radio'>
-                                <input
-                                    className='pretty'
-                                    name='mailbox'
-                                    type='radio'
-                                    onChange={() => {
-                                        this.handleRadioChanged('profesional');
-                                    }}
-                                />
-                                <span></span>
-                            </div>
-                            {'Profesional'}
-                        </label>
-
-                        <label className='radio radio-info radio-inline pretty-input'>
-                            <div className='pretty-radio'>
-                                <input
-                                    type='radio'
-                                    className='pretty'
-                                    name='mailbox'
-                                    onChange={() => {
-                                        this.handleRadioChanged('premium');
-                                    }}
-                                />
-                                <span></span>
-                            </div>
-                            {'Premium'}
-                        </label>
+                        {cosElements}
 
                         <input
                             type='hidden'
-                            ref='plan'
+                            ref='zimbraCOSId'
                             data-required='true'
                             data-message='El plan de su cuenta es requerido, por favor verificar.'
                         />
@@ -309,29 +593,19 @@ export default class EditMailBox extends React.Component {
                 props: {
                     className: 'btn btn-default btn-xs action-button',
                     onClick: (e) => {
-                        Utils.handleLink(e, '/mailboxes', this.props.location);
+                        Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
                     }
                 }
             },
             {
-                setComponent: (
-                    <ToggleModalButton
-                        role='button'
-                        className='btn btn-xs btn-danger action-button'
-                        dialogType={ConfirmDeleteModal}
-                        dialogProps={{data}}
-                        key='delete-mailbox'
-                    >
-                        {'Eliminar'}
-                    </ToggleModalButton>
-                )
+                setComponent: buttonDelete
             }
         ];
 
         return (
             <div>
-                {message}
                 <div className='content animate-panel'>
+                    {message}
                     <div className='row'>
                         <div className='col-md-12 central-content'>
                             <Panel

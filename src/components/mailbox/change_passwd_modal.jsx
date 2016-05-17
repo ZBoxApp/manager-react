@@ -1,11 +1,11 @@
 // Copyright (c) 2016 ZBox, Spa. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import React from 'react';
 import {browserHistory} from 'react-router';
 import {Modal} from 'react-bootstrap';
 import UserStore from '../../stores/user_store.jsx';
-
-import React from 'react';
+import PasswordStrengthMeter from 'react-password-strength-meter';
 
 export default class ConfirmDeleteModal extends React.Component {
     constructor(props) {
@@ -13,8 +13,22 @@ export default class ConfirmDeleteModal extends React.Component {
 
         this.handleChangePasswd = this.handleChangePasswd.bind(this);
         this.forceLogout = this.forceLogout.bind(this);
+        this.handlePasswd = this.handlePasswd.bind(this);
+        this.restart = this.restart.bind(this);
 
         this.state = this.getStateFromStores();
+    }
+
+    restart() {
+        this.setState({
+            message: null
+        });
+    }
+
+    handlePasswd(e) {
+        const hidePasswd = this.refs.passwdfield;
+
+        hidePasswd.value = e.target.value;
     }
 
     getStateFromStores() {
@@ -30,13 +44,24 @@ export default class ConfirmDeleteModal extends React.Component {
 
     handleChangePasswd() {
         if (this.refs.passwdfield.value && this.refs.passwdfield.value.length > 0) {
+            if (this.refs.passwdfield.value.length < 9) {
+                return this.setState({
+                    alert: true,
+                    message: 'Su contraseña debe ser mayor a 8 caracteres.',
+                    typeError: 'text-danger'
+                });
+            }
+
             this.props.data.setPassword(this.refs.passwdfield.value, () => {
                 this.setState({
                     alert: true,
                     message: 'Su contraseña se ha sido cambiada éxitosamente.',
                     typeError: 'text-success'
                 });
-                this.forceLogout('/logout');
+
+                if (this.props.data.name === this.state.currentUser.name) {
+                    this.forceLogout('/logout');
+                }
             }, (error) => {
                 this.setState({
                     alert: true,
@@ -66,6 +91,9 @@ export default class ConfirmDeleteModal extends React.Component {
             <Modal
                 show={this.props.show}
                 onHide={this.props.onHide}
+                onExit={() => {
+                    this.restart();
+                }}
             >
                 <div className='color-line'></div>
                 <Modal.Header closeButton={true}>
@@ -82,10 +110,25 @@ export default class ConfirmDeleteModal extends React.Component {
                                 </div>
                                 <div className='col-xs-7'>
                                     <input
-                                        type='password'
+                                        type='hidden'
                                         ref='passwdfield'
                                         className='form-control'
                                         id='passwdfield'
+                                    />
+                                    <PasswordStrengthMeter
+                                        passwordText=''
+                                        className='form-control passwd-field'
+                                        hasLabel={false}
+                                        hasSuggestion={false}
+                                        hasWarning={true}
+                                        warning='Su contraseña debe ser mayor a 8 caracteres.'
+                                        onChange={this.handlePasswd}
+                                        strength={{
+                                            0: 'Su contraseña es muy debil',
+                                            1: 'Debe incrementar la dificultad de su contraseña',
+                                            2: 'Su contraseña es relativamente fuerte',
+                                            3: 'Su contraseña es fuerte'
+                                        }}
                                     />
                                 </div>
                                 <div className='col-xs-12 text-center'>

@@ -5,6 +5,7 @@ import LoadingScreen from './loading_screen.jsx';
 import Header from './header.jsx';
 import Sidebar from './sidebar.jsx';
 import ToastAlert from './toast_alert.jsx';
+import ProgressTask from './progress_task.jsx';
 
 import React from 'react';
 
@@ -12,6 +13,7 @@ export default class LoggedIn extends React.Component {
     render() {
         return (
             <div>
+                <ProgressTask/>
                 <ToastAlert/>
                 <LoadingScreen/>
                 <Header/>

@@ -11,9 +11,23 @@ export function emitStartLoading() {
     });
 }
 
+export function emitStartTask(params) {
+    AppDispatcher.handleViewAction({
+        type: ActionTypes.START_TASK_LOADING,
+        params
+    });
+}
+
 export function emitEndLoading() {
     AppDispatcher.handleViewAction({
         type: ActionTypes.END_LOADING
+    });
+}
+
+export function emitEndTask(params) {
+    AppDispatcher.handleViewAction({
+        type: ActionTypes.END_TASK_LOADING,
+        params
     });
 }
 
