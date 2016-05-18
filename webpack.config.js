@@ -2,10 +2,23 @@ const webpack = require('webpack');
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const AssetsPlugin = require('assets-webpack-plugin');
+const assetsPluginInstance = new AssetsPlugin({
+    filename: 'path.json',
+    processOutput: function (assets) {
+        return 'module.exports = ' + JSON.stringify(assets);
+    }
+});
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const htmlExtract = new ExtractTextPlugin('html', 'index.html');
+const Instancehtmlwebpackplugin = new HtmlWebpackPlugin({template: './src/index.html', inject: 'head'});
 
 const NPM_TARGET = process.env.npm_lifecycle_event; //eslint-disable-line no-process-env
+
+// Create a simple hash based on timestamp promp
+const timestamp = new Date().getTime().toString();
+const hash = timestamp.slice(-6, timestamp.length);
 
 var DEV = false;
 var FULLMAP = false;
@@ -17,11 +30,11 @@ if (NPM_TARGET === 'run' || NPM_TARGET === 'run-fullmap') {
 }
 
 var config = {
-    entry: ['babel-polyfill', './src/index.jsx', 'src/index.html'],
+    entry: ['babel-polyfill', './src/index.jsx'],
     output: {
         path: 'dist',
         publicPath: '/',
-        filename: 'bundle.js'
+        filename: hash + 'bundle.js'
     },
     module: {
         loaders: [
@@ -61,14 +74,12 @@ var config = {
                 query: {
                     name: 'files/[hash].[ext]'
                 }
-            },
-            {
-                test: /\.html$/,
-                loader: htmlExtract.extract('html?attrs=link:href')
             }
         ]
     },
     plugins: [
+        Instancehtmlwebpackplugin,
+        assetsPluginInstance,
         new CopyWebpackPlugin([
             {from: 'src/config', to: 'config'}
         ]),

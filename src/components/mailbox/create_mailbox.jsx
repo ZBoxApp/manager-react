@@ -182,6 +182,8 @@ export default class CreateMailBox extends React.Component {
                         if (currentDomainId === domain.id) {
                             return domain;
                         }
+
+                        return null;
                     });
                 }
 
@@ -481,5 +483,6 @@ export default class CreateMailBox extends React.Component {
 }
 
 CreateMailBox.propTypes = {
-    location: React.PropTypes.object
+    location: React.PropTypes.object,
+    params: React.PropTypes.object
 };

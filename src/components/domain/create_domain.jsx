@@ -1,303 +1,153 @@
+//import * as Utils from '../../utils/utils.jsx';
 import React from 'react';
-import {browserHistory} from 'react-router';
-
-import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
-
-import CompanyStore from '../../stores/company_store.jsx';
+import CreateDomainForm from './multiform/create_domain_form.jsx';
+import MailCleanerForm from './multiform/mailcleaner_form.jsx';
+import DNSZoneForm from './multiform/dns_form.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
-import ZimbraStore from '../../stores/zimbra_store.jsx';
-
-import * as Client from '../../utils/client.jsx';
-import * as Utils from '../../utils/utils.jsx';
-import * as GlobalActions from '../../action_creators/global_actions.jsx';
-
-import Constants from '../../utils/constants.jsx';
+import EventStore from '../../stores/event_store.jsx';
+import MessageBar from '../message_bar.jsx';
 
 export default class CreateDomain extends React.Component {
     constructor(props) {
         super(props);
 
-        this.planSize = this.planSize.bind(this);
-        this.getCompanies = this.getCompanies.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+        this.getNextStep = this.getNextStep.bind(this);
+        this.showMessage = this.showMessage.bind(this);
 
-        this.state = {};
-    }
+        this.multiform = window.manager_config.multiFormDomain;
+        let total = 1;
 
-    planSize(e) {
-        e.preventDefault();
-        let total = 0;
-        const plans = Object.keys(this.state.plans);
+        if (this.multiform) {
+            if (this.multiform.hasMailCleaner) {
+                total++;
+            }
 
-        plans.forEach((p) => {
-            total += parseInt(this.refs[`plan-${p}`].value, 10) || 0;
-        });
-
-        this.refs.mailboxLimit.value = total;
-    }
-
-    getCompanies() {
-        const companyId = this.props.params.id;
-        const companies = CompanyStore.getCompanies();
-
-        if (companies) {
-            this.setState({
-                plans: Utils.getEnabledPlansByCos(ZimbraStore.getAllCos()),
-                companies,
-                companyId
-            });
-            return GlobalActions.emitEndLoading();
+            if (this.multiform.hasDNSZone) {
+                total++;
+            }
         }
-        return Client.getAllCompanies().
-        then((data) => {
-            this.setState({
-                plans: Utils.getEnabledPlansByCos(ZimbraStore.getAllCos()),
-                companies: data,
-                companyId
-            });
-        }).
-        catch((error) => {
-            error.type = Constants.MessageType.ERROR;
-            this.setState({error});
-        }).
-        finally(() => {
-            GlobalActions.emitEndLoading();
-        });
+
+        this.state = {
+            step: 1,
+            total
+        };
     }
 
-    handleSubmit(e) {
-        e.preventDefault();
-        GlobalActions.emitStartLoading();
+    getNextStep(attrs) {
+        const states = {};
 
-        const elementList = document.querySelectorAll('.has-error');
-        Array.from(elementList).forEach((el) => el.classList.remove('has-error'));
+        if (attrs.domain) {
+            states.domain = attrs.domain;
+        }
 
-        Utils.validateInputRequired(this.refs).
-        then(() => {
-            const plans = Object.keys(this.state.plans);
-            const zimbraDomainCOSMaxAccounts = [];
-            const name = this.refs.domainName.value.trim();
-            const businessCategory = this.refs.company.value.trim();
+        states.step = attrs.step;
 
-            plans.forEach((p) => {
-                zimbraDomainCOSMaxAccounts.push(`${this.refs[`plan-${p}`].getAttribute('data-id')}:${this.refs[`plan-${p}`].value || 0}`);
-            });
+        this.setState(states);
+    }
 
-            const domain = {
-                name,
-                attrs: {
-                    zimbraDomainCOSMaxAccounts,
-                    businessCategory
-                }
-            };
-
-            Client.createDomain(
-                domain,
-                (data) => {
-                    CompanyStore.addDomain(businessCategory, data);
-                    DomainStore.setCurrent(data);
-                    browserHistory.push(`/domains/${data.id}`);
-                },
-                (error) => {
-                    GlobalActions.emitEndLoading();
-                    return this.setState({error});
-                }
-            );
-        }).
-        catch((error) => {
-            GlobalActions.emitEndLoading();
-            error.refs = true;
-            error.type = error.typeError;
-            error.node.closest('.form-group').classList.add('has-error');
-            return this.setState({error});
+    showMessage(attrs) {
+        this.setState({
+            error: attrs.message,
+            type: attrs.typeError
         });
     }
 
     componentDidMount() {
-        this.getCompanies();
+        DomainStore.addNextStepListener(this.getNextStep);
+        EventStore.addMessageListener(this.showMessage);
+    }
+
+    componentWillUnmount() {
+        DomainStore.removeNextStepListener(this.getNextStep);
+        EventStore.removeMessageListener(this.showMessage);
     }
 
     render() {
-        const companies = this.state.companies;
-        const error = this.state.error;
+        let form = null;
+        let titleForm = null;
+        const progress = `${this.state.step}/${this.state.total}`;
+        let progressForm = null;
+        const width = ((100 / this.state.total) * this.state.step);
+        const progressSize = {
+            width: `${width}%`
+        };
+        let error = null;
 
-        if (companies || error) {
-            let backUrl = '/domains';
-            if (this.state.companyId) {
-                backUrl = `/companies/${this.state.companyId}`;
-            }
-
-            let errorBar;
-            if (error) {
-                errorBar = (
-                    <MessageBar
-                        message={error.message}
-                        type={error.type}
-                        autoclose={true}
-                    />
-                );
-            }
-
-            const companiesOptions = companies.map((c) => {
-                return (
-                    <option
-                        key={`company-${c.id}`}
-                        value={c.id}
-                    >
-                        {c.name}
-                    </option>
-                );
-            });
-
-            const statePlans = this.state.plans;
-            const enabledPlans = Object.keys(statePlans);
-            const plans = enabledPlans.map((p) => {
-                return (
-                    <div
-                        key={`plan-${statePlans[p]}`}
-                        className='col-md-4 form-group required'
-                    >
-                        <label
-                            htmlFor={`plan-${p}`}
-                            clasName='label-top control-label'
-                        >
-                            <abbr title='Requerido'>{'*'}</abbr><br/>
-                            {Utils.titleCase(p)}
-                        </label>
-
-                        <br/>
-
-                        <div className='row'>
-                            <div className='col-sm-8'>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    defaultValue='0'
-                                    data-required='true'
-                                    data-message={`Debe asignar la cantidad de casillas del tipo ${Utils.titleCase(p)}`}
-                                    data-id={statePlans[p]}
-                                    ref={`plan-${p}`}
-                                    onKeyUp={this.planSize}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                );
-            });
-
-            const form = (
-                <form
-                    className='simple_form form-horizontal mailbox-form'
-                    onSubmit={this.handleSubmit}
-                >
-                    <div className='form-group string required'>
-                        <label className='string required col-sm-3 control-label'>
-                            <abbr title='requerido'>{'*'}</abbr>
-                            {'Nombre'}
-                        </label>
-
-                        <div className='col-sm-8'>
-                            <input
-                                type='text'
-                                data-required='true'
-                                data-message='El nombre del dominio es obligatorio'
-                                className='form-control'
-                                ref='domainName'
-                                placeholder='example.com'
-                            />
-                        </div>
-                    </div>
-
-                    <div className='form-group string'>
-                        <label className='string required col-sm-3 control-label'>
-                            <abbr title='requerido'>{'*'}</abbr>
-                            {'Empresa'}
-                        </label>
-
-                        <div className='col-sm-8'>
-                            <select
-                                className='form-control select required'
-                                data-required='true'
-                                data-message='Debe especificar a que empresa corresponde el dominio'
-                                ref='company'
-                                defaultValue={this.state.companyId}
-                            >
-                                {companiesOptions}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className='form-group row'>
-                        <div className='col-md-8 col-md-offset-3'>
-                            <div className='box-content'>
-                                {plans}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className='form-group string'>
-                        <label className='string required col-sm-3 control-label'>
-                            {'Límite de casillas'}
-                        </label>
-
-                        <div className='col-sm-8'>
-                            <input
-                                type='text'
-                                className='form-control'
-                                ref='mailboxLimit'
-                                value='0'
-                                disabled='disabled'
-                            />
-                        </div>
-                    </div>
-
-                    <div className='form-group'>
-                        <div className='col-sm-8 col-sm-offset-3'>
-                            <input
-                                type='submit'
-                                name='commit'
-                                value='Guardar'
-                                className='btn btn-info'
-                            />
-                            <a
-                                href='#'
-                                className='btn btn-default'
-                                onClick={(e) => Utils.handleLink(e, backUrl)}
-                            >
-                                {'Cancelar'}
-                            </a>
-                        </div>
-                    </div>
-                </form>
-            );
-
-            const actions = [
-                {
-                    label: 'Cancelar',
-                    props: {
-                        className: 'btn btn-default btn-xs',
-                        onClick: (e) => Utils.handleLink(e, backUrl)
-                    }
-                }
-            ];
-
-            return (
-                <Panel
-                    title={'Agregar Dominio'}
-                    btnsHeader={actions}
-                    error={errorBar}
-                    classHeader={'forum-box'}
-                >
-                    {form}
-                </Panel>
+        if (this.state.error) {
+            error = (
+                <MessageBar
+                    message={this.state.error}
+                    type={this.state.type}
+                    autoclose={true}
+                />
             );
         }
 
-        return <div/>;
+        let step = this.state.step;
+
+        if (!this.multiform.hasMailCleaner && step > 1) {
+            ++step;
+        }
+
+        switch (step) {
+        case 1:
+            form = (
+                <CreateDomainForm
+                    params={this.props.params}
+                    state={this.state}
+                />
+            );
+            titleForm = 'Creación de Dominio';
+            break;
+        case 2:
+            form = <MailCleanerForm state={this.state}/>;
+            titleForm = 'Asignación del Dominio al MailCleaner';
+            break;
+        case 3:
+            form = <DNSZoneForm state={this.state}/>;
+            titleForm = 'Asignación de la Zona DNS';
+            break;
+        }
+
+        //onClick: (e) => Utils.handleLink(e, backUrl)
+        const actions = [
+            {
+                label: 'Cancelar',
+                props: {
+                    className: 'btn btn-default btn-xs'
+                }
+            }
+        ];
+
+        if (this.state.total > 1) {
+            progressForm = (
+                <div className='progress'>
+                    <div
+                        className={'progress-bar progress-bar-info progress-bar-striped active text-center step'}
+                        style={progressSize}
+                    >
+                        <span className='progress-text'>{`${titleForm} - ${progress}`}</span>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <Panel
+                title={'Agregar Dominio'}
+                classHeader={'forum-box'}
+                btnsHeader={actions}
+            >
+                {error}
+                {progressForm}
+                {form}
+            </Panel>
+        );
     }
 }
 
 CreateDomain.propTypes = {
     params: React.PropTypes.object.isRequired
 };
+

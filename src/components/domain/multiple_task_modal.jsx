@@ -69,8 +69,7 @@ export default class MultipleTaskModal extends React.Component {
             if (this.props.show) {
                 this.props.onHide();
             }
-        }, (err) => {
-            console.log('err',err);
+        }, () => {
             if (this.props.show) {
                 this.props.onHide();
             }
@@ -93,8 +92,7 @@ export default class MultipleTaskModal extends React.Component {
                 accounts: res
             });
         }).catch((error) => {
-            console.log('err', error);
-        }).finally(() => {
+            return error;
         });
     }
 

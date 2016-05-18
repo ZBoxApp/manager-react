@@ -31,7 +31,9 @@ export default {
         USER_CHANGE_EVENT: null,
         NEW_MESSAGE_EVENT: null,
         NEW_TOAST_EVENT: null,
-        MAILBOX_ADD_MASSIVE_EVENT: null
+        MAILBOX_ADD_MASSIVE_EVENT: null,
+        NEXT_STEP_EVENT: null,
+        ZONE_DNS_CHANGE_EVENT: null
     }),
 
     MessageType: keyMirror({
@@ -54,5 +56,50 @@ export default {
     MONTHS: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Juio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
     QueryOptions: {
         DEFAULT_LIMIT: 10
-    }
+    },
+    Labels: keyMirror({
+        name: null,
+        type: null,
+        content: null,
+        priority: null,
+        ttl: null
+    }),
+    typesOfDNS: [
+        'AAAA',
+        'AFSDB',
+        'CERT',
+        'CNAME',
+        'A',
+        'DLV',
+        'DNSKEY',
+        'DS',
+        'EUI48',
+        'EUI64',
+        'HINFO',
+        'IPSECKEY',
+        'KEY',
+        'KX',
+        'LOC',
+        'MINFO',
+        'MR',
+        'MX',
+        'NAPTR',
+        'NS',
+        'NSEC',
+        'NSEC3',
+        'NSEC3PARAM',
+        'OPT',
+        'PTR',
+        'RKEY',
+        'RP',
+        'RRSIG',
+        'SOA',
+        'SPF',
+        'SRV',
+        'SSHFP',
+        'TLSA',
+        'TSIG',
+        'TXT',
+        'WKS'
+    ]
 };

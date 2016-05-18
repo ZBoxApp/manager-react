@@ -8,7 +8,6 @@ import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
 import PanelTab from '../panel_tab.jsx';
 
-import Button from '../button.jsx';
 import DomainGeneralInfo from './domain_general_info.jsx';
 import DomainMailboxPlans from './domain_mailbox_plans.jsx';
 import DomainAdmins from './domain_admin_list.jsx';
@@ -16,6 +15,8 @@ import DomainDistributionList from './domain_distribution_list.jsx';
 import ToggleModalButton from '../toggle_modal_button.jsx';
 import MultipleTaskModal from './multiple_task_modal.jsx';
 import AntiSpamComponent from './antispam.jsx';
+import ZonaDNS from './domain_admin_dns.jsx';
+import EventStore from '../../stores/event_store.jsx';
 
 import DomainStore from '../../stores/domain_store.jsx';
 
@@ -27,8 +28,18 @@ export default class DomainDetails extends React.Component {
         super(props);
 
         this.getDomain = this.getDomain.bind(this);
+        this.showMessage = this.showMessage.bind(this);
 
         this.state = {};
+    }
+
+    showMessage(attrs) {
+        this.setState({
+            error: {
+                message: attrs.message,
+                type: attrs.typeError
+            }
+        });
     }
 
     getDomain() {
@@ -36,18 +47,44 @@ export default class DomainDetails extends React.Component {
 
         if (domain && domain.id === this.props.params.id) {
             GlobalActions.emitEndLoading();
-            this.setState({
-                domain
+            Client.getZone(domain.name, (zone) => {
+                DomainStore.setZoneDNS(zone);
+
+                this.setState({
+                    domain
+                });
+
+                GlobalActions.emitEndLoading();
+            }, () => {
+                DomainStore.setZoneDNS(null);
+
+                this.setState({
+                    domain
+                });
+
+                GlobalActions.emitEndLoading();
             });
         } else {
             Client.getDomain(
                 this.props.params.id,
                 (data) => {
                     DomainStore.setCurrent(data);
-                    this.setState({
-                        domain: data
+
+                    Client.getZone(data.name, (zone) => {
+                        DomainStore.setZoneDNS(zone);
+
+                        this.setState({
+                            domain: data
+                        });
+
+                        GlobalActions.emitEndLoading();
+                    }, () => {
+                        this.setState({
+                            domain: data
+                        });
+
+                        GlobalActions.emitEndLoading();
                     });
-                    GlobalActions.emitEndLoading();
                 },
                 (error) => {
                     this.setState({
@@ -60,12 +97,14 @@ export default class DomainDetails extends React.Component {
     }
 
     componentDidMount() {
+        EventStore.addMessageListener(this.showMessage);
         $('#sidebar-domains').addClass('active');
         this.getDomain();
     }
 
     componentWillUnmount() {
         $('#sidebar-domains').removeClass('active');
+        EventStore.removeMessageListener(this.showMessage);
     }
 
     render() {
@@ -125,14 +164,21 @@ export default class DomainDetails extends React.Component {
                 </div>
             );
 
+            const zonaDNS = (
+                <ZonaDNS
+                    domain={domain}
+                />
+            );
+
             const panelTabs = (
                 <PanelTab
-                    tabNames={['Administradores', 'AntiSpam', 'Listas De Distribución', 'Tareas Masivas']}
+                    tabNames={['Administradores', 'AntiSpam', 'Listas De Distribución', 'Tareas Masivas', 'Zona DNS']}
                     tabs={{
                         administradores: tabAdmin,
                         antispam: tabAntiSpam,
                         listas_de_distribución: tabDistribution,
-                        tareas_masivas: tabTareasMasivas
+                        tareas_masivas: tabTareasMasivas,
+                        zona_dns: zonaDNS
                     }}
                     location={this.props.location}
                 />

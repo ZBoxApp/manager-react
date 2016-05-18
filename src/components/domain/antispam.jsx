@@ -7,6 +7,10 @@ import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import Promise from 'bluebird';
 import DomainStore from '../../stores/domain_store.jsx';
+import EventStore from '../../stores/event_store.jsx';
+import Constants from '../../utils/constants.jsx';
+
+const MessageType = Constants.MessageType;
 
 export default class AntiSpam extends React.Component {
     constructor(props) {
@@ -15,12 +19,17 @@ export default class AntiSpam extends React.Component {
         this.handleDelete = this.handleDelete.bind(this);
         this.handleSave = this.handleSave.bind(this);
         this.alterDomain = this.alterDomain.bind(this);
-
         this.domain = DomainStore.getCurrent();
-        console.log(this.domain);
+        this.blackList = null;
+        this.whiteList = null;
 
-        this.blackList = Array.isArray(this.domain.attrs.amavisBlacklistSender) ? this.domain.attrs.amavisBlacklistSender : this.domain.attrs.amavisBlacklistSender.trim().split(' ');
-        this.whiteList = Array.isArray(this.domain.attrs.amavisWhitelistSender) ? this.domain.attrs.amavisWhitelistSender : this.domain.attrs.amavisWhitelistSender.trim().split(' ');
+        if (this.domain.attrs.amavisBlacklistSender) {
+            this.blackList = Array.isArray(this.domain.attrs.amavisBlacklistSender) ? this.domain.attrs.amavisBlacklistSender : this.domain.attrs.amavisBlacklistSender.trim().split(' ');
+        }
+
+        if (this.domain.attrs.amavisWhitelistSender) {
+            this.whiteList = Array.isArray(this.domain.attrs.amavisWhitelistSender) ? this.domain.attrs.amavisWhitelistSender : this.domain.attrs.amavisWhitelistSender.trim().split(' ');
+        }
     }
 
     handleDelete(e, item, action) {
@@ -56,20 +65,27 @@ export default class AntiSpam extends React.Component {
         const attrs = {};
         const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         const isDomain = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+        const target = action === 'black' ? 'lista negra' : 'lista blanca';
         e.preventDefault();
 
         const input = this.refs[`${action}-item`];
         const value = input.value.trim();
 
         if (!value || value === '') {
-            console.log('no hay valores');
+            EventStore.emitMessage({
+                message: `No puede agregar una ${target} vacia.`,
+                typeError: MessageType.ERROR
+            });
             return false;
         }
 
         const isValid = isEmail.test(value) || isDomain.test(value);
 
         if (!isValid) {
-            console.log('es invalido');
+            EventStore.emitMessage({
+                message: `Solo es posible agregar dominios o email en ${target}`,
+                typeError: MessageType.ERROR
+            });
             return false;
         }
 
@@ -84,7 +100,7 @@ export default class AntiSpam extends React.Component {
             break;
         }
 
-        this.alterDomain(attrs, e.target, input);
+        return this.alterDomain(attrs, e.target, input);
     }
 
     alterDomain(attrs, button, input) {
@@ -98,7 +114,6 @@ export default class AntiSpam extends React.Component {
             oldContent = button.innerHTML;
             id = `#${button.getAttribute('id')}`;
         }
-
 
         new Promise((resolve, reject) => {
             if (hasButton) {
@@ -117,7 +132,10 @@ export default class AntiSpam extends React.Component {
                 update: true
             });
         }).catch((err) => {
-            console.log(err);
+            EventStore.emitMessage({
+                message: err.message || err.reason,
+                typeError: MessageType.ERROR
+            });
         }).finally(() => {
             if (hasButton) {
                 Utils.toggleStatusButtons(id, false);
@@ -134,7 +152,7 @@ export default class AntiSpam extends React.Component {
         let whiteList = null;
         let blackList = null;
 
-        if (this.blackList.length > 0) {
+        if (this.blackList && this.blackList.length > 0) {
             blackList = this.blackList.map((black, i) => {
                 return (
                     <tr
@@ -169,7 +187,7 @@ export default class AntiSpam extends React.Component {
             );
         }
 
-        if (this.whiteList.length > 0) {
+        if (this.whiteList && this.whiteList.length > 0) {
             whiteList = this.whiteList.map((white, i) => {
                 return (
                     <tr
