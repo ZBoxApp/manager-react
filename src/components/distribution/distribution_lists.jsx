@@ -57,7 +57,6 @@ export default class DistributionLists extends React.Component {
             if (domain) {
                 response.domain = domain;
                 const dl = DomainStore.getDistributionListById(id, domain);
-                console.log(domain, dl);
                 response.distributionsList = dl;
 
                 dl.getOwners((error, owners) => {
@@ -382,8 +381,6 @@ export default class DistributionLists extends React.Component {
         let message;
         let panelTabs;
         let isPrivate = null;
-
-        console.log(this.state);
 
         if (this.state.distributionsList && this.state.owners) {
             const data = this.state.distributionsList;
