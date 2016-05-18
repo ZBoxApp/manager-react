@@ -12,6 +12,7 @@ class DomainStoreClass extends EventEmitter {
         this.current = null;
         this.distributionListOwners = null;
         this.distributionListMembers = null;
+        this.zoneDNS = null;
     }
 
     getCurrent() {
@@ -241,11 +242,36 @@ class DomainStoreClass extends EventEmitter {
         return false;
     }
 
+    setZoneDNS(zone) {
+        this.zoneDNS = zone;
+        return this.emitZoneDNSChange(zone);
+    }
+
+    getZoneDNS() {
+        if (this.zoneDNS) {
+            return this.zoneDNS;
+        }
+
+        return null;
+    }
+
     removeDistributionList(listId) {
         if (this.current.lists) {
             Reflect.deleteProperty(this.current.lists, listId);
         }
         this.emitDistributionListsChange();
+    }
+
+    emitZoneDNSChange(zone) {
+        this.emit(eventTypes.ZONE_DNS_CHANGE_EVENT, zone);
+    }
+
+    addZoneDNSChangeListener(zone) {
+        this.on(eventTypes.ZONE_DNS_CHANGE_EVENT, zone);
+    }
+
+    removeZoneDNSChangeListener(zone) {
+        this.removeListener(eventTypes.ZONE_DNS_CHANGE_EVENT, zone);
     }
 
     emitDistributionListsChange() {
@@ -258,6 +284,18 @@ class DomainStoreClass extends EventEmitter {
 
     removeDistributionListsChangeListener(callback) {
         this.removeListener(eventTypes.DOMAIN_DLS_CHANGE_EVENT, callback);
+    }
+
+    emitNextStep(attrs) {
+        this.emit(eventTypes.NEXT_STEP_EVENT, attrs);
+    }
+
+    addNextStepListener(callback) {
+        this.on(eventTypes.NEXT_STEP_EVENT, callback);
+    }
+
+    removeNextStepListener(callback) {
+        this.removeListener(eventTypes.NEXT_STEP_EVENT, callback);
     }
 }
 

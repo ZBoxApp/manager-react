@@ -5,6 +5,7 @@ import $ from 'jquery';
 import Promise from 'bluebird';
 
 import ZimbraAdminApi from 'zimbra-admin-api-js';
+import Powerdns from 'js-powerdns';
 import ZimbraStore from '../stores/zimbra_store.jsx';
 
 import * as GlobalActions from '../action_creators/global_actions.jsx';
@@ -160,20 +161,18 @@ export function getAllCompanies() {
     });
 }
 
-export function getCompany(id) {
+export function getCompany(id, success, error) {
     const url = global.window.manager_config.companiesEndPoints.detail.replace('{id}', id);
 
-    return new Promise((resolve, reject) => {
-        return $.ajax({
-            url,
-            dataType: 'json',
-            success: function onSuccess(data) {
-                resolve(data);
-            },
-            error: function onError(xhr, status, err) {
-                reject(err);
-            }
-        });
+    return $.ajax({
+        url,
+        dataType: 'json',
+        success: function onSuccess(data) {
+            success(data);
+        },
+        error: function onError(xhr) {
+            error(xhr.responseJSON);
+        }
     });
 }
 
@@ -661,6 +660,96 @@ export function renameAccount(account, success, error) {
         },
         (err) => {
             const e = handleError('renameAccount', err);
+            return error(e);
+        }
+    );
+}
+
+export function initPowerDNS() {
+    return new Promise((resolve, reject) => {
+        const powerAttrs = window.manager_config.dns;
+        const api = new Powerdns({url: powerAttrs.url, token: powerAttrs.token});
+
+        if (api) {
+            return resolve(api);
+        }
+
+        return reject({
+            type: Constants.MessageType.ERROR,
+            message: 'PowerDNS no instanciado'
+        });
+    });
+}
+
+export function createZoneWithRecords(zoneData, records, success, error) {
+    initPowerDNS().then(
+        (api) => {
+            api.createZoneWithRecords(zoneData, records, (er, data) => {
+                if (er) {
+                    return error(er);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('createZoneWithRecords', err);
+            return error(e);
+        }
+    );
+}
+
+export function getZone(domain, success, error) {
+    initPowerDNS().then(
+        (api) => {
+            api.getZone(domain, (er, data) => {
+                if (er) {
+                    return error(er);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('getZone', err);
+            return error(e);
+        }
+    );
+}
+
+export function modifyOrCreateRecords(record, success, error) {
+    initPowerDNS().then(
+        (api) => {
+            api.modifyOrCreateRecords(record, (err, data) => {
+                if (err) {
+                    const e = handleError('modifyOrCreateRecords', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('modifyOrCreateRecords', err);
+            return error(e);
+        }
+    );
+}
+
+export function deleteRecords(zoneUrl, record, success, error) {
+    initPowerDNS().then(
+        (api) => {
+            api.deleteRecords(zoneUrl, record, (err, data) => {
+                if (err) {
+                    const e = handleError('deleteRecords', err);
+                    return error(e);
+                }
+
+                return success(data);
+            });
+        },
+        (err) => {
+            const e = handleError('deleteRecords', err);
             return error(e);
         }
     );

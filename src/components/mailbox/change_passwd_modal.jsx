@@ -70,6 +70,8 @@ export default class ConfirmDeleteModal extends React.Component {
                 });
             });
         }
+
+        return null;
     }
 
     render() {

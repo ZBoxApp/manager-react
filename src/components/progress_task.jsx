@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 import React from 'react';
 import EventStore from '../stores/event_store.jsx';
-import * as GlobalActions from '../action_creators/global_actions.jsx';
 
 export default class ProgressTask extends React.Component {
     constructor(props) {

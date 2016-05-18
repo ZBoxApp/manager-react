@@ -92,7 +92,7 @@ export default class EditMailBox extends React.Component {
             return false;
         }
 
-        this.handleRenameAccount(mail);
+        return this.handleRenameAccount(mail);
     }
 
     handleRenameAccount(email) {
@@ -139,7 +139,7 @@ export default class EditMailBox extends React.Component {
             });
         }
 
-        GlobalActions.emitMessage({
+        return GlobalActions.emitMessage({
             message: 'Error, no existe instancia de la casilla.',
             typeError: messageType.ERROR
         });

@@ -132,6 +132,8 @@ export default class Mailboxes extends React.Component {
 
     componentWillReceiveProps(newProps) {
         const condition = this.props.location.query.page !== newProps.location.query.page;
+        let domainId = null;
+
         if (condition) {
             const page = parseInt(newProps.location.query.page, 10) || 1;
 
@@ -142,13 +144,16 @@ export default class Mailboxes extends React.Component {
                 offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
             };
 
-            this.getAllMailboxes();
+            domainId = this.props.params.domain_id;
+
+            this.getAllMailboxes(domainId);
         } else {
             GlobalActions.emitStartLoading();
-            let domainId;
+
             if (newProps.params.domain_id !== this.props.params.domain_id) {
                 domainId = newProps.params.domain_id;
             }
+
             this.getAllMailboxes(domainId);
         }
     }
@@ -221,8 +226,8 @@ export default class Mailboxes extends React.Component {
                 notMatches: true,
                 domain: domainName
             });
-        }).catch(() => {
-            console.log('error',error);
+        }).catch((error) => {
+            return error;
         }).finally(() => {
             GlobalActions.emitEndLoading();
         });
@@ -493,7 +498,7 @@ export default class Mailboxes extends React.Component {
                             className='form-control plans'
                             onChange={this.handleChangeFilter}
                         >
-                            <option value=''>Todoas los planes</option>
+                            <option value=''>Todos los planes</option>
                             <option value='basic'>Básico</option>
                             <option value='professional'>Profesional</option>
                             <option value='premium'>Premium</option>
@@ -572,7 +577,6 @@ export default class Mailboxes extends React.Component {
                     onClick={this.handleTabChanged}
                 />
             );
-
         }
 
         return (

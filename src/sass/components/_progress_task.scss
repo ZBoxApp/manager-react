@@ -25,9 +25,9 @@
   }
 
   .taskboard {
+    height: 100%;
     max-height: 0;
     overflow: hidden;
-    height: 100%;
     transition: max-height 1s;
 
     .alert {
@@ -46,5 +46,11 @@
     padding: 3px 0;
     text-align: center;
     width: 100%;
+  }
+}
+
+.flash {
+  + .progress {
+    margin-top: 10px;
   }
 }

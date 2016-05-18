@@ -97,7 +97,7 @@ export default class MailboxDetails extends React.Component {
                     });
                 }
 
-                this.setState({
+                return this.setState({
                     data: account,
                     alias: items,
                     webmail: false
@@ -132,7 +132,7 @@ export default class MailboxDetails extends React.Component {
                         });
                     }
 
-                    this.setState({
+                    return this.setState({
                         data: result,
                         alias: items,
                         webmail: false
