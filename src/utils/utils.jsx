@@ -557,6 +557,8 @@ export function getDomainIdFromDL(dlName, arr) {
             }
         }
     }
+
+    return null;
 }
 
 export function getInitialDateFromTimestamp(timestamp) {
@@ -587,12 +589,12 @@ export function forceTimestampFromHumanDate(date) {
     return formattedTimeStamp;
 }
 
-export function setInitialDate(){
+export function setInitialDate() {
     const dateInstance = new Date();
     const day = dateInstance.getDate().toString().length < 2 ? '0' + dateInstance.getDate().toString() : dateInstance.getDate();
     const month = (dateInstance.getMonth() + 1).toString().length < 2 ? '0' + (dateInstance.getMonth() + 1).toString() : (dateInstance.getMonth() + 1);
     const formatted = `${day}/${month}/${dateInstance.getFullYear()}`;
-    const date = new Date(dateInstance.getFullYear(), dateInstance.getMonth(), dateInstance.getDate(), '00','00','00').getTime();
+    const date = new Date(dateInstance.getFullYear(), dateInstance.getMonth(), dateInstance.getDate(), '00', '00', '00').getTime();
     const dateObject = {
         timestamp: date,
         formatted
