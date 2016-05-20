@@ -7,11 +7,13 @@ import Constants from '../utils/constants.jsx';
 const eventTypes = Constants.EventTypes;
 
 let mailboxesArray = null;
+let mailboxexInstances = [];
 
 class MailboxStoreClass extends EventEmitter {
     constructor() {
         super();
         this.current = null;
+        this.currentPage = {};
     }
 
     getMailboxById(id) {
@@ -38,6 +40,27 @@ class MailboxStoreClass extends EventEmitter {
         }
     }
 
+    hasThisPage(page) {
+        if (page && this.currentPage[page]) {
+            return this.currentPage[page];
+        }
+
+        return false;
+    }
+
+    setCurrentPage(page) {
+        this.currentPage[page] = true;
+    }
+
+    getMailboxByPage(page) {
+        if (page && this.currentPage[page]) {
+            console.log(this.currentPage);
+            return this.currentPage[page];
+        }
+
+        return false;
+    }
+
     setCurrent(account) {
         this.current = account;
     }
@@ -54,12 +77,33 @@ class MailboxStoreClass extends EventEmitter {
         return false;
     }
 
+    getPages() {
+        return this.currentPage;
+    }
+
     getMailboxes() {
         return mailboxesArray;
     }
 
-    setMailboxes(mailboxes) {
+    setMailboxes(mailboxes, page) {
+        if (mailboxesArray) {
+            Array.prototype.push.apply(mailboxexInstances, mailboxes.account);
+            mailboxesArray.account = mailboxexInstances;
+            console.log('mailbox', mailboxes);
+            if (page) {
+                this.currentPage[page] = mailboxes;
+                console.log(this.currentPage[page]);
+            }
+            return true;
+        }
+
         mailboxesArray = mailboxes;
+        mailboxexInstances = mailboxes.account;
+        if (page) {
+            this.currentPage[page] = mailboxes;
+            console.log(this.currentPage[page]);
+        }
+        return true;
     }
 
     changeAccount(newAccount) {

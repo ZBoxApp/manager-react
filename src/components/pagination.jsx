@@ -60,7 +60,8 @@ export default class Pagination extends React.Component {
         let prev;
         let next;
         let last;
-        let i = 1;
+        let console;
+        //let i = 1;
 
         if (current > 1 && current <= total) {
             first = (
@@ -96,9 +97,43 @@ export default class Pagination extends React.Component {
                     >{'Última'}</a>
                 </li>
             );
+
+            console = (
+                <li key='console-page'>
+                    <span>{`${current} de ${this.props.totalPages}`}</span>
+                </li>
+            );
         }
 
-        for (; i <= total; i++) {
+        const rangeBack = current - this.props.range;
+        const rangeForward = ((current + this.props.range) + 1);
+
+        for (let p = rangeBack; p < rangeForward; p++) {
+            if ((p > 0) && (p <= total)) {
+                if (p === current) {
+                    pages.push(
+                        <li
+                            key={`page-${p}`}
+                            className='active'
+                        >
+                            <a remote='false'>{p.toString()}</a>
+                        </li>
+                    );
+                } else {
+                    pages.push(
+                        <li key={`page-${p}`}>
+                            <a
+                                onClick={this.handleChange}
+                            >
+                                {p.toString()}
+                            </a>
+                        </li>
+                    );
+                }
+            }
+        }
+
+        /*for (; i <= total; i++) {
             if (current === i) {
                 pages.push(
                     <li
@@ -119,7 +154,7 @@ export default class Pagination extends React.Component {
                     </li>
                 );
             }
-        }
+        }*/
 
         return (
             <div id='pagination'>
@@ -129,6 +164,7 @@ export default class Pagination extends React.Component {
                     {pages}
                     {next}
                     {last}
+                    {console}
                 </ul>
             </div>
         );
@@ -138,5 +174,10 @@ export default class Pagination extends React.Component {
 Pagination.propTypes = {
     url: React.PropTypes.string.isRequired,
     currentPage: React.PropTypes.number.isRequired,
-    totalPages: React.PropTypes.number.isRequired
+    totalPages: React.PropTypes.number.isRequired,
+    range: React.PropTypes.number
 };
+
+Pagination.defaultProps = {
+    range: 2
+}

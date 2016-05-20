@@ -58,10 +58,26 @@ export default class ProgressTask extends React.Component {
         });
     }
 
+    isTaskDuplicated(params) {
+        const id = params.id;
+        for (let i = 0; i < this.tasks.length; i++) {
+            const currentTask = this.tasks[i];
+            if (id === currentTask.id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     showTasks(params) {
+        if (this.isTaskDuplicated(params)) {
+            return null;
+        }
+
         this.tasks.push(params);
 
-        this.setState({
+        return this.setState({
             show: true,
             tasks: this.tasks,
             total: this.tasks.length

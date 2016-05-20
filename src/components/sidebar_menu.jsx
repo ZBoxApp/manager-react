@@ -24,14 +24,6 @@ export default class SidebarMenu extends React.Component {
                 className='nav'
                 id='side-menu'
             >
-                <li id='sidebar-dashboards'>
-                    <a
-                        href='#'
-                        onClick={(e) => this.handleLink(e, '/dashboards')}
-                    >
-                        <span className='nav-label'>{'dashboards'}</span>
-                    </a>
-                </li>
                 <li id='sidebar-companies'>
                     <a
                         href='#'

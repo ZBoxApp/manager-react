@@ -29,6 +29,7 @@ function handleError(methodName, err) {
 
     if (err) {
         error.message = err.extra.reason;
+        error.code = err.extra.code || null;
     } else {
         error.message = 'Ocurrio un error general';
     }
@@ -111,7 +112,7 @@ export function login(user, password, success, error) {
         }
 
         Utils.setCookie('token', zimbra.client.token);
-        ZimbraStore.setCurrent(zimbra);
+        window.manager_config.dns.token = Utils.getCookie('token');
         return getMe(success, error);
     });
 }
@@ -524,9 +525,7 @@ export function search(query, success, error) {
     initZimbra().then(
         (zimbra) => {
             zimbra.directorySearch(
-                {
-                    query
-                },
+                query,
                 (err, data) => {
                     if (err) {
                         const e = handleError('search', err);

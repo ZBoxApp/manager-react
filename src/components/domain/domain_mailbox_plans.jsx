@@ -111,6 +111,7 @@ export default class DomainMailboxPlans extends React.Component {
                         );
                     }
                 } else {
+                    console.log(totalLimit);
                     totalLimit += plan.limit;
                 }
 

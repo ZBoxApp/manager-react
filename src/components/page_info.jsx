@@ -19,7 +19,7 @@ export default class PageInfo extends React.Component {
 
 PageInfo.propTypes = {
     titlePage: React.PropTypes.any.isRequired,
-    descriptionPage: React.PropTypes.string
+    descriptionPage: React.PropTypes.any
 };
 
 PageInfo.defaultProps = {
