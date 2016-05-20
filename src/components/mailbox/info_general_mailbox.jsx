@@ -45,11 +45,16 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 
     render() {
         let blockInfo = null;
-        let statusCos = null;
+        let cosName = 'Sin Plan';
+        let statusCos = 'label noplan btn-xs';
         console.log(ZimbraStore.getAllCos()); //eslint-disable-line no-console
         console.log(this.data); //eslint-disable-line no-console
         const cosID = Utils.getEnabledPlansObjectByCos(ZimbraStore.getAllCos(), this.props.data.attrs.zimbraCOSId);
-        let cosName = null;
+
+        if (window.manager_config.plans[cosID.name]) {
+            cosName = Utils.titleCase(cosID.name);
+            statusCos = 'label btn-xs' + window.manager_config.plans[cosID.name].statusCos;
+        }
 
         switch (cosID.name) {
         case 'premium':
