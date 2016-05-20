@@ -2,7 +2,9 @@
 # Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
 
 dist
+src/config
 node_modules
+path.json
 .npminstall
 ncp-debug.log
 npm-debug.log
