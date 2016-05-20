@@ -20,8 +20,8 @@ export default class AntiSpam extends React.Component {
         this.handleSave = this.handleSave.bind(this);
         this.alterDomain = this.alterDomain.bind(this);
         this.domain = DomainStore.getCurrent();
-        this.blackList = null;
-        this.whiteList = null;
+        this.blackList = [];
+        this.whiteList = [];
 
         if (this.domain.attrs.amavisBlacklistSender) {
             this.blackList = Array.isArray(this.domain.attrs.amavisBlacklistSender) ? this.domain.attrs.amavisBlacklistSender : this.domain.attrs.amavisBlacklistSender.trim().split(' ');
@@ -39,11 +39,11 @@ export default class AntiSpam extends React.Component {
         switch (action) {
         case 'black':
             this.searchItemToRemove(this.blackList, item);
-            attrs.amavisBlacklistSender = this.blackList;
+            attrs.amavisBlacklistSender = this.blackList.length > 0 ? this.blackList : null;
             break;
         case 'white':
             this.searchItemToRemove(this.whiteList, item);
-            attrs.amavisWhitelistSender = this.whiteList;
+            attrs.amavisWhitelistSender = this.whiteList.length > 0 ? this.whiteList : null;
             break;
         }
 

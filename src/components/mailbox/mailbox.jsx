@@ -41,7 +41,9 @@ export default class Mailboxes extends React.Component {
         const page = parseInt(this.props.location.query.page, 10) || 1;
         this.mailboxes = null;
         this.status = '';
-        this.cos = null;
+        this.cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
+        this.cosById = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
+        this.isRefreshing = true;
 
         this.state = {
             page,
@@ -146,7 +148,7 @@ export default class Mailboxes extends React.Component {
 
             domainId = this.props.params.domain_id;
 
-            this.getAllMailboxes(domainId);
+            this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);
         } else {
             GlobalActions.emitStartLoading();
 
@@ -154,7 +156,7 @@ export default class Mailboxes extends React.Component {
                 domainId = newProps.params.domain_id;
             }
 
-            this.getAllMailboxes(domainId);
+            this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);
         }
     }
 
@@ -180,8 +182,13 @@ export default class Mailboxes extends React.Component {
         );
     }
 
-    getAccounts(domainName) {
-        const attrs = {};
+    getAccounts(domainName, maxResult) {
+        const attrs = {
+            limit: QueryOptions.DEFAULT_LIMIT,
+            maxResults: maxResult,
+            offset: this.state.offset
+        };
+
         if (domainName) {
             attrs.domain = domainName;
         }
@@ -195,19 +202,23 @@ export default class Mailboxes extends React.Component {
                 });
             }
 
-            if (MailboxStore.hasMailboxes()) {
-                resolve(MailboxStore.getMailboxes());
+            if (MailboxStore.hasMailboxes() && MailboxStore.hasThisPage(this.state.page)) {
+                console.log('has page with data'); //eslint-disable-line no-console
+                return resolve(MailboxStore.getMailboxByPage(this.state.page));
             }
 
             return Client.getAllAccounts(attrs, (success) => {
-                MailboxStore.setMailboxes(success);
-                this.mailboxes = this.mailboxes = MailboxStore.getMailboxes();
+                MailboxStore.setMailboxes(success, this.state.page);
+                this.mailboxes = MailboxStore.getMailboxes();
+
                 return resolve(success);
             }, (error) => {
                 return reject(error);
             });
         }).then((data) => {
             if (data.account) {
+                this.isRefreshing = false;
+
                 const tables = this.buildTableFromData(data, ['Todas', 'Bloqueadas']);
 
                 if (tables.lockedAlert) {
@@ -227,9 +238,18 @@ export default class Mailboxes extends React.Component {
                 domain: domainName
             });
         }).catch((error) => {
-            return error;
+            if (error.code === 'account.TOO_MANY_SEARCH_RESULTS') {
+                this.isRefreshing = true;
+                const newMaxResult = (parseInt(maxResult, 10) + window.manager_config.autoincrementOnFailRequestZimbra);
+                window.manager_config.maxResultOnRequestZimbra = newMaxResult;
+                setTimeout(() => {
+                    this.getAccounts(domainName, newMaxResult);
+                }, 250);
+            }
         }).finally(() => {
-            GlobalActions.emitEndLoading();
+            if (!this.isRefreshing) {
+                GlobalActions.emitEndLoading();
+            }
         });
     }
 
@@ -237,11 +257,11 @@ export default class Mailboxes extends React.Component {
         if (domainId) {
             return this.domainInfo(domainId).then(() => {
                 const domain = DomainStore.getCurrent();
-                this.getAccounts(domain.name);
+                this.getAccounts(domain.name, window.manager_config.maxResultOnRequestZimbra);
             });
         }
 
-        return this.getAccounts();
+        return this.getAccounts(null, window.manager_config.maxResultOnRequestZimbra);
     }
 
     refreshAllAccounts() {
@@ -276,6 +296,29 @@ export default class Mailboxes extends React.Component {
 
     buildRow(row, classes, status) {
         const id = row.id;
+        const attrs = row.attrs;
+        let displayName = 'No definido';
+        let tipo = attrs.zimbraCOSId || null;
+
+        if (tipo) {
+            tipo = this.cosById[tipo] || null;
+            if (tipo) {
+                tipo = Utils.titleCase(tipo);
+            }
+        }
+
+        if (!tipo) {
+            tipo = 'Desconocido';
+        }
+
+        if (attrs.displayName) {
+            displayName = attrs.displayName.trim();
+        } else if (attrs.cn || attrs.sn) {
+            const cn = attrs.cn || '';
+            const sn = attrs.sn || '';
+            displayName = `${cn.trim()} ${sn.trim()}`;
+        }
+
         return (
             <tr
                 key={id}
@@ -297,14 +340,14 @@ export default class Mailboxes extends React.Component {
                 </td>
 
                 <td className={'mailbox-displayname'}>
-                    {row.name}
+                    {displayName}
                 </td>
 
                 <td className={'mailbox-cos-plan'}>
-                    <statusLabel className={'label-plan label-unknown'}>{'unknown'}</statusLabel>
+                    <statusLabel className={'label-plan label-unknown'}>{tipo}</statusLabel>
                 </td>
 
-                <td>
+                <td className='text-center'>
                     <Button
                         btnAttrs={
                             {
@@ -360,8 +403,8 @@ export default class Mailboxes extends React.Component {
                     <tr>
                         <th>{'Email'}</th>
                         <th className='td-mbxs text-left'>{'Nombre'}</th>
-                        <th className='text-center text-center'>{'Tipo'}</th>
-                        <th className='text-center text-center'>{'Acciones'}</th>
+                        <th className='text-left'>{'Tipo'}</th>
+                        <th className='text-center'>{'Acciones'}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -416,7 +459,7 @@ export default class Mailboxes extends React.Component {
             }
 
             const response = {};
-            const all = `${arrayTabNames.shift()} (${activeAccounts.length})`;
+            const all = `${arrayTabNames.shift()} (${totalAccounts})`;
             const locked = `${arrayTabNames.shift()} (${lockedAccounts.length})`;
 
             // create structure html for all accountsç
@@ -461,7 +504,9 @@ export default class Mailboxes extends React.Component {
                 }
             ];
 
-            let activePagination = null;
+            let activePagination = {
+                total: totalAccounts
+            };
             const totalPage = Math.ceil(totalAccounts / QueryOptions.DEFAULT_LIMIT);
             if (activeAccounts.length > QueryOptions.DEFAULT_LIMIT) {
                 activeAccounts = activeAccounts.slice(this.state.offset, (this.state.page * QueryOptions.DEFAULT_LIMIT));

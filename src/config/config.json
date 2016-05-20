@@ -8,6 +8,8 @@
         "url": "http://192.168.1.8:8081",
         "token": "otto"
     },
+    "maxResultOnRequestZimbra": 4000,
+    "autoincrementOnFailRequestZimbra": 500,
     "plans": {
         "basic": true,
         "premium": true,

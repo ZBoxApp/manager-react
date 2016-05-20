@@ -2,17 +2,19 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {browserHistory} from 'react-router';
 import {Modal} from 'react-bootstrap';
 import UserStore from '../../stores/user_store.jsx';
 import PasswordStrengthMeter from 'react-password-strength-meter';
+import * as GlobalActions from '../../action_creators/global_actions.jsx';
+import Constants from '../../utils/constants.jsx';
+
+const MessageTypes = Constants.MessageType;
 
 export default class ConfirmDeleteModal extends React.Component {
     constructor(props) {
         super(props);
 
         this.handleChangePasswd = this.handleChangePasswd.bind(this);
-        this.forceLogout = this.forceLogout.bind(this);
         this.handlePasswd = this.handlePasswd.bind(this);
         this.restart = this.restart.bind(this);
 
@@ -36,12 +38,6 @@ export default class ConfirmDeleteModal extends React.Component {
         return {currentUser};
     }
 
-    forceLogout(path) {
-        setTimeout(() => {
-            browserHistory.push(path);
-        }, 3000);
-    }
-
     handleChangePasswd() {
         if (this.refs.passwdfield.value && this.refs.passwdfield.value.length > 0) {
             if (this.refs.passwdfield.value.length < 9) {
@@ -53,15 +49,22 @@ export default class ConfirmDeleteModal extends React.Component {
             }
 
             this.props.data.setPassword(this.refs.passwdfield.value, () => {
-                this.setState({
-                    alert: true,
-                    message: 'Su contraseña se ha sido cambiada éxitosamente.',
-                    typeError: 'text-success'
-                });
+                const message = {
+                    error: 'Su contraseña se ha sido cambiada éxitosamente.',
+                    typeError: MessageTypes.SUCCESS
+                };
+
+                if (this.props.show) {
+                    this.props.onHide();
+                }
 
                 if (this.props.data.name === this.state.currentUser.name) {
-                    this.forceLogout('/logout');
+                    const alterMessage = `${message.error} Deberá iniciar sesión de nuevo.`;
+                    message.error = alterMessage;
+                    message.logout = true;
                 }
+
+                GlobalActions.emitMessage(message);
             }, (error) => {
                 this.setState({
                     alert: true,

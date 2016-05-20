@@ -12,7 +12,7 @@ test: | install
 install: package.json
 	@echo Getting scss-lint using gem
 
-	@gem install scss_lint
+	#@gem install scss_lint
 
 	@echo Getting dependencies using npm
 

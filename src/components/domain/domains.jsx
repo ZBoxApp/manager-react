@@ -17,6 +17,7 @@ import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import Constants from '../../utils/constants.jsx';
+import UserStore from '../../stores/user_store.jsx';
 
 const QueryOptions = Constants.QueryOptions;
 const messageType = Constants.MessageType;
@@ -28,12 +29,14 @@ export default class Domains extends React.Component {
         this.getDomains = this.getDomains.bind(this);
 
         const page = parseInt(this.props.location.query.page, 10) || 1;
+        this.isGlobalAdmin = UserStore.isGlobalAdmin();
 
         this.state = {
             page,
             offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
         };
     }
+
     getDomains() {
         const self = this;
         Client.getAllDomains(
@@ -72,6 +75,7 @@ export default class Domains extends React.Component {
             }
         );
     }
+
     getPlans(domains) {
         const names = domains.map((d) => {
             return d.name;
@@ -110,6 +114,7 @@ export default class Domains extends React.Component {
         $('#sidebar-domains').addClass('active');
         this.getDomains();
     }
+
     componentWillUnmount() {
         $('#sidebar-domains').removeClass('active');
     }
@@ -117,6 +122,7 @@ export default class Domains extends React.Component {
     render() {
         const error = this.state.error;
         let message;
+        let addDomainButton = null;
         if (error) {
             message = (
                 <MessageBar
@@ -127,15 +133,17 @@ export default class Domains extends React.Component {
             );
         }
 
-        const addDomainButton = [{
-            label: 'Agregar Dominio',
-            props: {
-                className: 'btn btn-success',
-                onClick: (e) => {
-                    Utils.handleLink(e, '/domains/new');
+        if (this.isGlobalAdmin) {
+            addDomainButton = [{
+                label: 'Agregar Dominio',
+                props: {
+                    className: 'btn btn-success',
+                    onClick: (e) => {
+                        Utils.handleLink(e, '/domains/new');
+                    }
                 }
-            }
-        }];
+            }];
+        }
 
         let tableResults;
         if (this.state.data) {
@@ -233,7 +241,7 @@ export default class Domains extends React.Component {
                         <thead>
                         <tr>
                             <th>{'Nombre'}</th>
-                            <th className='text-center'>{'Casillas Usadas'}</th>
+                            <th className='text-center'>{'Casillas Compradas'}</th>
                             <th className='text-center'>{'Descripción'}</th>
                             <th className='text-center'>{'Estado'}</th>
                         </tr>
