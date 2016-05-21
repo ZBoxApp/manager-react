@@ -4,7 +4,7 @@
 dist
 src/config
 node_modules
-path.json
+/path.json
 .npminstall
 ncp-debug.log
 npm-debug.log
