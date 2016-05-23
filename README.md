@@ -116,3 +116,4 @@ A sample for the `NGINX` configuration can be found [here](nginx/nginx.conf).
 ## TODO
 
 * Add security to the companies Endpoints
+* test
