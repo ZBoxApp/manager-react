@@ -3,6 +3,7 @@ import * as Utils from '../../utils/utils.jsx';
 import Constants from '../../utils/constants.jsx';
 import EventStore from '../../stores/event_store.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
+import Client from '../../utils/client.jsx';
 
 const Labels = Constants.Labels;
 
@@ -56,6 +57,11 @@ export default class DNSZoneForm extends React.Component {
     addDNSRequest() {
         const records = this.defaultRows;
         const zoneDNS = this.zoneDNS;
+        const request = {
+            name: this.props.domain.name,
+            kind: 'Master',
+            nameservers: []
+        };
 
         Utils.toggleStatusButtons('.savedns', true);
         const button = this.refs.savedns;
@@ -84,12 +90,25 @@ export default class DNSZoneForm extends React.Component {
                     typeError: MessageType.SUCCESS
                 });
             });
-        } else {
+        }
+
+        Client.createZoneWithRecords(request, records, () => {
+            Utils.toggleStatusButtons('.savedns', false);
+            button.innerHTML = oldContent;
+
             EventStore.emitMessage({
-                message: 'Ha ocurrido un error general al intentar agregar un registro DNS',
+                message: 'Se ha creado su zona DNS éxitosamente.',
+                typeError: MessageType.SUCCESS
+            });
+        }, (error) => {
+            EventStore.emitMessage({
+                message: error.extra.reason,
                 typeError: MessageType.ERROR
             });
-        }
+
+            Utils.toggleStatusButtons('.savedns', false);
+            button.innerHTML = oldContent;
+        });
     }
 
     addDNSRow() {
@@ -172,6 +191,7 @@ export default class DNSZoneForm extends React.Component {
     }
 
     render() {
+        const textButton = this.zoneDNS ? 'Agregar otro registro' : 'Crear zona DNS';
         let isVisible = false;
         let fields = null;
         let header = null;
@@ -315,7 +335,7 @@ export default class DNSZoneForm extends React.Component {
                             className='btn btn-info pull-right'
                             onClick={this.addDNSRow}
                         >
-                            <i className='fa fa-plus-circle fa-lg'></i> Agregar otro registro
+                            <i className='fa fa-plus-circle fa-lg'></i> {textButton}
                         </button>
                     </p>
                 </blockquote>

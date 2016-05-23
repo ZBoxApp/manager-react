@@ -120,6 +120,10 @@ export default class Companies extends React.Component {
         });
     }
 
+    componentWillReceiveProps() {
+        GlobalActions.emitEndLoading();
+    }
+
     componentDidMount() {
         $('#sidebar-companies').addClass('active');
         this.getCompanies();

@@ -5,10 +5,10 @@
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
     "webMailUrl": "https://zimbra.zboxapp.dev",
     "dns": {
-        "url": "http://192.168.1.8:8081",
+        "url": "http://192.168.1.8:8081/powerdns_proxy/",
         "token": "otto"
     },
-    "maxResultOnRequestZimbra": 4000,
+    "maxResultOnRequestZimbra": 20000,
     "autoincrementOnFailRequestZimbra": 500,
     "plans": {
         "basic": {

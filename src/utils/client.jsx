@@ -668,9 +668,9 @@ export function renameAccount(account, success, error) {
 }
 
 export function initPowerDNS() {
-    return new Promise((resolve, reject) => {
-        const powerAttrs = window.manager_config.dns;
+    /*return new Promise((resolve, reject) => {
         const api = new Powerdns({url: powerAttrs.url, token: powerAttrs.token});
+        console.log(api);
 
         if (api) {
             return resolve(api);
@@ -680,79 +680,54 @@ export function initPowerDNS() {
             type: Constants.MessageType.ERROR,
             message: 'PowerDNS no instanciado'
         });
-    });
+    });*/
+    const powerAttrs = window.manager_config.dns;
+    const api = new Powerdns({url: powerAttrs.url, token: powerAttrs.token});
+    return api;
 }
 
 export function createZoneWithRecords(zoneData, records, success, error) {
-    initPowerDNS().then(
-        (api) => {
-            api.createZoneWithRecords(zoneData, records, (er, data) => {
-                if (er) {
-                    return error(er);
-                }
-
-                return success(data);
-            });
-        },
-        (err) => {
-            const e = handleError('createZoneWithRecords', err);
-            return error(e);
+    const api = initPowerDNS();
+    api.createZoneWithRecords(zoneData, records, (er, data) => {
+        if (er) {
+            return error(er);
         }
-    );
+
+        return success(data);
+    });
 }
 
 export function getZone(domain, success, error) {
-    initPowerDNS().then(
-        (api) => {
-            api.getZone(domain, (er, data) => {
-                if (er) {
-                    return error(er);
-                }
-
-                return success(data);
-            });
-        },
-        (err) => {
-            const e = handleError('getZone', err);
-            return error(e);
+    const api = initPowerDNS();
+    api.getZone(domain, (er, data) => {
+        if (er) {
+            return error(er);
         }
-    );
+
+        return success(data);
+    });
 }
 
 export function modifyOrCreateRecords(record, success, error) {
-    initPowerDNS().then(
-        (api) => {
-            api.modifyOrCreateRecords(record, (err, data) => {
-                if (err) {
-                    const e = handleError('modifyOrCreateRecords', err);
-                    return error(e);
-                }
-
-                return success(data);
-            });
-        },
-        (err) => {
+    const api = initPowerDNS();
+    api.modifyOrCreateRecords(record, (err, data) => {
+        if (err) {
             const e = handleError('modifyOrCreateRecords', err);
             return error(e);
         }
-    );
+
+        return success(data);
+    });
 }
 
 export function deleteRecords(zoneUrl, record, success, error) {
-    initPowerDNS().then(
-        (api) => {
-            api.deleteRecords(zoneUrl, record, (err, data) => {
-                if (err) {
-                    const e = handleError('deleteRecords', err);
-                    return error(e);
-                }
-
-                return success(data);
-            });
-        },
-        (err) => {
+    const api = initPowerDNS();
+    api.deleteRecords(zoneUrl, record, (err, data) => {
+        if (err) {
             const e = handleError('deleteRecords', err);
             return error(e);
         }
-    );
+
+        return success(data);
+    });
 }

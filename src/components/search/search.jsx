@@ -29,6 +29,9 @@ export default class SearchView extends React.Component {
     }
 
     makeSearch(query) {
+        this.setState({
+            loading: true
+        });
         Client.search({
             query: `(|(mail=*${query}*)(cn=*${query}*)(sn=*${query}*)(gn=*${query}*)(displayName=*${query}*)(zimbraMailDeliveryAddress=*${query}*)(zimbraDomainName=*${query}*)(uid=*${query}*)(zimbraMailAlias=*${query}*)(uid=*${query}*)(zimbraDomainName=*${query}*)(cn=*${query}*))`,
             types: 'accounts,distributionlists,domains'
@@ -45,12 +48,14 @@ export default class SearchView extends React.Component {
 
             if (success.total <= 0) {
                 return this.setState({
-                    notfound: true
+                    notfound: true,
+                    loading: false
                 });
             }
 
             return this.setState({
-                result
+                result,
+                loading: false
             });
         }, (error) => {
             console.log(error); //eslint-disable-line no-console
@@ -191,6 +196,15 @@ export default class SearchView extends React.Component {
                     <h4>
                         No existen resultados para su búsqueda
                     </h4>
+                </div>
+            );
+        }
+
+        if (this.state.loading) {
+            content = (
+                <div className='text-center'>
+                    <i className='fa fa-spinner fa-spin fa-4x fa-fw'></i>
+                    <p>{'Buscando...'}</p>
                 </div>
             );
         }

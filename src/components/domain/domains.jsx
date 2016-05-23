@@ -33,7 +33,8 @@ export default class Domains extends React.Component {
 
         this.state = {
             page,
-            offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
+            offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT),
+            loading: true
         };
     }
 
@@ -41,7 +42,7 @@ export default class Domains extends React.Component {
         const self = this;
         Client.getAllDomains(
             {
-                limit: 200,
+                limit: QueryOptions.DEFAULT_LIMIT,
                 offset: this.state.offset
             },
             (data) => {
@@ -49,14 +50,16 @@ export default class Domains extends React.Component {
                 this.getPlans(domains).
                 then(() => {
                     self.setState({
-                        data
+                        data,
+                        loading: false
                     });
                 }).
                 catch(() => {
                     this.setState({
                         error: {
                             message: 'No se obtuvieron los planes de las cuentas',
-                            type: messageType.ERROR
+                            type: messageType.ERROR,
+                            loading: false
                         }
                     });
                 }).
@@ -68,7 +71,8 @@ export default class Domains extends React.Component {
                 this.setState({
                     error: {
                         message: error.message,
-                        type: messageType.ERROR
+                        type: messageType.ERROR,
+                        loading: false
                     }
                 });
                 GlobalActions.emitEndLoading();
@@ -104,7 +108,8 @@ export default class Domains extends React.Component {
 
             this.state = {
                 page,
-                offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
+                offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT),
+                loading: true
             };
 
             this.getDomains();
@@ -121,8 +126,12 @@ export default class Domains extends React.Component {
 
     render() {
         const error = this.state.error;
-        let message;
+        let message = null;
         let addDomainButton = null;
+        let pagination = null;
+        let panelBody = null;
+        let tableResults = null;
+
         if (error) {
             message = (
                 <MessageBar
@@ -133,7 +142,16 @@ export default class Domains extends React.Component {
             );
         }
 
-        if (!this.isGlobalAdmin) {
+        if (this.state.loading) {
+            panelBody = (
+                <div className='text-center'>
+                    <i className='fa fa-spinner fa-spin fa-4x fa-fw'></i>
+                    <p>{'Cargando Dominios...'}</p>
+                </div>
+            );
+        }
+
+        if (this.isGlobalAdmin) {
             addDomainButton = [{
                 label: 'Agregar Dominio',
                 props: {
@@ -145,7 +163,6 @@ export default class Domains extends React.Component {
             }];
         }
 
-        let tableResults;
         if (this.state.data) {
             const configPlans = global.window.manager_config.plans;
             tableResults = this.state.data.domain.map((d) => {
@@ -224,47 +241,46 @@ export default class Domains extends React.Component {
                     </tr>
                 );
             });
-        }
 
-        const panelBody = (
-            <div key='panelBody'>
-                <div
-                    id='index-domains-table'
-                    className='table-responsive'
-                >
-                    <table
-                        id='index-domains'
-                        cellPadding='1'
-                        cellSpacing='1'
-                        className='table table-condensed table-striped vertical-align'
+            if (this.state.offset > 0 || (this.state.data && this.state.data.more)) {
+                const totalPages = this.state.data ? Math.ceil(this.state.data.total / QueryOptions.DEFAULT_LIMIT) : 0;
+                pagination = (
+                    <Pagination
+                        key='panelPagination'
+                        url='domains'
+                        currentPage={this.state.page}
+                        totalPages={totalPages}
+                    />
+                );
+            }
+
+            panelBody = (
+                <div>
+                    <div
+                        id='index-domains-table'
+                        className='table-responsive'
                     >
-                        <thead>
-                        <tr>
-                            <th>{'Nombre'}</th>
-                            <th className='text-center'>{'Casillas Compradas'}</th>
-                            <th className='text-center'>{'Descripción'}</th>
-                            <th className='text-center'>{'Estado'}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {tableResults}
-                        </tbody>
-                    </table>
+                        <table
+                            id='index-domains'
+                            cellPadding='1'
+                            cellSpacing='1'
+                            className='table table-condensed table-striped vertical-align'
+                        >
+                            <thead>
+                            <tr key='table-heading'>
+                                <th>{'Nombre'}</th>
+                                <th className='text-center'>{'Casillas Compradas'}</th>
+                                <th className='text-center'>{'Descripción'}</th>
+                                <th className='text-center'>{'Estado'}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {tableResults}
+                            </tbody>
+                        </table>
 
+                    </div>
                 </div>
-            </div>
-        );
-
-        let pagination;
-        if (this.state.offset > 0 || (this.state.data && this.state.data.more)) {
-            const totalPages = this.state.data ? Math.ceil(this.state.data.total / QueryOptions.DEFAULT_LIMIT) : 0;
-            pagination = (
-                <Pagination
-                    key='panelPagination'
-                    url='domains'
-                    currentPage={this.state.page}
-                    totalPages={totalPages}
-                />
             );
         }
 

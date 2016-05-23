@@ -508,10 +508,10 @@ export default class Mailboxes extends React.Component {
                 }
             ];
 
-            let activePagination = {
-                total: totalAccounts
-            };
             const totalPage = Math.ceil(totalAccounts / QueryOptions.DEFAULT_LIMIT);
+            let activePagination = {
+                total: totalPage
+            };
             if (activeAccounts.length > QueryOptions.DEFAULT_LIMIT) {
                 activeAccounts = activeAccounts.slice(this.state.offset, (this.state.page * QueryOptions.DEFAULT_LIMIT));
                 activePagination = {
