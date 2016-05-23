@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import * as GlobalActions from '../action_creators/global_actions.jsx';
+import UserStore from '../stores/user_store.jsx';
 
 import React from 'react';
 import {browserHistory} from 'react-router';
@@ -19,6 +20,8 @@ export default class SidebarMenu extends React.Component {
         }
     }
     render() {
+        const companyText = UserStore.isGlobalAdmin() ? 'Empresas' : 'Mi Empresa';
+
         return (
             <ul
                 className='nav'
@@ -29,7 +32,7 @@ export default class SidebarMenu extends React.Component {
                         href='#'
                         onClick={(e) => this.handleLink(e, '/companies')}
                     >
-                        <span className='nav-label'>{'Empresas'}</span>
+                        <span className='nav-label'>{companyText}</span>
                     </a>
                 </li>
                 <li id='sidebar-domains'>

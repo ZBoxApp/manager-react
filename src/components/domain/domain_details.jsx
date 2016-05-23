@@ -47,6 +47,9 @@ export default class DomainDetails extends React.Component {
 
         if (domain && domain.id === this.props.params.id) {
             GlobalActions.emitEndLoading();
+            this.setState({
+                domain
+            });
             Client.getZone(domain.name, (zone) => {
                 DomainStore.setZoneDNS(zone);
 

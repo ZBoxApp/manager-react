@@ -3,22 +3,26 @@ import Button from './button.jsx';
 
 export default class Panel extends React.Component {
     render() {
-        const btns = this.props.btnsHeader.map((btn, i) => {
-            if (btn.setComponent) {
-                return btn.setComponent;
-            }
-            return (
-                <Button
-                    btnAttrs={btn.props}
-                    key={`button-${i}`}
-                >
-                    {btn.label}
-                </Button>
-            );
-        });
+        let btns = null;
+
+        if (this.props.btnsHeader) {
+            btns = this.props.btnsHeader.map((btn, i) => {
+                if (btn.setComponent) {
+                    return btn.setComponent;
+                }
+                return (
+                    <Button
+                        btnAttrs={btn.props}
+                        key={`button-${i}`}
+                    >
+                        {btn.label}
+                    </Button>
+                );
+            });
+        }
 
         let panelHeader;
-        if (this.props.hasHeader) {
+        if (this.props.hasHeader && (this.props.btnsHeader || this.props.title || this.props.filter)) {
             panelHeader = (
                 <div className='panel-heading hbuilt clearfix'>
                     <div className='pull-right'>{btns}</div>

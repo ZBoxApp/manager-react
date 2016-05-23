@@ -303,9 +303,11 @@ export default class MailboxDetails extends React.Component {
         }
 
         if (this.state.data) {
+            const webmail = this.state.webmail ? this.state.webmail : null;
             generalData = (
                 <BlockGeneralInfoMailbox
                     data={this.state.data}
+                    webmail={webmail}
                     location={this.props.location}
                 />
             );
@@ -321,7 +323,7 @@ export default class MailboxDetails extends React.Component {
                     props: {
                         className: 'btn btn-xs btn-default action-info-btns',
                         onClick: (e) => {
-                            this.handleEdit(e, `mailboxes/${this.state.data.id}/edit`, this.props.location);
+                            this.handleEdit(e, `/mailboxes/${this.state.data.id}/edit`, this.props.location);
                         }
                     },
                     label: 'Editar'
@@ -330,7 +332,7 @@ export default class MailboxDetails extends React.Component {
                     setComponent: (
                         <ToggleModalButton
                             role='button'
-                            className='btn btn-xs btn-default action-info-btns'
+                            className='btn btn-xs btn-danger action-info-btns'
                             dialogType={ChangePasswordModal}
                             dialogProps={{
                                 data: this.state.data
@@ -440,21 +442,30 @@ export default class MailboxDetails extends React.Component {
                 <div className='content animate-panel'>
                     {message}
                     <div className='row'>
-                        <div className='col-md-6 central-content'>
-                            <Panel
-                                title='Información General'
-                                btnsHeader={btnsGeneralInfo}
-                                children={generalData}
-                                classHeader='with-min-height'
-                            />
-                        </div>
-                        <div className='col-md-6 central-content'>
-                            <Panel
-                                title='Estadísticas'
-                                btnsHeader={btnsStats}
-                                children={statsData}
-                                classHeader='with-min-height'
-                            />
+                        <div className='layout-back clearfix'>
+                            <div className='back-left backstage'>
+                                <div className='backbg'></div>
+                            </div>
+                            <div className='back-right backstage'>
+                                <div className='backbg'></div>
+                            </div>
+
+                            <div className='col-md-6 central-content'>
+                                <Panel
+                                    title='Información General'
+                                    btnsHeader={btnsGeneralInfo}
+                                    children={generalData}
+                                    classHeader='with-min-height'
+                                />
+                            </div>
+                            <div className='col-md-6 central-content'>
+                                <Panel
+                                    title='Estadísticas'
+                                    btnsHeader={btnsStats}
+                                    children={statsData}
+                                    classHeader='with-min-height'
+                                />
+                            </div>
                         </div>
                     </div>
                     <div className='row'>

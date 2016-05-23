@@ -602,3 +602,13 @@ export function setInitialDate() {
 
     return dateObject;
 }
+
+export function cloneObject(obj) {
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) {
+            copy[attr] = obj[attr];
+        }
+    }
+    return copy;
+}

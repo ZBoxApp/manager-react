@@ -14,6 +14,10 @@ class UserStoreClass extends EventEmitter {
         this.currentUser = null;
     }
 
+    resetThisStore() {
+        this.currentUser = null;
+    }
+
     getCurrentUser() {
         return this.currentUser;
     }

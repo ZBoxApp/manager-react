@@ -1,5 +1,7 @@
 import React from 'react';
 import * as Utils from '../../utils/utils.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
+import bytesConvertor from 'bytes';
 
 export default class BlockGeneralInfoMailbox extends React.Component {
     constructor(props) {
@@ -9,6 +11,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         this.className = null;
         this.lastConection = 'No se ha conectado';
         this.getMailSize = this.getMailSize.bind(this);
+        this.sizeEnabled = Utils.getEnabledPlansObjectByCos(ZimbraStore.getAllCos(), this.props.data.attrs.zimbraCOSId);
 
         this.state = {};
     }
@@ -17,7 +20,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         this.props.data.getMailboxSize((err, bytes) => {
             let currentSize = '0 MB';
             if (bytes) {
-                currentSize = Utils.bytesToMegas(bytes);
+                currentSize = bytesConvertor(bytes);
             }
 
             this.setState({
@@ -58,9 +61,16 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 
     render() {
         let size = null;
+        let sizeEnaled = null;
 
         if (this.state.size) {
             size = this.state.size;
+        }
+
+        if (this.sizeEnabled.hasOwnProperty('attrs') && this.sizeEnabled.attrs.zimbraMailQuota) {
+            const sizeOfPlan = typeof this.sizeEnabled.attrs.zimbraMailQuota === 'string' ? parseInt(this.sizeEnabled.attrs.zimbraMailQuota, 10) : this.sizeEnabled.attrs.zimbraMailQuota;
+
+            sizeEnaled = bytesConvertor(sizeOfPlan);
         }
 
         return (
@@ -85,11 +95,23 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 
                 <div className='row'>
                     <div className='col-xs-6'>
-                        <div>
-                            <p>
-                                <span className='center-block'>Espacio Usado</span>
-                                <strong>{size}</strong>
-                            </p>
+                        <div className='row'>
+                            <div className='col-xs-6'>
+                                {size && (
+                                    <p>
+                                        <span className='center-block'>Espacio Usado</span>
+                                        <strong>{size}</strong>
+                                    </p>
+                                )}
+                            </div>
+                            <div className='col-xs-6'>
+                                {sizeEnaled && (
+                                    <p>
+                                        <span className='center-block'>Espacio Disponible</span>
+                                        <strong>{sizeEnaled}</strong>
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                     <div className='col-xs-6'>

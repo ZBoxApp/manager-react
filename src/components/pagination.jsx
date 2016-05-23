@@ -1,5 +1,8 @@
 import React from 'react';
 import {browserHistory} from 'react-router';
+import Constants from '../utils/constants.jsx';
+
+const limit = Constants.QueryOptions.DEFAULT_LIMIT;
 
 export default class Pagination extends React.Component {
     constructor(props) {
@@ -48,22 +51,28 @@ export default class Pagination extends React.Component {
     }
     handleLast(e) {
         e.preventDefault();
-        const page = this.getPageQueryString(this.props.totalPages);
+        const page = this.getPageQueryString(Math.ceil(this.props.totalPages / limit));
         browserHistory.push(`/${this.props.url}${page}`);
     }
     render() {
         //let i = 1;
         const total = this.props.totalPages;
         const current = this.props.currentPage;
+        const totalPages = Math.ceil(total / limit);
         const pages = [];
 
         let first;
         let prev;
         let next;
         let last;
-        let console;
 
-        if (current > 1 && current <= total) {
+        const console = (
+            <li key='console-page'>
+                <span>{`${current} de ${totalPages}`}</span>
+            </li>
+        );
+
+        if (current > 1 && current <= totalPages) {
             first = (
                 <li key='first-page'>
                     <a
@@ -81,7 +90,7 @@ export default class Pagination extends React.Component {
             );
         }
 
-        if (current < total) {
+        if (current < totalPages) {
             next = (
                 <li key='next-page'>
                     <a
@@ -97,16 +106,10 @@ export default class Pagination extends React.Component {
                     >{'Última'}</a>
                 </li>
             );
-
-            console = (
-                <li key='console-page'>
-                    <span>{`${current} de ${this.props.totalPages}`}</span>
-                </li>
-            );
         }
 
         const rangeBack = current - this.props.range;
-        const rangeForward = ((current + this.props.range) + 1);
+        const rangeForward = ((current + this.props.range) + 1) > totalPages ? totalPages + 1 : ((current + this.props.range) + 1);
 
         for (let p = rangeBack; p < rangeForward; p++) {
             if ((p > 0) && (p <= total)) {

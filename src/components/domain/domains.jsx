@@ -133,7 +133,7 @@ export default class Domains extends React.Component {
             );
         }
 
-        if (this.isGlobalAdmin) {
+        if (!this.isGlobalAdmin) {
             addDomainButton = [{
                 label: 'Agregar Dominio',
                 props: {

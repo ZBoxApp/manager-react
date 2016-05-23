@@ -51,7 +51,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 
         if (window.manager_config.plans[cosID.name]) {
             cosName = Utils.titleCase(cosID.name);
-            statusCos = 'label btn-xs' + window.manager_config.plans[cosID.name].statusCos;
+            statusCos = 'label btn-xs ' + window.manager_config.plans[cosID.name].statusCos;
         }
 
         if (this.state.hasDomain) {
@@ -64,6 +64,20 @@ export default class BlockGeneralInfoMailbox extends React.Component {
             const description = attrs.description;
             const mailhost = attrs.zimbraMailHost;
             const archive = attrs.zimbraArchiveAccount;
+            let btnArchive = archive;
+
+            if (this.props.webmail) {
+                btnArchive = (
+                <Button
+                    btnAttrs={{
+                        href: this.props.webmail,
+                        target: '_blank'
+                    }}
+                >
+                    {archive}
+                </Button>
+                );
+            }
 
             blockInfo = (
                 <article className='account-info'>
@@ -105,7 +119,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
                         <div>
                             <p>
                                 <strong>{'Archive: '}</strong>
-                                {archive}
+                                {btnArchive}
                             </p>
                         </div>
                     )}
@@ -138,5 +152,6 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 
 BlockGeneralInfoMailbox.propTypes = {
     data: React.PropTypes.object.isRequired,
+    webmail: React.PropTypes.string,
     location: React.PropTypes.object.isRequired
 };

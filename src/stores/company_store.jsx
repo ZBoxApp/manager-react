@@ -10,6 +10,11 @@ class CompanyStoreClass {
         this.companies = null;
     }
 
+    resetThisStore() {
+        this.current = null;
+        this.companies = null;
+    }
+
     getCompanies() {
         const array = [];
         const companies = this.companies;

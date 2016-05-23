@@ -28,16 +28,20 @@ export default class Sidebar extends React.Component {
     }
     render() {
         if (this.state.user) {
+            const userName = this.state.user.name;
             return (
                 <aside id='menu'>
                     <div id='navigation'>
                         <div className='profile-picture'>
-                            <div className='stats-label text-color'>
-                                <span className='font-extra-bold font-uppercase'>
+                            <div className='stats-label text-color format-text'>
+                                <span
+                                    className='font-extra-bold font-uppercase'
+                                    title={userName}
+                                >
                                     <Link
                                         to={`/mailboxes/${this.state.user.id}`}
                                     >
-                                        {this.state.user.name}
+                                        {userName}
                                     </Link>
                                     <small className='text-muted'></small>
                                 </span>

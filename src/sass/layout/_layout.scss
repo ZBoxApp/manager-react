@@ -40,15 +40,23 @@ body {
   width: $menu-width;
 }
 
+#root {
+  height: inherit;
 
-#wrapper {
-  background: $color-background;
-  border-left: 1px solid $border-color;
-  margin: 0 0 0 $menu-width;
-  min-height: 100%;
-  padding: 0;
-  position: relative;
-  transition: all .4s ease 0s;
+  > div {
+    height: inherit;
+  }
+
+  #wrapper {
+    background: $color-background;
+    border-left: 1px solid $border-color;
+    height: inherit;
+    margin: 0 0 0 $menu-width;
+    min-height: 100%;
+    padding: 0;
+    position: relative;
+    transition: all .4s ease 0s;
+  }
 }
 
 .content {
