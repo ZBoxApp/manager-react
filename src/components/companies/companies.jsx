@@ -11,6 +11,8 @@ import Panel from '../panel.jsx';
 
 import CompaniesStore from '../../stores/company_store.jsx';
 import ZimbraStore from '../../stores/zimbra_store.jsx';
+import UserStore from '../../stores/user_store.jsx';
+import DomainStore from '../../stores/domain_store.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
@@ -30,6 +32,8 @@ export default class Companies extends React.Component {
         this.getDomains = this.getDomains.bind(this);
         this.getPlans = this.getPlans.bind(this);
         this.gotoCompany = this.gotoCompany.bind(this);
+
+        this.isGlobalAdmin = UserStore.isGlobalAdmin();
     }
 
     gotoCompany(e, company) {
@@ -47,29 +51,65 @@ export default class Companies extends React.Component {
             return GlobalActions.emitEndLoading();
         }
 
-        return Client.getAllCompanies().then((data) => {
-            const domains = data.map((company) => {
-                return self.getDomains(company);
-            });
+        const mydomain = UserStore.getCurrentUser().name.split('@').pop();
 
-            return Promise.all(domains).then((comps) => {
-                CompaniesStore.setCompanies(comps);
-
-                self.setState({
-                    companies: comps
+        if (this.isGlobalAdmin) {
+            return Client.getAllCompanies().then((data) => {
+                const domains = data.map((company) => {
+                    return self.getDomains(company);
                 });
-            }).
-            catch((error) => {
+
+                return Promise.all(domains).then((comps) => {
+                    CompaniesStore.setCompanies(comps);
+
+                    self.setState({
+                        companies: comps
+                    });
+                }).
+                catch((error) => {
+                    self.setState({error: {
+                        message: error,
+                        type: messageTypes.ERROR
+                    }});
+                });
+            }).catch((error) => {
+                self.setState({error});
+            }).finally(() => {
+                GlobalActions.emitEndLoading();
+            });
+        }
+
+        if (DomainStore.getDomains()) {
+            const domain = DomainStore.getDomainByName(mydomain);
+            Client.getCompany(domain.attrs.businessCategory, (company) => {
+                CompaniesStore.setCompanies(company);
+            }, (error) => {
                 self.setState({error: {
                     message: error,
                     type: messageTypes.ERROR
                 }});
             });
-        }).catch((error) => {
-            self.setState({error});
-        }).finally(() => {
-            GlobalActions.emitEndLoading();
-        });
+        } else {
+            Client.getDomain(mydomain, (dom) => {
+                Client.getCompany(dom.attrs.businessCategory, (company) => {
+                    self.setState({
+                        companies: company
+                    });
+                }, (error) => {
+                    self.setState({error: {
+                        message: error,
+                        type: messageTypes.ERROR
+                    }});
+                });
+            }, (error) => {
+                self.setState({
+                    error,
+                    type: messageTypes.ERROR
+                });
+            });
+        }
+
+        return GlobalActions.emitEndLoading();
     }
 
     getDomains(company) {
