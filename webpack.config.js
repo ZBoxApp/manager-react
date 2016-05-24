@@ -22,7 +22,7 @@ const hash = timestamp.slice(-6, timestamp.length);
 
 var DEV = false;
 var FULLMAP = false;
-if (NPM_TARGET === 'run' || NPM_TARGET === 'run-fullmap') {
+if (NPM_TARGET === 'run' || NPM_TARGET === 'run-fullmap' || NPM_TARGET === 'deploy') {
     DEV = true;
     if (NPM_TARGET === 'run-fullmap') {
         FULLMAP = true;
