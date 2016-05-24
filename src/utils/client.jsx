@@ -47,6 +47,7 @@ function initZimbra() {
 
             if (zimbra && token) {
                 window.manager_config.dns.token = token;
+                window.manager_config.user_token = token;
                 return resolve(zimbra);
             } else if (token) {
                 zimbra = new ZimbraAdminApi({
@@ -55,6 +56,7 @@ function initZimbra() {
                 zimbra.client.token = token;
                 ZimbraStore.setCurrent(zimbra);
                 window.manager_config.dns.token = token;
+                window.manager_config.user_token = token;
                 return resolve(zimbra);
             }
 
@@ -154,6 +156,9 @@ export function getAllCompanies() {
     return new Promise((resolve, reject) => {
         return $.ajax({
             url,
+            beforeSend: function setApiToken(xhrObj) {
+                xhrObj.setRequestHeader('x-api-token', window.manager_config.user_token);
+            },
             dataType: 'json',
             success: function onSuccess(data) {
                 resolve(data);
@@ -170,6 +175,9 @@ export function getCompany(id, success, error) {
 
     return $.ajax({
         url,
+        beforeSend: function setApiToken(xhrObj) {
+            xhrObj.setRequestHeader('x-api-token', window.manager_config.user_token);
+        },
         dataType: 'json',
         success: function onSuccess(data) {
             success(data);
@@ -185,6 +193,9 @@ export function getInvoices(id, success, error) {
 
     return $.ajax({
         url,
+        beforeSend: function setApiToken(xhrObj) {
+            xhrObj.setRequestHeader('x-api-token', window.manager_config.user_token);
+        },
         dataType: 'json',
         success,
         error: function onError(xhr, status, err) {
