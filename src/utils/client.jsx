@@ -157,7 +157,7 @@ export function getAllCompanies() {
         return $.ajax({
             url,
             beforeSend: function setApiToken(xhrObj) {
-                xhrObj.setRequestHeader('x-api-token', window.manager_config.user_token);
+                xhrObj.setRequestHeader('x-api-key', window.manager_config.user_token);
             },
             dataType: 'json',
             success: function onSuccess(data) {
@@ -176,7 +176,7 @@ export function getCompany(id, success, error) {
     return $.ajax({
         url,
         beforeSend: function setApiToken(xhrObj) {
-            xhrObj.setRequestHeader('x-api-token', window.manager_config.user_token);
+            xhrObj.setRequestHeader('x-api-key', window.manager_config.user_token);
         },
         dataType: 'json',
         success: function onSuccess(data) {
@@ -194,7 +194,7 @@ export function getInvoices(id, success, error) {
     return $.ajax({
         url,
         beforeSend: function setApiToken(xhrObj) {
-            xhrObj.setRequestHeader('x-api-token', window.manager_config.user_token);
+            xhrObj.setRequestHeader('x-api-key', window.manager_config.user_token);
         },
         dataType: 'json',
         success,
