@@ -7,20 +7,16 @@ import Constants from '../utils/constants.jsx';
 const eventTypes = Constants.EventTypes;
 
 let mailboxesArray = null;
-let mailboxesInstances = [];
 
 class MailboxStoreClass extends EventEmitter {
     constructor() {
         super();
         this.current = null;
-        this.currentPage = {};
     }
 
     resetThisStore() {
         this.current = null;
-        this.currentPage = {};
         mailboxesArray = null;
-        mailboxesInstances = [];
     }
 
     getMailboxById(id) {
@@ -91,26 +87,12 @@ class MailboxStoreClass extends EventEmitter {
         return mailboxesArray;
     }
 
-    setMailboxes(mailboxes, page) {
-        if (mailboxesArray) {
-            Array.prototype.push.apply(mailboxesInstances, mailboxes.account);
-            mailboxesArray.account = mailboxesInstances;
-
-            if (page) {
-                this.currentPage[page] = mailboxes;
-            }
-            return true;
+    setMailboxes(mailboxes) {
+        if (mailboxes) {
+            mailboxesArray = mailboxes;
         }
 
-        const copy = Object.assign({}, mailboxes);
-        const accounts = mailboxes.account.slice();
-        mailboxesArray = copy;
-        mailboxesInstances = accounts;
-
-        if (page) {
-            this.currentPage[page] = mailboxes;
-        }
-        return true;
+        return false;
     }
 
     changeAccount(newAccount) {
