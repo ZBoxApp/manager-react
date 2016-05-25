@@ -30,13 +30,13 @@ export default class DomainMailboxPlans extends React.Component {
                 plans
             });
         }
-
         return this.props.domain.countAccounts(
             (err, data) => {
                 if (err) {
                     return this.setState({plans: {}});
                 }
 
+                this.props.domain.plans = data;
                 return this.setState({plans: data});
             }
         );
@@ -94,12 +94,12 @@ export default class DomainMailboxPlans extends React.Component {
             });
         }
 
-        for (const key in plans) {
+        for (const key in this.state.plans) {
             if (plans.hasOwnProperty(key)) {
                 const plan = plans[key];
-                totalUsed += plan.used;
+                totalUsed += (parseInt(plan.used, 10)) ? parseInt(plan.used, 10) : 0;
                 if (plan.limit === 0) {
-                    totalLimit = '\u221e';
+                    //totalLimit = '\u221e';
 
                     if (!noLimitError) {
                         noLimitError = (
@@ -111,7 +111,6 @@ export default class DomainMailboxPlans extends React.Component {
                         );
                     }
                 } else {
-                    console.log(totalLimit); //eslint-disable-line no-console
                     totalLimit += plan.limit;
                 }
 

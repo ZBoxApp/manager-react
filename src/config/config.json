@@ -12,13 +12,16 @@
     "autoincrementOnFailRequestZimbra": 500,
     "plans": {
         "basic": {
-            "statusCos": "btn-success"
+            "statusCos": "btn-success",
+            "label": "Básica"
         },
         "premium": {
-            "statusCos": "btn-primary2"
+            "statusCos": "btn-primary2",
+            "label": "Premium"
         },
         "professional": {
-            "statusCos": "btn-primary"
+            "statusCos": "btn-primary",
+            "label": "Profesional"
         },
         "default": false
     },

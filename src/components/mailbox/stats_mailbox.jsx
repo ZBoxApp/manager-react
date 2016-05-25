@@ -107,7 +107,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
                             <div className='col-xs-6'>
                                 {sizeEnaled && (
                                     <p>
-                                        <span className='center-block'>Espacio Disponible</span>
+                                        <span className='center-block'>Espacio Total</span>
                                         <strong>{sizeEnaled}</strong>
                                     </p>
                                 )}
