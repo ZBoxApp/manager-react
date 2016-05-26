@@ -185,7 +185,7 @@ export default class DomainMailboxPlans extends React.Component {
         } else {
             panelBody = (
                 <div className='text-center'>
-                    <h4 className='text-danger'>{'No posee casillas asignadas a su dominio.'}</h4>
+                    <h4 className='text-danger'>{'No se han asignado límites de casillas.'}</h4>
                 </div>
             );
         }

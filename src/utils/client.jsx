@@ -172,21 +172,23 @@ export function getAllCompanies() {
     });
 }
 
-export function getCompany(id, success, error) {
+export function getCompany(id) {
     const url = global.window.manager_config.companiesEndPoints.detail.replace('{id}', id);
 
-    return $.ajax({
-        url,
-        beforeSend: function setApiToken(xhrObj) {
-            xhrObj.setRequestHeader('x-api-key', window.manager_config.user_token);
-        },
-        dataType: 'json',
-        success: function onSuccess(data) {
-            success(data);
-        },
-        error: function onError(xhr) {
-            error(xhr.responseJSON);
-        }
+    return new Promise((resolve, reject) => {
+        return $.ajax({
+            url,
+            beforeSend: function setApiToken(xhrObj) {
+                xhrObj.setRequestHeader('x-api-key', window.manager_config.user_token);
+            },
+            dataType: 'json',
+            success: function onSuccess(data) {
+                resolve(data);
+            },
+            error: function onError(xhr) {
+                reject(xhr.responseJSON);
+            }
+        });
     });
 }
 

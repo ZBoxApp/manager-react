@@ -287,14 +287,20 @@ export default class EditDomain extends React.Component {
             ];
 
             return (
-                <Panel
-                    title={'Editar Dominio'}
-                    btnsHeader={actions}
-                    classHeader={'forum-box'}
-                    error={messageBar}
-                >
-                    {form}
-                </Panel>
+                <div className='content animate-panel'>
+                    <div className='row'>
+                        <div className='col-md-12 central-content'>
+                            <Panel
+                                title={'Editar Dominio'}
+                                btnsHeader={actions}
+                                classHeader={'forum-box'}
+                                error={messageBar}
+                            >
+                                {form}
+                            </Panel>
+                        </div>
+                    </div>
+                </div>
             );
         }
 
