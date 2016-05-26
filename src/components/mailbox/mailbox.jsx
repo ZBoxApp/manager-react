@@ -24,11 +24,10 @@ import ToggleModalButton from '../toggle_modal_button.jsx';
 import ImportMassiveModal from '../import_massive_modal.jsx';
 
 import DomainStore from '../../stores/domain_store.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 const QueryOptions = Constants.QueryOptions;
 const messageType = Constants.MessageType;
-
-import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 export default class Mailboxes extends React.Component {
     constructor(props) {
