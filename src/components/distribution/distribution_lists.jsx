@@ -34,6 +34,8 @@ export default class DistributionLists extends React.Component {
         this.onSubmitMembers = this.onSubmitMembers.bind(this);
         this.onCancelMember = this.onCancelMember.bind(this);
         this.onCancelOwner = this.onCancelOwner.bind(this);
+        this.onExportMembers = this.onExportMembers.bind(this);
+        this.onExportAllowers = this.onExportAllowers.bind(this);
         this.domain = null;
 
         this.state = {};
@@ -46,6 +48,16 @@ export default class DistributionLists extends React.Component {
             type: attrs.typeError,
             autocloseInSecs: autoTimer
         });
+    }
+
+    onExportMembers(data) {
+        const title = `Miembros de la lista de distribución '${this.state.distributionsList.name}' de ${this.state.domain.name}`;
+        Utils.exportAsCSV(data, 'members', title, true);
+    }
+
+    onExportAllowers(data) {
+        const title = `Permitidos de la lista de distribución '${this.state.distributionsList.name}' de ${this.state.domain.name}`;
+        Utils.exportAsCSV(data, 'allowers', title, true);
     }
 
     getDistributionLists() {
@@ -451,6 +463,9 @@ export default class DistributionLists extends React.Component {
                     onCancel={(response) => {
                         this.onCancelMember(response);
                     }}
+                    onExport={(members) => {
+                        this.onExportMembers(members);
+                    }}
                 />
             );
 
@@ -468,6 +483,9 @@ export default class DistributionLists extends React.Component {
                     }}
                     onCancel={(response) => {
                         this.onCancelOwner(response);
+                    }}
+                    onExport={(allowers) => {
+                        this.onExportAllowers(allowers);
                     }}
                 />
             );

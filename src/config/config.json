@@ -3,7 +3,7 @@
     "zimbraUrl": "http://zimbra.zboxapp.dev:9081/zimbra_proxy/service/admin/soap",
     "zimbraProxy": "https://192.168.1.8:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
-    "webMailUrl": "https://zimbra.zboxapp.dev",
+    "webMailUrl": "https://192.168.1.8:8443",
     "dns": {
         "url": "http://zimbra.zboxapp.dev:9081//powerdns_proxy/",
         "token": "otto"
@@ -55,6 +55,22 @@
                 "zimbraCreateTimestamp": true,
                 "zimbraLastLogonTimestamp": true
             }
+        }
+    },
+    "export" : {
+        "domain": {
+            "name": "Email",
+            "giverName": "Nombre",
+            "sn": "Apellido",
+            "cn": "Usuario",
+            "zimbraCOSId": "Plan",
+            "zimbraAccountStatus": "Status"
+        },
+        "members": {
+            "name": "Miembros"
+        },
+        "allowers": {
+            "name": "Permitidos"
         }
     }
 }
