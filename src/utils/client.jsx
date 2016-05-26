@@ -8,6 +8,7 @@ import ZimbraAdminApi from 'zimbra-admin-api-js';
 import Powerdns from 'js-powerdns';
 import ZimbraStore from '../stores/zimbra_store.jsx';
 import ResetStores from '../stores/reset_stores.jsx';
+import UserStore from '../stores/user_store.jsx';
 
 import * as GlobalActions from '../action_creators/global_actions.jsx';
 import * as Utils from './utils.jsx';
@@ -584,16 +585,34 @@ export function batchRequest(requestArray, success, error) {
 export function getAllCos(success, error) {
     initZimbra().then(
         (zimbra) => {
-            zimbra.getAllCos((err, data) => {
+            if (UserStore.isGlobalAdmin()) {
+              zimbra.getAllCos((err, data) => {
+                  if (err) {
+                      const e = handleError('getAllCos', err);
+                      if (error) {
+                          return error(e);
+                      }
+                  }
+
+                  return success(data);
+              });
+            } else {
+              const batchRequests = [];
+              const plans_names = Object.keys(window.manager_config.plans);
+              plans_names.forEach((plan) => {
+                batchRequests.push(zimbra.getCos(plan));
+              });
+
+              zimbra.makeBatchRequest(batchRequests, (err, data) => {
                 if (err) {
-                    const e = handleError('getAllCos', err);
+                    const e = handleError('getCos', err);
                     if (error) {
                         return error(e);
                     }
                 }
-
-                return success(data);
-            });
+                return success(data.GetCosResponse.map((r) => {return r.cos[0];}));
+              });
+            }
         },
         (err) => {
             const e = handleError('getAllCos', err);
