@@ -63,7 +63,7 @@ export default class SearchView extends React.Component {
     makeSearch(query) {
       let advanceQuery = false;
       try {
-        advanceQuery = JSON.parse(query).advanceQuery;
+        advanceQuery = JSON.parse(query).advance_query;
       } catch (e) {
         advanceQuery = false;
       }
