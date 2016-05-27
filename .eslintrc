@@ -127,7 +127,7 @@
     "consistent-this": [2, "self"],
     "func-names": 2,
     "func-style": [2, "declaration"],
-    "indent": [2, 4, {"SwitchCase": 0}],
+    # "indent": [2, 2, {"SwitchCase": 0}],
     "jsx-quotes": [2, "prefer-single"],
     "key-spacing": [2, {"beforeColon": false, "afterColon": true}],
     "linebreak-style": 2,
