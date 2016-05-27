@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import {Link} from 'react-router';
 
 import Constants from '../utils/constants.jsx';
 
@@ -64,6 +65,21 @@ export default class MessageBar extends React.Component {
                 );
             }
 
+            const link = this.props.link;
+            const linkText = this.props.linkText ? this.props.linkText : link;
+            let messageLink;
+            if (link) {
+              messageLink = (
+                <span> -
+                  <Link to={link}
+                    style={{color: '#fff'}}
+                  >
+                    {` ${linkText}`}
+                  </Link>
+                </span>
+              );
+            }
+
             const alertClass = `alert flash-${this.props.type.toLowerCase()} ${dismissible}`;
             let icon;
             switch (this.props.type) {
@@ -91,7 +107,7 @@ export default class MessageBar extends React.Component {
                         role='alert'
                     >
                         {closeButton}
-                        {icon} {message}
+                        {icon} {message} {messageLink}
                     </div>
                 </div>
             );
@@ -107,7 +123,9 @@ MessageBar.defaultProps = {
     position: 'relative',
     canClose: true,
     autoclose: false,
-    autocloseInSecs: 10
+    autocloseInSecs: 10,
+    link: null,
+    linkText: null
 };
 
 MessageBar.propTypes = {
@@ -116,5 +134,7 @@ MessageBar.propTypes = {
     position: React.PropTypes.oneOf(['absolute', 'fixed', 'relative', 'static', 'inherit']),
     canClose: React.PropTypes.bool,
     autoclose: React.PropTypes.bool,
-    autocloseInSecs: React.PropTypes.number
+    autocloseInSecs: React.PropTypes.number,
+    link: React.PropTypes.string,
+    linkText: React.PropTypes.string
 };
