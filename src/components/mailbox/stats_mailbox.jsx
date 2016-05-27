@@ -33,7 +33,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         this.date = Utils.dateFormatted(this.props.data.attrs.zimbraCreateTimestamp);
 
         switch (this.props.data.attrs.zimbraAccountStatus) {
-        case 'lockedout':
+        case 'lockout':
             this.status = 'Bloqueada';
             this.className = 'label-locked mailbox-status';
             break;
