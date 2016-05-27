@@ -28,41 +28,56 @@ export default class SearchView extends React.Component {
         this.makeSearch(query);
     }
 
+    runSearch(queryObject) {
+      this.setState({
+          loading: true
+      });
+      Client.search(queryObject, (success) => {
+          const result = [];
+
+          for (const key in success) {
+              if (success.hasOwnProperty(key)) {
+                  if (key === 'dl' || key === 'domain' || key === 'account') {
+                      Array.prototype.push.apply(result, success[key]);
+                  }
+              }
+          }
+
+          if (success.total <= 0) {
+              return this.setState({
+                  notfound: true,
+                  loading: false
+              });
+          }
+
+          return this.setState({
+              result,
+              loading: false,
+              notfound: false
+          });
+      }, (error) => {
+          console.log(error); //eslint-disable-line no-console
+      });
+    }
+
     makeSearch(query) {
-        this.setState({
-            loading: true
-        });
-        Client.search({
+      let advanceQuery = false;
+      try {
+        advanceQuery = JSON.parse(query).advanceQuery;
+      } catch (e) {
+        advanceQuery = false;
+      }
+      if (advanceQuery) {
+        this.runSearch(advanceQuery);
+      } else {
+        const queryObject = {
             maxResults: window.manager_config.maxResultOnRequestZimbra,
             query: `(|(mail=*${query}*)(cn=*${query}*)(sn=*${query}*)(gn=*${query}*)(displayName=*${query}*)(zimbraMailDeliveryAddress=*${query}*)(zimbraDomainName=*${query}*)(uid=*${query}*)(zimbraMailAlias=*${query}*)(uid=*${query}*)(zimbraDomainName=*${query}*)(cn=*${query}*))`,
             types: 'accounts,distributionlists,domains',
             attrs: 'objectClass'
-        }, (success) => {
-            const result = [];
-
-            for (const key in success) {
-                if (success.hasOwnProperty(key)) {
-                    if (key === 'dl' || key === 'domain' || key === 'account') {
-                        Array.prototype.push.apply(result, success[key]);
-                    }
-                }
-            }
-
-            if (success.total <= 0) {
-                return this.setState({
-                    notfound: true,
-                    loading: false
-                });
-            }
-
-            return this.setState({
-                result,
-                loading: false,
-                notfound: false
-            });
-        }, (error) => {
-            console.log(error); //eslint-disable-line no-console
-        });
+        };
+        this.runSearch(queryObject);
+      }
     }
 
     render() {

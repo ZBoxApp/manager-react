@@ -264,7 +264,9 @@ export default class Companies extends React.Component {
                             <MessageBar
                                 message='Existen dominios sin límites asignados'
                                 type='WARNING'
-                                autoclose={true}
+                                autoclose={false}
+                                link={`/search/${Constants.ZimbraSearchs.DOMAINS_WITHOUT_LIMITS}`}
+                                linkText='Ver dominios sin límites'
                             />
                         );
                     }

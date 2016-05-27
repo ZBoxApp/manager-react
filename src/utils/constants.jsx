@@ -49,6 +49,10 @@ export default {
         AUTH__REQUIRED: 'service.AUTH_REQUIRED'
     },
 
+    ZimbraSearchs: {
+      DOMAINS_WITHOUT_LIMITS: '{"advance_query": {"query": "(!(zimbraDomainCOSMaxAccounts=*))", "types": "domains"}}'
+    },
+
     RESERVED_USERNAMES: [
         'admin',
         'root'
