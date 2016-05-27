@@ -5,10 +5,12 @@ import $ from 'jquery';
 import React from 'react';
 import Promise from 'bluebird';
 import EventStore from '../../stores/event_store.jsx';
+import {browserHistory} from 'react-router';
 
 import PageInfo from '../page_info.jsx';
 import Panel from '../panel.jsx';
-import PanelTab from '../panel_tab.jsx';
+
+//import PanelTab from '../panel_tab.jsx';
 import Pagination from '../pagination.jsx';
 import MailboxStore from '../../stores/mailbox_store.jsx';
 import Button from '../button.jsx';
@@ -36,6 +38,7 @@ export default class Mailboxes extends React.Component {
         this.showMessage = this.showMessage.bind(this);
         this.refreshAllAccounts = this.refreshAllAccounts.bind(this);
         this.handleChangeFilter = this.handleChangeFilter.bind(this);
+        this.handleTabChanged = this.handleTabChanged.bind(this);
         this.makeFilter = this.makeFilter.bind(this);
 
         const page = parseInt(this.props.location.query.page, 10) || 1;
@@ -65,6 +68,10 @@ export default class Mailboxes extends React.Component {
         };
     }
 
+    handleTabChanged(tab) {
+        browserHistory.push(`/mailboxes?tab=${tab}`);
+    }
+
     handleChangeFilter(e) {
         const selected = e.target.value;
 
@@ -77,12 +84,12 @@ export default class Mailboxes extends React.Component {
         }
 
         if (e.target.className.indexOf('status') > -1) {
-            this.selectedStatusFilter = selected.length > 0 ? selected : null;
+            this.selectedStatusFilter = selected.length > 0 ? selected : '';
         }
 
-        const domainId = this.domainId;
-
-        this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);
+        /*const domainId = this.domainId;
+        this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);*/
+        browserHistory.push(this.props.location.pathname);
     }
 
     makeFilter() {
@@ -134,8 +141,8 @@ export default class Mailboxes extends React.Component {
     componentWillReceiveProps(newProps) {
         const condition = this.props.location.query.page !== newProps.location.query.page;
         let domainId = null;
-        this.domainName = null;
 
+        //this.domainName = null;
         if (condition) {
             const page = parseInt(newProps.location.query.page, 10) || 1;
 
@@ -255,7 +262,8 @@ export default class Mailboxes extends React.Component {
 
                 const items = this.makeFilter() || this.mailboxes;
 
-                const tables = this.buildTableFromData(items, ['Todas', 'Bloqueadas']);
+                //const tables = this.buildTableFromData(items, ['Todas', 'Bloqueadas']);
+                const tables = this.buildTableFromData(items);
 
                 if (items.lockout) {
                     GlobalActions.emitMessage({
@@ -412,9 +420,10 @@ export default class Mailboxes extends React.Component {
             pagination = (
                 <Pagination
                     key='panelPagination'
-                    url='mailboxes'
+                    url={this.props.location.pathname}
                     currentPage={this.state.page}
                     totalPages={hasPage.total}
+                    total={hasPage.totalItems}
                 />
             );
         }
@@ -472,33 +481,36 @@ export default class Mailboxes extends React.Component {
         );
     }
 
-    buildTableFromData(data, arrayTabNames) {
+    //buildTableFromData(data, arrayTabNames) {
+    buildTableFromData(data) {
         if (data.account) {
             const accounts = data.account;
             const totalAccounts = data.total;
             let limit = data.account.length;
             const hasPage = totalAccounts > Constants.QueryOptions.DEFAULT_LIMIT;
             let activeAccounts = [];
-            let lockedAccounts = [];
-            const tabs = {};
+
+            //let lockedAccounts = [];
+            //const tabs = {};
             let partialAccounts = accounts;
-            let partialLockOut = data.lockout ? data.lockout : 0;
-            const limitLockout = data.lockout ? data.lockout.length : 0;
-            const hasPageLockOut = limitLockout > Constants.QueryOptions.DEFAULT_LIMIT;
+
+            //let partialLockOut = data.lockout ? data.lockout : 0;
+            //const limitLockout = data.lockout ? data.lockout.length : 0;
+            //const hasPageLockOut = limitLockout > Constants.QueryOptions.DEFAULT_LIMIT;
 
             if (hasPage) {
                 partialAccounts = accounts.slice(this.state.offset, (this.state.page * Constants.QueryOptions.DEFAULT_LIMIT));
                 limit = partialAccounts.length;
             }
 
-            if (hasPageLockOut) {
+            /*if (hasPageLockOut) {
                 partialLockOut = partialLockOut.slice(this.state.offset, (this.state.page * Constants.QueryOptions.DEFAULT_LIMIT));
                 partialLockOut = partialLockOut.map((lockout) => {
                     return this.buildRow(lockout, 'label label-locked m-r', 'Bloqueada');
                 });
-            }
+            }*/
 
-            const response = {};
+            //const response = {};
 
             for (let i = 0; i < limit; i++) {
                 const account = partialAccounts[i].attrs;
@@ -513,13 +525,14 @@ export default class Mailboxes extends React.Component {
                     activeAccounts.push(this.buildRow(partialAccounts[i], 'label label-warning m-r', 'Inactiva'));
                     break;
                 case 'lockout':
-                    lockedAccounts.push(this.buildRow(partialAccounts[i], 'label label-locked m-r', 'Bloqueada'));
+                    //lockedAccounts.push(this.buildRow(partialAccounts[i], 'label label-locked m-r', 'Bloqueada'));
                     activeAccounts.push(this.buildRow(partialAccounts[i], 'label label-locked m-r', 'Bloqueada'));
                     break;
                 }
             }
-            const all = `${arrayTabNames.shift()} (${totalAccounts})`;
-            const locked = `${arrayTabNames.shift()} (${limitLockout})`;
+
+            /*const all = `${arrayTabNames.shift()} (${totalAccounts})`;
+            const locked = `${arrayTabNames.shift()} (${limitLockout})`;*/
 
             // create structure html for all accountsç
             let exportBtn = null;
@@ -569,17 +582,18 @@ export default class Mailboxes extends React.Component {
             if (hasPage) {
                 const totalPage = Math.ceil(totalAccounts / QueryOptions.DEFAULT_LIMIT);
                 activePagination = {
-                    total: totalPage
+                    total: totalPage,
+                    totalItems: totalAccounts
                 };
             }
 
-            let lockedPagination = null;
+            /*let lockedPagination = null;
             if (hasPageLockOut) {
                 const totalPageLockOut = Math.ceil(limitLockout / QueryOptions.DEFAULT_LIMIT);
                 lockedPagination = {
                     total: totalPageLockOut
                 };
-            }
+            }*/
 
             const status = Object.keys(this.optionStatus).map((item, i) => {
                 return (
@@ -622,7 +636,7 @@ export default class Mailboxes extends React.Component {
 
                     <div className='input-group'>
                         <select
-                            className='form-control plans'
+                            className='form-control plans margin-left'
                             onChange={this.handleChangeFilter}
                             value={this.selectedPlan}
                         >
@@ -637,24 +651,24 @@ export default class Mailboxes extends React.Component {
             const panelActive = this.insertToPanel(tableActive, 'panel-all', btn, filter);
 
             // create structure html for all locked accounts
-            const tableLocked = this.makeTable(partialLockOut, lockedPagination);
-            const panelLocked = this.insertToPanel(tableLocked, 'panel-locked');
+            //const tableLocked = this.makeTable(partialLockOut, lockedPagination);
+            //const panelLocked = this.insertToPanel(tableLocked, 'panel-locked');
 
-            arrayTabNames.push(all, locked);
+            /*arrayTabNames.push(all, locked);
             tabs[Utils.slug(all)] = panelActive;
             tabs[Utils.slug(locked)] = panelLocked;
             response.tabNames = arrayTabNames;
-            response.tabs = tabs;
+            response.tabs = tabs;*/
 
-            if (lockedAccounts.length > 0) {
-                const isPlural = (lockedAccounts.length > 1) ? true : null;
+            /*if (limitLockout > 0) {
+                const isPlural = (limitLockout > 1) ? true : null;
                 response.lockedAlert = {
                     total: lockedAccounts.length,
                     message: (isPlural) ? `${lockedAccounts.length} casillas bloqueadas` : `${lockedAccounts.length} casilla bloqueada`
                 };
-            }
+            }*/
 
-            return response;
+            return panelActive;
         }
 
         return false;
@@ -663,7 +677,6 @@ export default class Mailboxes extends React.Component {
     render() {
         let message = null;
         let content = null;
-        let panelInfo = null;
         const data = this.state.data;
 
         if (this.state.loading) {
@@ -696,7 +709,7 @@ export default class Mailboxes extends React.Component {
             );
         }
 
-        panelInfo = (
+        let panelInfo = (
             <PageInfo
                 titlePage='Casillas'
                 descriptionPage='Usuarios de correo electrónico'
@@ -714,14 +727,16 @@ export default class Mailboxes extends React.Component {
         }
 
         if (data) {
-            content = (
+            /*content = (
                 <PanelTab
                     tabNames={data.tabNames}
                     tabs={data.tabs}
                     location={this.props.location}
                     onClick={this.handleTabChanged}
                 />
-            );
+            );*/
+
+            content = data;
         }
 
         return (

@@ -11,6 +11,20 @@ export default class Pagination extends React.Component {
         this.handleLast = this.handleLast.bind(this);
     }
     getPageQueryString(number) {
+        /*let params = `${(url.indexOf('?') > -1 ? '&' : '?')}page=${number}`;
+        const query = this.props.location.query;
+        const hasParams = Object.keys(query);
+
+        if (hasParams.length > 0 && this.props.location.query.page) {
+            params = '';
+            hasParams.forEach((param, i) => {
+                const joiner = i > 0 ? '&' : '?';
+                params += param === 'page' ? `${joiner}${param}=${number}` : `${joiner}${param}=${this.props.location.query[param]}`;
+            });
+        } else if (hasParams.length > 0) {
+            params = `?${hasParams[0]}=${query[hasParams[0]]}&page=${number}`;
+        }*/
+
         const url = this.props.url;
         return `${(url.indexOf('?') > -1 ? '&' : '?')}page=${number}`;
     }
@@ -65,6 +79,12 @@ export default class Pagination extends React.Component {
         const console = (
             <li key='console-page'>
                 <span>{`${current} de ${total}`}</span>
+            </li>
+        );
+
+        let totalItems = (
+            <li key='total-items'>
+                <span>{`${this.props.total} Casillas`}</span>
             </li>
         );
 
@@ -164,6 +184,7 @@ export default class Pagination extends React.Component {
                     {next}
                     {last}
                     {console}
+                    {totalItems}
                 </ul>
             </div>
         );
@@ -174,7 +195,8 @@ Pagination.propTypes = {
     url: React.PropTypes.string.isRequired,
     currentPage: React.PropTypes.number.isRequired,
     totalPages: React.PropTypes.number.isRequired,
-    range: React.PropTypes.number
+    range: React.PropTypes.number,
+    total: React.PropTypes.number
 };
 
 Pagination.defaultProps = {
