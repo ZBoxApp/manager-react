@@ -587,46 +587,37 @@ export function batchRequest(requestArray, success, error) {
 }
 
 export function getAllCos(success, error) {
-    initZimbra().then(
-        (zimbra) => {
-            if (UserStore.isGlobalAdmin()) {
-              zimbra.getAllCos((err, data) => {
-                  if (err) {
-                      const e = handleError('getAllCos', err);
-                      if (error) {
-                          return error(e);
-                      }
-                  }
+  initZimbra().then(
+    (zimbra) => {
+      if (UserStore.isGlobalAdmin()) {
+        zimbra.getAllCos((err, data) => {
+          if (err) {
+            return error(handleError('getAllCos', err));
+          }
+          return success(data);
+        });
+      } else {
+        const batchRequests = [];
+        const planNames = Object.keys(window.manager_config.plans);
+        planNames.forEach((plan) => {
+          batchRequests.push(zimbra.getCos(plan));
+        });
 
-                  return success(data);
-              });
-            } else {
-              const batchRequests = [];
-              const plans_names = Object.keys(window.manager_config.plans);
-              plans_names.forEach((plan) => {
-                batchRequests.push(zimbra.getCos(plan));
-              });
-
-              zimbra.makeBatchRequest(batchRequests, (err, data) => {
-                if (err) {
-                    const e = handleError('getCos', err);
-                    if (error) {
-                        return error(e);
-                    }
-                }
-                return success(data.GetCosResponse.map((r) => {return r.cos[0];}));
-              });
-            }
-        },
-        (err) => {
-            const e = handleError('getAllCos', err);
-            if (error) {
-                return error(e);
-            }
-
-            return null;
-        }
-    );
+        zimbra.makeBatchRequest(batchRequests, (err, data) => {
+          if (err) {
+            return error(handleError('getCos', err));
+          }
+          const allCos = data.GetCosResponse.map((r) => {
+            return r.cos[0];
+          });
+          return success(allCos);
+        });
+      }
+    },
+    (err) => {
+      return error(handleError('getAllCos', err));
+    }
+  );
 }
 
 export function getAllDistributionLists(query, success, error) {
