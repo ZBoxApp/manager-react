@@ -655,3 +655,21 @@ export function getAttrsBySectionFromConfig(section, asObject) {
 
     return false;
 }
+
+export function extractLockOuts(object) {
+    if (object && object.account) {
+        const lockout = object.account.filter((account) => {
+            if (account.attrs.zimbraAccountStatus === 'lockout') {
+                return true;
+            }
+
+            return false;
+        });
+
+        if (lockout.length > 0) {
+            object.lockout = lockout;
+        }
+    }
+
+    return object;
+}

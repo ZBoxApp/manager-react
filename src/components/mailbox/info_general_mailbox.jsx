@@ -51,7 +51,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 
         if (window.manager_config.plans[cosID.name]) {
             cosName = Utils.titleCase(cosID.name);
-            statusCos = 'label btn-xs margin-left ' + window.manager_config.plans[cosID.name].statusCos;
+            statusCos = 'label btn-xs ' + window.manager_config.plans[cosID.name].statusCos;
         }
 
         if (this.state.hasDomain) {
@@ -67,6 +67,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
             const archive = attrs.zimbraArchiveAccount;
             const isAdminDelegated = attrs.zimbraIsDelegatedAdminAccount === 'TRUE';
             if (isAdminDelegated) {
+                statusCos += ' margin-left';
                 AdminStatus = (
                     <StatusLabel classes={'label btn-xs btn-warning2'}>
                         {'Administrador'}
