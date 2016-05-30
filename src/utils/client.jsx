@@ -90,10 +90,25 @@ export function getMe(success, error) {
                     const e = handleError('getMe', err);
                     return error(e);
                 }
+                const user = data;
 
-                Reflect.deleteProperty(data, 'obj');
-                GlobalActions.saveUser(data);
-                return success();
+                if (user.attrs._attrs.zimbraIsAdminAccount === 'TRUE') {
+                  Reflect.deleteProperty(user, 'obj');
+                  GlobalActions.saveUser(user);
+                  return success();
+                } else {
+                  const domain = user.name.split(/@/)[1];
+                  zimbra.getDomain(domain, (e, d) => {
+                    if (e) {
+                        const error = handleError('getDomain', e);
+                        return error(error);
+                    }
+                    user.company_id = d.attrs.businessCategory;
+                    Reflect.deleteProperty(user, 'obj');
+                    GlobalActions.saveUser(user);
+                    return success();
+                  });
+                }
             });
         },
         (err) => {

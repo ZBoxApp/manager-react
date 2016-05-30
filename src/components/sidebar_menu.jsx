@@ -19,9 +19,19 @@ export default class SidebarMenu extends React.Component {
             browserHistory.push(path);
         }
     }
-    render() {
-        const companyText = UserStore.isGlobalAdmin() ? 'Empresas' : 'Mi Empresa';
 
+    makeCompanyLink() {
+      const link = { text: 'Empresas', path: '/companies' };
+      if (!UserStore.isGlobalAdmin()) {
+        const user = UserStore.getCurrentUser();
+        link.text = 'Mi Empresa';
+        link.path = `/companies/${user.company_id}`;
+      }
+      return link;
+    }
+
+    render() {
+        const companyLink = this.makeCompanyLink();
         return (
             <ul
                 className='nav'
@@ -30,9 +40,9 @@ export default class SidebarMenu extends React.Component {
                 <li id='sidebar-companies'>
                     <a
                         href='#'
-                        onClick={(e) => this.handleLink(e, '/companies')}
+                        onClick={(e) => this.handleLink(e, companyLink.path)}
                     >
-                        <span className='nav-label'>{companyText}</span>
+                        <span className='nav-label'>{companyLink.text}</span>
                     </a>
                 </li>
                 <li id='sidebar-domains'>

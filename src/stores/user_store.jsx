@@ -36,6 +36,12 @@ class UserStoreClass extends EventEmitter {
         return null;
     }
 
+    getPrimaryDomain() {
+      const user = this.getCurrentUser();
+      const domain = user ? user.name.split(/@/)[1] : null;
+      return domain;
+    }
+
     isGlobalAdmin() {
         const user = this.getCurrentUser();
 
