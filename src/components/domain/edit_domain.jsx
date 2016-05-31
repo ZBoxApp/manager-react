@@ -29,8 +29,9 @@ export default class EditDomain extends React.Component {
     }
 
     getDomain() {
+        //const domain = DomainStore.getCurrent();
         const domainId = this.props.params.id;
-        const domain = DomainStore.getCurrent();
+        const domain = null;
 
         if (domain && domain.id === domainId) {
             return this.getCompanies(domain);

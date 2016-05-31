@@ -206,19 +206,6 @@ export default class Mailboxes extends React.Component {
             this.domainName = domainName;
         }
 
-        /*const attrsForLockOut = Object.assign({}, attrs);
-        attrsForLockOut.query = 'zimbraAccountStatus=lockout';
-        attrsForLockOut.limit = 10;
-        attrsForLockOut.countOnly = true;
-
-        promises.push(Client.getAllAccountsByBatch(attrsForLockOut));
-
-        Client.batchRequest(promises, (exito) => {
-            console.log('exito', exito);
-        }, (err) => {
-            console.log('error', err);
-        });*/
-
         new Promise((resolve, reject) => {
             if (domainName) {
                 const hasMailboxForDomain = MailboxStore.getMailboxByDomainId(this.domainId);

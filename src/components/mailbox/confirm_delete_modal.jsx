@@ -87,7 +87,6 @@ export default class ConfirmDeleteModal extends React.Component {
 
     handleKeyUp() {
         let val = this.refs.confirmMailbox.value;
-
         if (val === this.props.data.attrs.mail) {
             if (this.refs.buttonDelete.hasAttribute('disabled')) {
                 Utils.toggleStatusButtons('.action-delete', false);

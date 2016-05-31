@@ -45,7 +45,7 @@ export default class Domains extends React.Component {
             maxResults: window.manager_config.maxResultOnRequestZimbra
         };
 
-        if (DomainStore.getDomains()) {
+        /*if (DomainStore.getDomains()) {
             const data = DomainStore.getDomains();
 
             GlobalActions.emitEndLoading();
@@ -54,7 +54,7 @@ export default class Domains extends React.Component {
                 data,
                 loading: false
             });
-        }
+        }*/
 
         const attrneeded = Utils.getAttrsBySectionFromConfig('domains');
         attrs.attrs = attrneeded;
@@ -62,6 +62,10 @@ export default class Domains extends React.Component {
         Client.getAllDomains(
             attrs,
             (data) => {
+                data.domain = data.domain.filter((dom) => {
+                    return !dom.isAliasDomain;
+                });
+                data.total = data.domain.length;
                 domains = data.domain;
                 DomainStore.setDomains(data);
                 this.getPlans(domains).
