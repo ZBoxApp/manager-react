@@ -612,6 +612,23 @@ export function forceTimestampFromHumanDate(date) {
     return formattedTimeStamp;
 }
 
+export function timestampToDate(timestamp) {
+    const time = parseInt(timestamp, 10);
+    const generatedDate = new Date(time).toLocaleString();
+    const date = generatedDate.split(/\s/).shift();
+    const dateArr = date.split('/');
+    const dateParts = dateArr.map((item) => {
+        if (item.length < 2) {
+            return '0' + item;
+        }
+
+        return item;
+    });
+    const newDate = dateParts.join('/');
+
+    return newDate;
+}
+
 export function setInitialDate() {
     const dateInstance = new Date();
     const day = dateInstance.getDate().toString().length < 2 ? '0' + dateInstance.getDate().toString() : dateInstance.getDate();
@@ -702,14 +719,14 @@ export function getDomainsCleaned(domains) {
 }
 
 export function findDomaindIdFromAccount(account, domains) {
-    const name = account === 'object' ? account.domain : account;
+    const name = typeof account === 'object' ? account.domain : account;
     const rightsDomains = domains.filter((domain) => {
         return name === domain.name;
     });
 
     const domainReturned = rightsDomains.length === 1 ? rightsDomains.pop() : null;
 
-    return domainReturned ? domainReturned.id : null;
+    return domainReturned;
 }
 
 export function sortByNames(a, b) {
@@ -777,4 +794,12 @@ export function makeRequest(response, dl, resolve, returnAPI, store) {
 
     res.data = dl;
     return resolve(res);
+}
+
+export function addEventListenerFixed(element, type, callback) {
+    const fixEvents = {
+        blur: 'focusout'
+    };
+
+    element.addEventListener(type, callback, typeof (fixEvents[type]) !== 'undefined');
 }

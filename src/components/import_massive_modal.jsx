@@ -106,19 +106,19 @@ export default class ImportMassiveModal extends React.Component {
         return null;
     }
 
-    onChangeColumn(e, option, key) {
+    onChangeColumn(e, current, selected, key) {
         const parent = e.target.parentNode;
+        Reflect.deleteProperty(this.disabled, current);
 
-        if (option.restart) {
+        if (selected.restart) {
             parent.classList.remove('ok-option');
             parent.classList.add('missing-option');
-            Reflect.deleteProperty(this.disabled, option.restart);
         }
 
-        if (option && !option.restart) {
+        if (selected && !selected.restart) {
             parent.classList.remove('missing-option');
             parent.classList.add('ok-option');
-            this.disabled[option] = {
+            this.disabled[selected] = {
                 col: key
             };
         }
@@ -423,8 +423,8 @@ export default class ImportMassiveModal extends React.Component {
                                         className: 'form-control'
                                     }}
                                     id={key}
-                                    onSelected={(e, option, id) => {
-                                        this.onChangeColumn(e, option, id);
+                                    onSelected={(e, current, selected, id) => {
+                                        this.onChangeColumn(e, current, selected, id);
                                     }}
                                     disabledOptions={this.disabled}
                                     selected={selected}

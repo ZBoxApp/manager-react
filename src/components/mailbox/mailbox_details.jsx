@@ -118,7 +118,7 @@ export default class MailboxDetails extends React.Component {
             });
         }).then((mailbox) => {
             MailboxStore.setCurrent(mailbox);
-            let items = mailbox.attrs.zimbraMailAlias || null;
+            let items = mailbox.attrs.zimbraMailAlias || [];
 
             if (items) {
                 if (!Array.isArray(items)) {

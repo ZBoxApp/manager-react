@@ -58,16 +58,8 @@ export default class CreateMailBox extends React.Component {
         const parent = document.getElementById('add-mailbox');
 
         if (parent) {
-            this.addEventListenerFixed(parent, 'blur', this.getEnableAccountsFromDomain);
+            Utils.addEventListenerFixed(parent, 'blur', this.getEnableAccountsFromDomain);
         }
-    }
-
-    addEventListenerFixed(element, type, callback) {
-        const fixEvents = {
-            blur: 'focusout'
-        };
-
-        element.addEventListener(type, callback, typeof (fixEvents[type]) !== 'undefined');
     }
 
     getEnableAccountsFromDomain(e, currentDomain) {
@@ -383,7 +375,10 @@ export default class CreateMailBox extends React.Component {
         let enableAccounts;
         if (this.state.loadingEnableAccounts) {
             enableAccounts = (
-                <div className='text-center'>
+                <div
+                    className='text-center'
+                    key={'loader-plans'}
+                >
                     <i className='fa fa-refresh fa-spin fa-2x'></i>
                     <p>Cargando casillas disponibles</p>
                 </div>
@@ -500,6 +495,7 @@ export default class CreateMailBox extends React.Component {
                         this.handleSubmit(e);
                     }}
                     id='createAccount'
+                    key={'form-create-mailbox'}
                 >
                     <div className='form-group string required'>
                         <label className='string required col-sm-3 control-label'>

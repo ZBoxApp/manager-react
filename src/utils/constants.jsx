@@ -113,21 +113,25 @@ export default {
         active: {
             label: 'Activa',
             isEnabledOnCreate: true,
+            isEnabledOnEdit: true,
             classes: 'label-success mailbox-status'
         },
         locked: {
             label: 'Inactiva',
             isEnabledOnCreate: true,
+            isEnabledOnEdit: true,
             classes: 'label-warning mailbox-status'
         },
         lockout: {
             label: 'Bloqueada',
             isEnabledOnCreate: false,
+            isEnabledOnEdit: false,
             classes: 'label-warning mailbox-status'
         },
         closed: {
             label: 'Cerrada',
             isEnabledOnCreate: true,
+            isEnabledOnEdit: true,
             classes: 'label-default mailbox-status'
         }
     }

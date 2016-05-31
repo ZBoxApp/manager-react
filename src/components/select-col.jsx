@@ -14,6 +14,7 @@ export default class SelectCol extends React.Component {
     }
 
     handleSelectChange(e, id) {
+        const current = this.current;
         e.preventDefault();
         if (this.props.onSelected) {
             const option = e.target;
@@ -28,7 +29,7 @@ export default class SelectCol extends React.Component {
                 } else {
                     this.current = selected;
                 }
-                return this.props.onSelected(e, selected, id);
+                return this.props.onSelected(e, current, selected, id);
             }
             return null;
         }
