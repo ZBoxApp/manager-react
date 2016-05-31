@@ -61,9 +61,10 @@ export default class DistributionLists extends React.Component {
     }
 
     getDistributionLists() {
+        //const domain = DomainStore.getCurrent();
         const id = this.props.params.id;
         const response = {};
-        const domain = DomainStore.getCurrent();
+        const domain = null;
 
         return new Promise((resolve, reject) => {
             if (domain) {
@@ -84,7 +85,7 @@ export default class DistributionLists extends React.Component {
             return Client.getDistributionList(id, (success) => {
                 const distributionsList = success;
                 response.distributionsList = distributionsList;
-                const domainId = this.props.params.domain_id;
+                const domainId = this.props.params.domain_id === 'null' ? distributionsList.name.split('@').pop() : this.props.params.domain_id;
 
                 distributionsList.getOwners((error, owners) => {
                     if (owners) {
