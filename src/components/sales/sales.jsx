@@ -5,10 +5,8 @@ import moment from 'moment';
 import currencyFormatter from 'currency-formatter';
 import EventStore from '../../stores/event_store.jsx';
 import UserStore from '../../stores/user_store.jsx';
-
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Utils from '../../utils/utils.jsx';
-
 import * as Client from '../../utils/client.jsx';
 
 import ZimbraStore from '../../stores/zimbra_store.jsx';
