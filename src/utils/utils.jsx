@@ -739,17 +739,20 @@ export function makeRequest(response, dl, resolve, returnAPI, store) {
             const pop = element.pop();
             const target = typeof pop === 'object' ? pop.name || pop.id : pop;
             const label = action[0] === 'remove' ? 'eliminar' : 'agregar';
+            const isNew = action[0] === 'remove' ? 0 : 1;
             return dl[item](target, (er, success) => {
                 if (success) {
                     if (res.completed) {
                         res.completed.push({
                             action: label,
-                            target
+                            target,
+                            isNew
                         });
                     } else {
                         res.completed = [{
                             action: label,
-                            target
+                            target,
+                            isNew
                         }];
                     }
                     const api = success.api && APIReturn ? success : dl;

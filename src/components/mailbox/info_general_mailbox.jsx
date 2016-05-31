@@ -5,6 +5,7 @@ import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import ZimbraStore from '../../stores/zimbra_store.jsx';
+import MailboxStore from '../../stores/mailbox_store.jsx';
 
 export default class BlockGeneralInfoMailbox extends React.Component {
     constructor(props) {
@@ -27,6 +28,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         const domain = Utils.getDomainFromString(this.data.name);
 
         Client.getDomain(domain, (data) => {
+            MailboxStore.emitDomainId(data.id);
             this.setState({
                 hasDomain: true,
                 domainData: data
