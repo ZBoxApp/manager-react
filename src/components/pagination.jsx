@@ -30,18 +30,19 @@ export default class Pagination extends React.Component {
     }
     handleFirst(e) {
         e.preventDefault();
-        browserHistory.push(`/${this.props.url}`);
+        const url = this.props.url.indexOf('/') > -1 ? this.props.url : `/${this.props.url}`;
+        browserHistory.push(url);
     }
     handlePrev(e) {
         e.preventDefault();
         const prevPage = this.props.currentPage - 1;
-        const url = this.props.url;
+        const url = this.props.url.indexOf('/') > -1 ? this.props.url : `/${this.props.url}`;
 
         if (prevPage > 1) {
             const page = this.getPageQueryString(prevPage);
-            browserHistory.push(`/${url}${page}`);
+            browserHistory.push(`${url}${page}`);
         } else {
-            browserHistory.push(`/${url}`);
+            browserHistory.push(`${url}`);
         }
     }
     handleChange(e) {
@@ -58,12 +59,14 @@ export default class Pagination extends React.Component {
     handleNext(e) {
         e.preventDefault();
         const page = this.getPageQueryString(this.props.currentPage + 1);
-        browserHistory.push(`${this.props.url}${page}`);
+        const url = this.props.url.indexOf('/') > -1 ? this.props.url : `/${this.props.url}`;
+        browserHistory.push(`${url}${page}`);
     }
     handleLast(e) {
         e.preventDefault();
         const page = this.getPageQueryString(this.props.totalPages);
-        browserHistory.push(`/${this.props.url}${page}`);
+        const url = this.props.url.indexOf('/') > -1 ? this.props.url : `/${this.props.url}`;
+        browserHistory.push(`${url}${page}`);
     }
     render() {
         //let i = 1;
