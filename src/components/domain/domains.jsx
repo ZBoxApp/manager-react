@@ -41,6 +41,10 @@ export default class Domains extends React.Component {
     getDomains() {
         const self = this;
         let domains = null;
+        const attrs = {
+            maxResults: window.manager_config.maxResultOnRequestZimbra
+        };
+
         if (DomainStore.getDomains()) {
             const data = DomainStore.getDomains();
 
@@ -52,10 +56,11 @@ export default class Domains extends React.Component {
             });
         }
 
+        const attrneeded = Utils.getAttrsBySectionFromConfig('domains');
+        attrs.attrs = attrneeded;
+
         Client.getAllDomains(
-            {
-                maxResults: window.manager_config.maxResultOnRequestZimbra
-            },
+            attrs,
             (data) => {
                 domains = data.domain;
                 DomainStore.setDomains(data);
