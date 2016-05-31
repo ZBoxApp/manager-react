@@ -144,7 +144,7 @@ export default class CreateDomain extends React.Component {
         if (!this.state.isGlobalAdmin) {
             form = (
                 <div className='text-center'>
-                    <h4>
+                    <h4 className='text-danger'>
                         {'Lo sentimos pero usted no tiene permiso para crear dominios.'}
                     </h4>
                 </div>
