@@ -37,7 +37,8 @@
         "archiving": {
             "statusCos": "btn-warning",
             "label": "Archiving",
-            "isEnabledToEdit": false
+            "isEnabledToEdit": false,
+            "regexp": ".archive$"
         }
     },
     "multiFormDomain": {

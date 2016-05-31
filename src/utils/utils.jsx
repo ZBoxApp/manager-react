@@ -690,5 +690,5 @@ export function parseMaxCOSAccounts(maxCosAccounts) {
         return response;
     }
 
-    return arrCos;
+    return response;
 }

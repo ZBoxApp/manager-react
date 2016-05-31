@@ -94,6 +94,7 @@ export default class EditDomain extends React.Component {
             const businessCategory = this.refs.company.value.trim();
             const description = this.refs.description.value.trim();
             const zimbraNotes = this.refs.notes.value.trim();
+            const zimbraDomainMaxAccounts = this.refs.mailboxLimit.value;
             const plans = this.state.plans;
             const plansKeys = Object.keys(plans);
             const zimbraDomainCOSMaxAccounts = [];
@@ -108,7 +109,8 @@ export default class EditDomain extends React.Component {
                     businessCategory,
                     description,
                     zimbraNotes,
-                    zimbraDomainCOSMaxAccounts
+                    zimbraDomainCOSMaxAccounts,
+                    zimbraDomainMaxAccounts
                 }
             };
 

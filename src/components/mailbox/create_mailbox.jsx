@@ -33,7 +33,9 @@ export default class CreateMailBox extends React.Component {
         this.reset = null;
         this.cacheDomain = null;
 
-        this.state = {};
+        this.state = {
+            zimbraCOSId: ''
+        };
         this.s = true;
     }
 
@@ -96,8 +98,10 @@ export default class CreateMailBox extends React.Component {
                     const maxCosAccounts = Utils.parseMaxCOSAccounts(thatDomainExists.attrs.zimbraDomainCOSMaxAccounts);
                     this.setState({
                         loadingEnableAccounts: true,
-                        error: false
+                        error: false,
+                        zimbraCOSId: ''
                     });
+
                     return Client.batchCountAccount([thatDomainExists.name],
                         (s) => {
                             const usedAccounts = s.pop();
@@ -175,6 +179,9 @@ export default class CreateMailBox extends React.Component {
             const domain = document.querySelector('input[list=\'domain\']');
             const passwd = this.refs.passwd.value;
             const maskPasswd = document.getElementById('password');
+            let shouldEnableArchive = false;
+            const plans = this.state.plans;
+            let plan = null;
 
             if (domain.value === '') {
                 GlobalActions.emitMessage({
@@ -206,10 +213,19 @@ export default class CreateMailBox extends React.Component {
                 sn: this.refs.sn.value,
                 displayName: `${this.refs.givenName.value} ${this.refs.sn.value}`,
                 description: this.refs.description.value,
-                zimbraCOSId: this.refs.zimbraCOSId.value,
+                zimbraCOSId: this.state.zimbraCOSId,
                 zimbraAccountStatus: this.refs.zimbraAccountStatus.value,
                 zimbraIsDelegatedAdminAccount: this.refs.zimbraIsDelegatedAdminAccount.checked.toString().toUpperCase()
             };
+
+            const keysPlans = Object.keys(this.state.plans);
+
+            keysPlans.forEach((p) => {
+                if (plans[p] === this.state.zimbraCOSId) {
+                    plan = p;
+                    shouldEnableArchive = window.manager_config.plans[p].archiving;
+                }
+            });
 
             Client.createAccount(
                 email,
@@ -222,7 +238,17 @@ export default class CreateMailBox extends React.Component {
 
                     MailboxStore.setMailbox(data);
 
-                    return Utils.handleLink(event, `/mailboxes/${data.id}`, this.props.location);
+                    if (shouldEnableArchive) {
+                        data.enableArchiving(plan, (err) => {
+                            if (err) {
+                                return err;
+                            }
+
+                            return Utils.handleLink(event, `/mailboxes/${data.id}`, this.props.location);
+                        });
+                    } else {
+                        return Utils.handleLink(event, `/mailboxes/${data.id}`, this.props.location);
+                    }
 
                     /*GlobalActions.emitMessage({
                         message: 'Se ha creado su cuenta con éxito.',
@@ -249,7 +275,9 @@ export default class CreateMailBox extends React.Component {
     }
 
     handleRadioChanged(val) {
-        this.refs.zimbraCOSId.value = val;
+        this.setState({
+            zimbraCOSId: val
+        });
     }
 
     getAllDomains() {
@@ -364,15 +392,12 @@ export default class CreateMailBox extends React.Component {
         this.s = false;
     }
 
-    shouldComponentUpdate() {
-        return true;
-    }
-
     controllerDataList(controller) {
         this.reset = controller;
     }
 
     render() {
+        const {zimbraCOSId} = this.state;
         let message;
         let domains = [];
         let form = null;
@@ -458,7 +483,77 @@ export default class CreateMailBox extends React.Component {
                 return null;
             });
 
-            for (let plan in plans) {
+            const keyPlans = Object.keys(plans);
+
+            keyPlans.forEach((plan) => {
+                if (plans[plan]) {
+                    let isDisabled = null;
+                    let classCss = null;
+                    let info = null;
+                    let hasPlan = false;
+                    if (this.state.enabledAccounts) {
+                        this.state.enabledAccounts.forEach((p) => {
+                            if (plans[plan] === p.cosId) {
+                                hasPlan = true;
+                                isDisabled = p.enabled < 1 ? true : null;
+                                classCss = p.classCss;
+                                info = (
+                                    <div>
+                                        <span>
+                                            Usadas: {p.used}
+                                        </span>
+                                        <span> - </span>
+                                        <span className={p.enabled <= 0 ? 'text-danger' : 'text-success'}>
+                                            Libres: {p.enabled}
+                                        </span>
+                                    </div>
+                                );
+                            }
+                        });
+                    }
+
+                    if (this.state.enabledAccounts && !hasPlan && null) {
+                        isDisabled = true;
+                        info = (
+                            <div>
+                                <span className='text-danger'>
+                                    Este plan no esta contratado
+                                </span>
+                            </div>
+                        );
+                    }
+
+                    const disabledCss = isDisabled ? 'disabled' : '';
+
+                    const item = (
+                        <label
+                            className={`radio radio-info radio-inline pretty-input ${disabledCss}`}
+                            key={plan}
+                        >
+                            <div className='pretty-radio'>
+                                <input
+                                    type='radio'
+                                    className='pretty'
+                                    name='mailbox'
+                                    onChange={() => {
+                                        this.handleRadioChanged(plans[plan]);
+                                    }}
+                                    disabled={isDisabled}
+                                />
+                                <span></span>
+                            </div>
+
+                            <span className={`${classCss} status-plan`}>
+                                {Utils.titleCase(plan)}
+                            </span>
+                            {info}
+                        </label>
+                    );
+                    checkboxes.push(item);
+                }
+            });
+
+            /*for (let plan in plans) {
                 if (plans.hasOwnProperty(plan)) {
                     let isDisabled = null;
                     let classCss = null;
@@ -510,7 +605,7 @@ export default class CreateMailBox extends React.Component {
                     );
                     checkboxes.push(item);
                 }
-            }
+            }*/
 
             form = (
                 <form
@@ -646,6 +741,7 @@ export default class CreateMailBox extends React.Component {
                                 type='hidden'
                                 ref='zimbraCOSId'
                                 data-required='true'
+                                value={zimbraCOSId}
                                 data-message='El plan de su casilla es requerido, por favor verificar.'
                             />
                         </div>
@@ -686,14 +782,20 @@ export default class CreateMailBox extends React.Component {
 
                     <div className='form-group'>
                         <div className='col-sm-8 col-sm-offset-3'>
-                            {counterPlans > 0 && (
+                            /*{counterPlans > 0 && (
                                 <input
                                     type='submit'
                                     name='commit'
                                     value='Guardar'
                                     className='btn btn-primary action-save'
                                 />
-                            )}
+                            )}*/
+                            <input
+                                type='submit'
+                                name='commit'
+                                value='Guardar'
+                                className='btn btn-primary action-save'
+                            />
                             <Button
                                 btnAttrs={
                                     {
