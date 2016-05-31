@@ -360,6 +360,7 @@ export default class CreateMailBox extends React.Component {
         let domains = [];
         let form = null;
         let checkboxes = [];
+        let counterPlans = 9999;
 
         if (this.state.error) {
             message = (
@@ -383,7 +384,13 @@ export default class CreateMailBox extends React.Component {
 
         if (this.state.enabledAccounts) {
             const accounts = this.state.enabledAccounts;
-            if (accounts.length > 0) {
+            counterPlans = accounts.length;
+            accounts.forEach((plan) => {
+                if (plan.enabled <= 0) {
+                    counterPlans--;
+                }
+            });
+            /*if (accounts.length > 0) {
                 const response = accounts.map((account) => {
                     return (
                         <li
@@ -408,7 +415,7 @@ export default class CreateMailBox extends React.Component {
                         </div>
                     </div>
                 );
-            }
+            }*/
         }
 
         if (this.state.domains) {
@@ -437,10 +444,24 @@ export default class CreateMailBox extends React.Component {
             for (let plan in plans) {
                 if (plans.hasOwnProperty(plan)) {
                     let isDisabled = null;
+                    let classCss = null;
+                    let info = null;
                     if (this.state.enabledAccounts) {
                         this.state.enabledAccounts.forEach((p) => {
                             if (plans[plan] === p.cosId) {
                                 isDisabled = p.enabled < 1 ? true : null;
+                                classCss = p.classCss;
+                                info = (
+                                    <div>
+                                        <span>
+                                            Usadas: {p.used}
+                                        </span>
+                                        <span> - </span>
+                                        <span className={p.enabled <= 0 ? 'text-danger' : 'text-success'}>
+                                            Libres: {p.enabled}
+                                        </span>
+                                    </div>
+                                );
                             }
                         });
                     }
@@ -463,7 +484,11 @@ export default class CreateMailBox extends React.Component {
                                 />
                                 <span></span>
                             </div>
-                            {Utils.titleCase(plan)}
+
+                            <span className={`${classCss} status-plan`}>
+                                {Utils.titleCase(plan)}
+                            </span>
+                            {info}
                         </label>
                     );
                     checkboxes.push(item);
@@ -644,12 +669,14 @@ export default class CreateMailBox extends React.Component {
 
                     <div className='form-group'>
                         <div className='col-sm-8 col-sm-offset-3'>
-                            <input
-                                type='submit'
-                                name='commit'
-                                value='Guardar'
-                                className='btn btn-primary action-save'
-                            />
+                            {counterPlans > 0 && (
+                                <input
+                                    type='submit'
+                                    name='commit'
+                                    value='Guardar'
+                                    className='btn btn-primary action-save'
+                                />
+                            )}
                             <Button
                                 btnAttrs={
                                     {
