@@ -10,6 +10,7 @@ import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 import Constants from '../../utils/constants.jsx';
 import * as Client from '../../utils/client.jsx';
+import * as Utils from '../../utils/utils.jsx';
 
 import Panel from '../panel.jsx';
 import LoginEmail from './login_email.jsx';
@@ -49,8 +50,9 @@ export default class Login extends React.Component {
             browserHistory.push('/mailboxes');
         }
     }
-    submit(email, password) {
+    submit(email, password, refs) {
         var state = this.state;
+        const oldText = refs.submitbutton.innerHTML;
 
         if (!email) {
             state.loginError = 'El correo electrónico es obligatorio';
@@ -64,19 +66,26 @@ export default class Login extends React.Component {
             return;
         }
 
+        refs.submitbutton.innerHTML = '<i class="fa fa-spinner fa-spin fa-1x fa-fw"></i> Cargando ...';
+        Utils.toggleStatusButtons('.btn-block', true);
+
         this.setState({loginError: null});
 
         Client.login(email, password,
             () => {
                 return Client.getAllCos(
                     (cosData) => {
+                        refs.submitbutton.innerHTML = oldText;
                         ZimbraStore.setAllCos(cosData);
+                        Utils.toggleStatusButtons('.btn-block', false);
                         browserHistory.push('/mailboxes');
                     }
                 );
             },
             (err) => {
+                refs.submitbutton.innerHTML = oldText;
                 this.setState({loginError: err.message});
+                Utils.toggleStatusButtons('.btn-block', false);
             }
         );
     }

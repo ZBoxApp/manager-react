@@ -65,7 +65,8 @@
                 "zimbraPrefOutOfOfficeUntilDate": true,
                 "zimbraPrefOutOfOfficeReply": true,
                 "zimbraCreateTimestamp": true,
-                "zimbraLastLogonTimestamp": true
+                "zimbraLastLogonTimestamp": true,
+                "zimbraIsDelegatedAdminAccount": true
             }
         }
     },
