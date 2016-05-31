@@ -201,6 +201,11 @@ export default class Mailboxes extends React.Component {
             limit: 5000
         };
 
+        this.setState({
+            loading: true,
+            data: null
+        });
+
         const attrneeded = Utils.getAttrsBySectionFromConfig('mailboxes');
 
         if (attrneeded) {
@@ -311,18 +316,23 @@ export default class Mailboxes extends React.Component {
 
     refreshAllAccounts() {
         const mailboxes = this.isStoreEnabled ? MailboxStore.getMailboxes() : null;
-        const tables = this.buildTableFromData(mailboxes, ['Todas', 'Bloqueadas']);
 
-        if (tables.lockedAlert) {
-            GlobalActions.emitMessage({
-                error: tables.lockedAlert.message,
-                typeError: messageType.LOCKED
+        if (mailboxes) {
+            const tables = this.buildTableFromData(mailboxes, ['Todas']);
+
+            if (tables.lockedAlert) {
+                GlobalActions.emitMessage({
+                    error: tables.lockedAlert.message,
+                    typeError: messageType.LOCKED
+                });
+            }
+
+            return this.setState({
+                data: tables
             });
         }
 
-        this.setState({
-            data: tables
-        });
+        return this.getAllMailboxes();
     }
 
     componentDidMount() {

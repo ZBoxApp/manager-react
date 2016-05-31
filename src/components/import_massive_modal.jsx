@@ -348,9 +348,8 @@ export default class ImportMassiveModal extends React.Component {
             }
 
             //Aqui va error batchrequest
-
-            if (this.show) {
-                this.onHide();
+            if (this.props.show) {
+                this.props.onHide();
             }
 
             return GlobalActions.emitEndTask({

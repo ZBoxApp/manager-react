@@ -41,16 +41,18 @@ export default class DomainDistributionList extends React.Component {
     }
     getLists() {
         const domain = this.props.domain;
-        domain.getAllDistributionLists(
-            (err, lists) => {
-                console.log('getAllDL', lists); //eslint-disable-line no-console
-                if (this.isStoreEnabled) {
-                    DomainStore.setDistibutionLists(domain, lists);
+        setTimeout(() => {
+            domain.getAllDistributionLists(
+                (err, lists) => {
+                    console.log('getAllDL', lists); //eslint-disable-line no-console
+                    if (this.isStoreEnabled) {
+                        DomainStore.setDistibutionLists(domain, lists);
+                    }
+                    this.listscache = lists;
+                    this.setState({lists});
                 }
-                this.listscache = lists;
-                this.setState({lists});
-            }
-        );
+            );
+        }, 100);
     }
     componentWillReceiveProps(nextProps) {
         const page = parseInt(nextProps.location.query.page, 10) || 1;
