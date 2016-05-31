@@ -124,7 +124,9 @@ export default class EditDomain extends React.Component {
     }
 
     componentDidMount() {
-        this.getDomain();
+        if (this.isGlobalAdmin) {
+            this.getDomain();
+        }
     }
 
     render() {
@@ -279,14 +281,6 @@ export default class EditDomain extends React.Component {
                         </div>
                     </form>
                 );
-            } else {
-                form = (
-                    <div className='text-center'>
-                        <h4 className='text-danger'>
-                            {'Lo sentimos pero usted no tiene permiso para editar dominios.'}
-                        </h4>
-                    </div>
-                );
             }
 
             const actions = [
@@ -313,6 +307,16 @@ export default class EditDomain extends React.Component {
                             </Panel>
                         </div>
                     </div>
+                </div>
+            );
+        }
+
+        if (!this.isGlobalAdmin) {
+            return (
+                <div className='text-center'>
+                    <h4 className='text-danger'>
+                        {'Lo sentimos pero usted no tiene permiso para editar dominios.'}
+                    </h4>
                 </div>
             );
         }

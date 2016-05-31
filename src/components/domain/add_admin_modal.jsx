@@ -25,6 +25,10 @@ export default class AddAdminModal extends React.Component {
         this.state = {
             users: null
         };
+
+        this.plans = Object.keys(window.manager_config.plans).filter((plan) => {
+            return window.manager_config.plans[plan].forRights;
+        });
     }
 
     handleSearch(e) {
@@ -71,6 +75,7 @@ export default class AddAdminModal extends React.Component {
 
         this.props.domain.addAdmin(
             user.id,
+            this.plans,
             (error) => {
                 if (error) {
                     return this.setState({
