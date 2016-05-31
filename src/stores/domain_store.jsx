@@ -317,8 +317,8 @@ class DomainStoreClass extends EventEmitter {
         this.removeListener(eventTypes.ZONE_DNS_CHANGE_EVENT, zone);
     }
 
-    emitDistributionListsChange() {
-        this.emit(eventTypes.DOMAIN_DLS_CHANGE_EVENT);
+    emitDistributionListsChange(params) {
+        this.emit(eventTypes.DOMAIN_DLS_CHANGE_EVENT, params);
     }
 
     addDistributionListsChangeListener(callback) {

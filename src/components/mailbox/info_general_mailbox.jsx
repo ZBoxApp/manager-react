@@ -116,7 +116,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
                             <Button
                                 btnAttrs={{
                                     onClick: (e) => {
-                                        this.handleWatchDomain(e, `domains/${this.state.domainData.id}`, this.props.location);
+                                        this.handleWatchDomain(e, `/domains/${this.state.domainData.id}`, this.props.location);
                                     }
                                 }}
                             >
