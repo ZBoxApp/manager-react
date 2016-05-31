@@ -715,8 +715,9 @@ export function parseMaxCOSAccounts(maxCosAccounts) {
 }
 
 export function getDomainsCleaned(domains) {
+    var regexp = new RegExp(window.manager_config.plans.archiving.regexp, 'gi');
     const rightsDomains = domains.filter((domain) => {
-        return !domain.isAliasDomain && !domain.name.match('archive');
+        return !domain.isAliasDomain && !domain.name.match(regexp);
     });
 
     return rightsDomains;

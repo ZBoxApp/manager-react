@@ -23,8 +23,9 @@ export default class Panel extends React.Component {
 
         let panelHeader;
         if (this.props.hasHeader && (this.props.btnsHeader || this.props.title || this.props.filter)) {
+            const {classCss} = this.props;
             panelHeader = (
-                <div className='panel-heading hbuilt clearfix'>
+                <div className={`panel-heading hbuilt clearfix ${classCss}`}>
                     <div className='pull-right text-right'>{btns}</div>
                     <div className='heading-buttons pull-left text-left'>
                         {this.props.title || this.props.filter}
@@ -52,7 +53,8 @@ Panel.propTypes = {
     classHeader: React.PropTypes.string,
     error: React.PropTypes.element,
     children: React.PropTypes.any,
-    filter: React.PropTypes.element
+    filter: React.PropTypes.element,
+    classCss: React.PropTypes.array
 };
 
 Panel.defaultProps = {

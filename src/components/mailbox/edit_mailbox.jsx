@@ -127,7 +127,7 @@ export default class EditMailBox extends React.Component {
                         const price = prices[data.plan] ? currencyFormatter.format(prices[data.plan], this.currencyParams) + ' ' + this.currency : 0;
                         const options = {
                             title: 'Cambio de Plan',
-                            text: `Al presionar <strong>Aceptar</strong>, está autorizando la emisión de una factura por un total de <strong>${price}</strong> correspondiente a : <br> <ul class="text-left"><li>Asunto: Cambio de Plan</li><li>Casilla: <strong>${account.name}</strong></li><li>Plan Original: <strong>${this.currentPlan}</strong></li><li>Nuevo Plan: <strong>${data.plan}</strong></li></ul>`,
+                            text: `Al presionar <strong>Aceptar</strong>, está autorizando la emisión de una factura por un total de <strong>${price}</strong> correspondiente a : <br> <ul class="list-buy-dialog"><li>Asunto: Cambio de Plan</li><li>Casilla: <strong>${account.name}</strong></li><li>Plan Original: <strong>${Utils.titleCase(this.currentPlan)}</strong></li><li>Nuevo Plan: <strong>${Utils.titleCase(data.plan)}</strong></li></ul>`,
                             html: true,
                             confirmButtonText: 'Si, Cambiar Plan',
                             showLoaderOnConfirm: true,
@@ -164,7 +164,8 @@ export default class EditMailBox extends React.Component {
                                             });
 
                                             this.setState({
-                                                enabledAccounts
+                                                enabledAccounts,
+                                                zimbraCOSId: data.cosId
                                             });
                                         }
                                     }, {
@@ -543,7 +544,7 @@ export default class EditMailBox extends React.Component {
                             return err;
                         }
 
-                        return Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
+                        return Utils.handleLink(null, `/mailboxes/${this.props.params.id}`, this.props.location);
                     });
                 }
 
@@ -553,11 +554,11 @@ export default class EditMailBox extends React.Component {
                             return err;
                         }
 
-                        return Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
+                        return Utils.handleLink(null, `/mailboxes/${this.props.params.id}`, this.props.location);
                     });
                 }
 
-                return Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
+                return Utils.handleLink(null, `/mailboxes/${this.props.params.id}`, this.props.location);
             }).catch((error) => {
                 GlobalActions.emitMessage({
                     message: error.message,
