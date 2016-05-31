@@ -19,6 +19,7 @@ import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
+import UserStore from '../../stores/user_store.jsx';
 import Constants from '../../utils/constants.jsx';
 
 const MessagesType = Constants.MessageType;
@@ -38,6 +39,7 @@ export default class DistributionLists extends React.Component {
         this.onExportMembers = this.onExportMembers.bind(this);
         this.onExportAllowers = this.onExportAllowers.bind(this);
         this.domain = null;
+        this.isGlobalAdmin = UserStore.isGlobalAdmin();
 
         this.state = {};
     }
@@ -573,13 +575,23 @@ export default class DistributionLists extends React.Component {
             />
         );
 
+        let tabNamesArray = ['Miembros', 'Permitidos'];
+        let tabs = {
+            miembros: members,
+            permitidos: allows
+        };
+
+        if (this.isGlobalAdmin) {
+            tabNamesArray = ['Miembros'];
+            tabs = {
+                miembros: members
+            };
+        }
+
         panelTabs = (
             <PanelTab
-                tabNames={['Miembros', 'Permitidos']}
-                tabs={{
-                    miembros: members,
-                    permitidos: allows
-                }}
+                tabNames={tabNamesArray}
+                tabs={tabs}
                 location={this.props.location}
             />
         );

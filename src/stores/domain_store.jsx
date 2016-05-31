@@ -92,7 +92,7 @@ class DomainStoreClass extends EventEmitter {
 
     getAdmins(domain) {
         if (this.current !== domain) {
-            this.setCurrent(domain);
+                this.setCurrent(domain);
         }
 
         const admins = [];

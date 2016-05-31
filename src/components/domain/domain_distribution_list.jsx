@@ -43,6 +43,7 @@ export default class DomainDistributionList extends React.Component {
         const domain = this.props.domain;
         domain.getAllDistributionLists(
             (err, lists) => {
+                console.log('getAllDL', lists); //eslint-disable-line no-console
                 if (this.isStoreEnabled) {
                     DomainStore.setDistibutionLists(domain, lists);
                 }
@@ -61,6 +62,7 @@ export default class DomainDistributionList extends React.Component {
     onListsChange() {
         const lists = this.isStoreEnabled ? DomainStore.getDistributionLists(this.props.domain) : null;
         if (!lists) {
+            console.log('no store'); //eslint-disable-line no-console
             return this.getLists();
         }
 
