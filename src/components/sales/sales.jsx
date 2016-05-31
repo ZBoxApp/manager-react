@@ -120,12 +120,6 @@ export default class SalesForm extends React.Component {
         }, options);
     }
 
-    componentWillMount() {
-        if (!UserStore.isGlobalAdmin()) {
-            Utils.handleLink(null, '/mailboxes');
-        }
-    }
-
     getPrices() {
         const {domainId} = this.props.params || this.state.domain.name || null;
         const attrs = this.state.domain.attrs;
