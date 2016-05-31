@@ -63,10 +63,12 @@ export default class Domains extends React.Component {
         Client.getAllDomains(
             attrs,
             (data) => {
-                data.domain = data.domain.filter((dom) => {
-                    return !dom.isAliasDomain;
-                });
-                data.total = data.domain.length;
+                if (data.domain) {
+                    data.domain = data.domain.filter((dom) => {
+                        return !dom.isAliasDomain;
+                    });
+                    data.total = data.domain.length;
+                }
                 domains = data.domain;
 
                 if (this.isStoreEnabled) {
