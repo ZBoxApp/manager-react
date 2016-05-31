@@ -86,6 +86,14 @@ export default class CreateDomainForm extends React.Component {
             const name = this.refs.domainName.value.trim();
             const businessCategory = this.refs.company.value.trim();
             const zimbraDomainStatus = this.refs.zimbraDomainStatus.value.trim();
+            const isDomain = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/gi;
+
+            if (!isDomain.test(name)) {
+                return GlobalActions.emitMessage({
+                    message: 'No se permite caracteres especiales en un dominio, por favor verificar.',
+                    typeError: MessageType.ERROR
+                });
+            }
 
             plans.forEach((p) => {
                 zimbraDomainCOSMaxAccounts.push(`${this.refs[`plan-${p}`].getAttribute('data-id')}:${this.refs[`plan-${p}`].value || 0}`);

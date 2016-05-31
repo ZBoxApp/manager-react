@@ -246,6 +246,21 @@ export default class CreateMailBox extends React.Component {
                 domains.push(object[limit].name);
             }
 
+            const options = Object.keys(Constants.status).map((option, i) => {
+                if (Constants.status[option].isEnabledOnCreate) {
+                    return (
+                        <option
+                            value={option}
+                            key={`option-plan-${i}`}
+                        >
+                            {Constants.status[option].label}
+                        </option>
+                    );
+                }
+
+                return null;
+            });
+
             for (let plan in plans) {
                 if (plans.hasOwnProperty(plan)) {
                     const item = (
@@ -364,9 +379,7 @@ export default class CreateMailBox extends React.Component {
                                 className='form-control'
                                 ref='zimbraAccountStatus'
                             >
-                                <option value='active'>Activa</option>
-                                <option value='closed'>Cerrada</option>
-                                <option value='locked'>Bloqueada</option>
+                                {options}
                             </select>
                         </div>
                     </div>
