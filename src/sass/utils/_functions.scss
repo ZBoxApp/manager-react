@@ -1,1 +1,45 @@
 @charset 'UTF-8';
+
+// scss-lint:disable all
+
+@keyframes wind {
+  0% {
+    margin-left: 110%;
+  }
+
+  100% {
+    margin-left: -10%;
+  }
+}
+
+@-webkit-keyframes windSlow {
+  0% {
+    margin-left: 150%;
+  }
+
+  100% {
+    margin-left: -20%;
+  }
+}
+
+@-webkit-keyframes windSlower {
+  0% {
+    margin-left: 180%;
+  }
+
+  100% {
+    margin-left: -70%;
+  }
+}
+
+@-webkit-keyframes flying {
+  0%, 100% {
+    top: 5px;
+  }
+
+  50% {
+    top: 30px;
+  }
+}
+
+// scss-lint:enable all

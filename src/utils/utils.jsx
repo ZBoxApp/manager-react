@@ -842,3 +842,7 @@ export function getDaysFromDate2Date(dateFrom, dateTo) {
     var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
     return diffDays;
 }
+
+export function randomRange(max, min) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
