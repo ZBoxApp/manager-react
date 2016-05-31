@@ -105,5 +105,23 @@ export default {
         'TSIG',
         'TXT',
         'WKS'
-    ]
+    ],
+    status: {
+        active: {
+            label: 'Active',
+            isEnabledOnCreate: true
+        },
+        locked: {
+            label: 'Inactiva',
+            isEnabledOnCreate: true
+        },
+        lockout: {
+            label: 'Bloqueada',
+            isEnabledOnCreate: false
+        },
+        closed: {
+            label: 'Cerrada',
+            isEnabledOnCreate: true
+        }
+    }
 };

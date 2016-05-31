@@ -159,7 +159,7 @@ export default class AddAdminModal extends React.Component {
                             </td>
                             <td className='text-center'>
                                 <a
-                                    className='btn btn-warning btn-xs'
+                                    className='btn btn-info btn-xs'
                                     onClick={(e) => this.handleAddAdmin(e, u)}
                                 >
                                     {'Activar Admin'}

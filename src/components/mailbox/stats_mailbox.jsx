@@ -1,19 +1,17 @@
+//import ZimbraStore from '../../stores/zimbra_store.jsx';
 import React from 'react';
 import * as Utils from '../../utils/utils.jsx';
-import ZimbraStore from '../../stores/zimbra_store.jsx';
 import bytesConvertor from 'bytes';
 
 export default class BlockGeneralInfoMailbox extends React.Component {
     constructor(props) {
+        //this.sizeEnabled = Utils.getEnabledPlansObjectByCos(ZimbraStore.getAllCos(), this.props.data.attrs.zimbraCOSId);
         super(props);
         this.date = null;
         this.status = null;
         this.className = null;
         this.lastConection = 'No se ha conectado';
         this.getMailSize = this.getMailSize.bind(this);
-        this.sizeEnabled = Utils.getEnabledPlansObjectByCos(ZimbraStore.getAllCos(), this.props.data.attrs.zimbraCOSId);
-        console.log('cosID', this.props.data.attrs.zimbraCOSId); //eslint-disable-line no-console
-        console.log('all cos', ZimbraStore.getAllCos()); //eslint-disable-line no-console
 
         this.state = {};
     }
@@ -68,9 +66,10 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         if (this.state.size) {
             size = this.state.size;
         }
-        console.log(this.sizeEnabled); //eslint-disable-line no-console
-        if (this.sizeEnabled.hasOwnProperty('attrs') && this.sizeEnabled.attrs.zimbraMailQuota) {
-            const sizeOfPlan = typeof this.sizeEnabled.attrs.zimbraMailQuota === 'string' ? parseInt(this.sizeEnabled.attrs.zimbraMailQuota, 10) : this.sizeEnabled.attrs.zimbraMailQuota;
+
+        if (this.props.data.attrs.zimbraMailQuota) {
+            const attrs = this.props.data.attrs;
+            const sizeOfPlan = typeof attrs.zimbraMailQuota === 'string' ? parseInt(attrs.zimbraMailQuota, 10) : attrs.zimbraMailQuota;
 
             sizeEnaled = (sizeOfPlan) ? bytesConvertor(sizeOfPlan) : 'Ilimitado';
         }

@@ -7,6 +7,7 @@ import Panel from '../panel.jsx';
 
 import CompanyStore from '../../stores/company_store.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
+import UserStore from '../../stores/user_store.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
@@ -22,6 +23,7 @@ export default class EditDomain extends React.Component {
         this.getDomain = this.getDomain.bind(this);
         this.getCompanies = this.getCompanies.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.isGlobalAdmin = UserStore.isGlobalAdmin();
 
         this.state = {};
     }
@@ -128,6 +130,7 @@ export default class EditDomain extends React.Component {
     render() {
         const domain = this.state.domain;
         const error = this.state.error;
+        let form = null;
 
         if (domain || error) {
             const companies = this.state.companies;
@@ -180,71 +183,72 @@ export default class EditDomain extends React.Component {
             //     </div>
             // </div>
 
-            const form = (
-                <form
-                    className='simple_form form-horizontal mailbox-form'
-                    onSubmit={this.handleSubmit}
-                >
-                    <div className='form-group string required'>
-                        <label className='string required col-sm-3 control-label'>
-                            <abbr title='requerido'>{'*'}</abbr>
-                            {'Nombre'}
-                        </label>
+            if (this.isGlobalAdmin) {
+                form = (
+                    <form
+                        className='simple_form form-horizontal mailbox-form'
+                        onSubmit={this.handleSubmit}
+                    >
+                        <div className='form-group string required'>
+                            <label className='string required col-sm-3 control-label'>
+                                <abbr title='requerido'>{'*'}</abbr>
+                                {'Nombre'}
+                            </label>
 
-                        <div className='col-sm-8'>
-                            <input
-                                type='text'
-                                className='form-control'
-                                ref='domainName'
-                                value={domain.name}
-                                disabled='disabled'
-                            />
+                            <div className='col-sm-8'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    ref='domainName'
+                                    value={domain.name}
+                                    disabled='disabled'
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    {lastRenovation}
+                        {lastRenovation}
 
-                    <div className='form-group string'>
-                        <label className='string required col-sm-3 control-label'>
-                            <abbr title='requerido'>{'*'}</abbr>
-                            {'Empresa'}
-                        </label>
+                        <div className='form-group string'>
+                            <label className='string required col-sm-3 control-label'>
+                                <abbr title='requerido'>{'*'}</abbr>
+                                {'Empresa'}
+                            </label>
 
-                        <div className='col-sm-8'>
-                            <select
-                                className='form-control select required'
-                                data-required='true'
-                                data-message='Debe especificar a que empresa corresponde el dominio'
-                                ref='company'
-                                defaultValue={domain.attrs.businessCategory}
-                            >
-                                {companiesOptions}
-                            </select>
+                            <div className='col-sm-8'>
+                                <select
+                                    className='form-control select required'
+                                    data-required='true'
+                                    data-message='Debe especificar a que empresa corresponde el dominio'
+                                    ref='company'
+                                    defaultValue={domain.attrs.businessCategory}
+                                >
+                                    {companiesOptions}
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className='form-group string'>
-                        <label className='string col-sm-3 control-label'>
-                            {'Descripción'}
-                        </label>
+                        <div className='form-group string'>
+                            <label className='string col-sm-3 control-label'>
+                                {'Descripción'}
+                            </label>
 
-                        <div className='col-sm-8'>
-                            <input
-                                type='text'
-                                className='form-control'
-                                ref='description'
-                                placeholder='Descripción del dominio'
-                                defaultValue={domain.attrs.description}
-                            />
+                            <div className='col-sm-8'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    ref='description'
+                                    placeholder='Descripción del dominio'
+                                    defaultValue={domain.attrs.description}
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div className='form-group string'>
-                        <label className='string col-sm-3 control-label'>
-                            {'Notas'}
-                        </label>
+                        <div className='form-group string'>
+                            <label className='string col-sm-3 control-label'>
+                                {'Notas'}
+                            </label>
 
-                        <div className='col-sm-8'>
+                            <div className='col-sm-8'>
                             <Textarea
                                 className='form-control'
                                 ref='notes'
@@ -253,28 +257,37 @@ export default class EditDomain extends React.Component {
                                 minRows={3}
                                 maxRows={9}
                             />
+                            </div>
                         </div>
-                    </div>
 
-                    <div className='form-group'>
-                        <div className='col-sm-8 col-sm-offset-3'>
-                            <input
-                                type='submit'
-                                name='commit'
-                                value='Guardar'
-                                className='btn btn-info'
-                            />
-                            <a
-                                href='#'
-                                className='btn btn-default'
-                                onClick={(e) => Utils.handleLink(e, `/domains/${domain.id}`)}
-                            >
-                                {'Cancelar'}
-                            </a>
+                        <div className='form-group'>
+                            <div className='col-sm-8 col-sm-offset-3'>
+                                <input
+                                    type='submit'
+                                    name='commit'
+                                    value='Guardar'
+                                    className='btn btn-info'
+                                />
+                                <a
+                                    href='#'
+                                    className='btn btn-default'
+                                    onClick={(e) => Utils.handleLink(e, `/domains/${domain.id}`)}
+                                >
+                                    {'Cancelar'}
+                                </a>
+                            </div>
                         </div>
+                    </form>
+                );
+            } else {
+                form = (
+                    <div className='text-center'>
+                        <h4 className='text-danger'>
+                            {'Lo sentimos pero usted no tiene permiso para editar dominios.'}
+                        </h4>
                     </div>
-                </form>
-            );
+                );
+            }
 
             const actions = [
                 {

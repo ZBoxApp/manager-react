@@ -8,6 +8,7 @@ import Panel from '../panel.jsx';
 import StatusLabel from '../status_label.jsx';
 
 import CompanyStore from '../../stores/company_store.jsx';
+import UserStore from '../../stores/user_store.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
@@ -21,6 +22,7 @@ export default class DomainGeneralInfo extends React.Component {
         this.getMXRecord = this.getMXRecord.bind(this);
         this.renovationDate = this.renovationDate.bind(this);
         this.getCompany = this.getCompany.bind(this);
+        this.isGlobalAdmin = UserStore.isGlobalAdmin();
 
         this.state = {
             mx: null,
@@ -80,6 +82,7 @@ export default class DomainGeneralInfo extends React.Component {
     }
     render() {
         const domain = this.props.domain;
+        let editDomainButton = null;
         const infoBody = (
             <div className='row'>
                 <div className='col-md-12'>
@@ -125,13 +128,15 @@ export default class DomainGeneralInfo extends React.Component {
             </div>
         );
 
-        const editDomainButton = [{
-            label: 'Editar',
-            props: {
-                className: 'btn btn-default btn-xs',
-                onClick: (e) => Utils.handleLink(e, `/domains/${this.props.params.id}/edit`, this.props.location)
-            }
-        }];
+        if (this.isGlobalAdmin) {
+            editDomainButton = [{
+                label: 'Editar',
+                props: {
+                    className: 'btn btn-default btn-xs',
+                    onClick: (e) => Utils.handleLink(e, `/domains/${this.props.params.id}/edit`, this.props.location)
+                }
+            }];
+        }
 
         return (
             <Panel
