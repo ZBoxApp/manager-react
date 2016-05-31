@@ -42,6 +42,10 @@ export default class DomainAdminList extends React.Component {
     }
 
     handleRemoveAdmin(e, admin) {
+        const plans = Object.keys(window.manager_config.plans).filter((plan) => {
+            return window.manager_config.plans[plan].forRights;
+        });
+
         e.preventDefault();
         const response = {
             title: 'Se ha borrado con éxito',
@@ -62,6 +66,7 @@ export default class DomainAdminList extends React.Component {
                 if (isDeleted) {
                     this.props.domain.removeAdmin(
                         admin.name,
+                        plans,
                         (error) => {
                             if (error) {
                                 response.title = 'Ha ocurrido un error.';
