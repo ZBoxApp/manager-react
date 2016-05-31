@@ -7,7 +7,7 @@ import Constants from '../../utils/constants.jsx';
 //import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import EventStore from '../../stores/event_store.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
-import Client from '../../utils/client.jsx';
+import * as Client from '../../utils/client.jsx';
 import Pagination from '../pagination.jsx';
 
 const Labels = Constants.Labels;
@@ -86,6 +86,7 @@ export default class DNSZoneForm extends React.Component {
     addDNSRequest() {
         const records = this.defaultRows;
         const zoneDNS = this.zoneDNS;
+        const domain = this.props.domain;
         const request = {
             name: this.props.domain.name,
             kind: 'Master',
@@ -101,7 +102,7 @@ export default class DNSZoneForm extends React.Component {
         const oldContent = button.innerHTML;
         button.innerHTML = '<i className=\'fa fa-spinner fa-spin\'></i> Creando Zona DNS';
         if (zoneDNS) {
-            return zoneDNS.createOrModifyRecords(records, (err, data) => {
+            return zoneDNS.createOrModifyRecords(records, (err) => {
                 if (err) {
                     Utils.toggleStatusButtons('.savedns', false);
                     button.innerHTML = oldContent;
@@ -118,22 +119,35 @@ export default class DNSZoneForm extends React.Component {
                     });
                 }
 
-                this.newRows = [];
+                return Client.getZone(domain.name, (zone) => {
+                    this.newRows = [];
 
-                DomainStore.setZoneDNS(data);
+                    DomainStore.setZoneDNS(zone);
 
-                Utils.toggleStatusButtons('.savedns', false);
-                button.innerHTML = oldContent;
+                    Utils.toggleStatusButtons('.savedns', false);
+                    button.innerHTML = oldContent;
 
-                return EventStore.emitToast({
-                    type: 'success',
-                    title: 'Creación Zona DNS',
-                    body: 'Se ha registrado su nuevo DNS éxitoxamente.',
-                    options: {
-                        timeOut: 6000,
-                        extendedTimeOut: 2500,
-                        closeButton: true
-                    }
+                    return EventStore.emitToast({
+                        type: 'success',
+                        title: 'Creación Zona DNS',
+                        body: 'Se ha registrado su nuevo DNS éxitoxamente.',
+                        options: {
+                            timeOut: 6000,
+                            extendedTimeOut: 2500,
+                            closeButton: true
+                        }
+                    });
+                }, () => {
+                    return EventStore.emitToast({
+                        type: 'error',
+                        title: 'Creación Zona DNS',
+                        body: 'Ha ocurrido un error al recuperar su zona DNS',
+                        options: {
+                            timeOut: 6000,
+                            extendedTimeOut: 2500,
+                            closeButton: true
+                        }
+                    });
                 });
             });
         }
