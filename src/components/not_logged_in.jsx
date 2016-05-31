@@ -8,7 +8,7 @@ import React from 'react';
 export default class NotLoggedIn extends React.Component {
     componentDidMount() {
         $('body').addClass('sticky');
-        $('#root').addClass('container-fluid');
+        $('#root').addClass('container-fluid container-fluid-login');
     }
     componentWillUnmount() {
         $('body').attr('class', '');
