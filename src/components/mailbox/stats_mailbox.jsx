@@ -12,6 +12,8 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         this.lastConection = 'No se ha conectado';
         this.getMailSize = this.getMailSize.bind(this);
         this.sizeEnabled = Utils.getEnabledPlansObjectByCos(ZimbraStore.getAllCos(), this.props.data.attrs.zimbraCOSId);
+        console.log('cosID', this.props.data.attrs.zimbraCOSId); //eslint-disable-line no-console
+        console.log('all cos', ZimbraStore.getAllCos()); //eslint-disable-line no-console
 
         this.state = {};
     }
@@ -66,7 +68,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         if (this.state.size) {
             size = this.state.size;
         }
-
+        console.log(this.sizeEnabled); //eslint-disable-line no-console
         if (this.sizeEnabled.hasOwnProperty('attrs') && this.sizeEnabled.attrs.zimbraMailQuota) {
             const sizeOfPlan = typeof this.sizeEnabled.attrs.zimbraMailQuota === 'string' ? parseInt(this.sizeEnabled.attrs.zimbraMailQuota, 10) : this.sizeEnabled.attrs.zimbraMailQuota;
 

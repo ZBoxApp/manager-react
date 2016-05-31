@@ -291,7 +291,7 @@ export function getEnabledPlansByCos(cosArray) {
 
     cosArray.forEach((cos) => {
         const key = cos.name;
-        if (configPlans.hasOwnProperty(key) && configPlans[key]) {
+        if (configPlans.hasOwnProperty(key) && configPlans[key] && configPlans[key].isEnabledToEdit) {
             plans[key] = cos.id;
         }
     });
