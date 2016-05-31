@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import sweetAlert from 'sweetalert';
 
 import DomainStore from '../../stores/domain_store.jsx';
 
@@ -47,18 +48,42 @@ export default class DomainDistributionList extends React.Component {
     }
     handleRemoveAdmin(e, list) {
         e.preventDefault();
+        const response = {
+            title: 'Se ha borrado con éxito',
+            type: 'success'
+        };
 
-        if (confirm(`¿Seguro quieres eliminar la lista de distribución ${list.name} del dominio?`)) { //eslint-disable-line no-alert
-            Client.removeDistributionList(
-                list.id,
-                () => {
-                    DomainStore.removeDistributionList(list.id);
-                },
-                (error) => {
-                    this.setState({error});
+        sweetAlert({
+                title: 'Borrar Lista de Distribución',
+                text: `¿Seguro quieres eliminar la lista de distribución ${list.name} del dominio?`,
+                type: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Si, deseo borrarlo!',
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true
+            },
+            (isDeleted) => {
+                if (isDeleted) {
+                    Client.removeDistributionList(
+                        list.id,
+                        () => {
+                            DomainStore.removeDistributionList(list.id);
+
+                            return sweetAlert(response);
+                        },
+                        (error) => {
+                            response.title = 'Ha ocurrido un error.';
+                            response.text = `${error.message}`;
+                            response.type = 'error';
+                            response.confirmButtonText = 'Intentar de nuevo';
+                            response.confirmButtonColor = '#DD6B55';
+                            return sweetAlert(response);
+                        }
+                    );
                 }
-            );
-        }
+            }
+        );
     }
     componentDidMount() {
         DomainStore.addDistributionListsChangeListener(this.onListsChange);

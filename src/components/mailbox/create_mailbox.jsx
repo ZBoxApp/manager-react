@@ -100,12 +100,12 @@ export default class CreateMailBox extends React.Component {
 
                     MailboxStore.setMailbox(data);
 
-                    //return Utils.handleLink(event, `/mailboxes/${data.id}`, this.props.location);
+                    return Utils.handleLink(event, `/mailboxes/${data.id}`, this.props.location);
 
-                    GlobalActions.emitMessage({
+                    /*GlobalActions.emitMessage({
                         message: 'Se ha creado su cuenta con éxito.',
                         typeError: messageType.SUCCESS
-                    });
+                    });*/
                 },
                 (error) => {
                     GlobalActions.emitMessage({

@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import sweetAlert from 'sweetalert';
 
 import DomainStore from '../../stores/domain_store.jsx';
 
@@ -12,7 +13,7 @@ import AddAdminModal from './add_admin_modal.jsx';
 
 import * as Utils from '../../utils/utils.jsx';
 
-import Constants from '../../utils/constants.jsx';
+//import Constants from '../../utils/constants.jsx';
 
 export default class DomainAdminList extends React.Component {
     constructor(props) {
@@ -23,12 +24,14 @@ export default class DomainAdminList extends React.Component {
         this.onAdminsChange = this.onAdminsChange.bind(this);
         this.state = this.getStateFromStores();
     }
+
     getStateFromStores() {
         const admins = DomainStore.getAdmins(this.props.domain);
         return {
             admins
         };
     }
+
     getAdmins() {
         const domain = this.props.domain;
         domain.getAdmins((err, data) => {
@@ -37,27 +40,47 @@ export default class DomainAdminList extends React.Component {
             this.setState({admins});
         });
     }
+
     handleRemoveAdmin(e, admin) {
         e.preventDefault();
-        if (confirm(`¿Seguro quieres eliminar a ${admin.name} como administrador del dominio?`)) { //eslint-disable-line no-alert
-            // previo a esto hay que remover el usuario como admin del dominio
-            this.props.domain.removeAdmin(
-                admin.name,
-                (error) => {
-                    if (error) {
-                        return this.setState({
-                            error: {
-                                message: error.extra.reason,
-                                type: Constants.MessageType.ERROR
-                            }
-                        });
-                    }
+        const response = {
+            title: 'Se ha borrado con éxito',
+            type: 'success'
+        };
 
-                    return DomainStore.removeAdmin(admin.id);
+        sweetAlert({
+                title: 'Borrar Administrador de Dominio',
+                text: `¿Seguro quieres eliminar a ${admin.name} como administrador del dominio?`,
+                type: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Si, deseo borrarlo!',
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true
+            },
+            (isDeleted) => {
+                if (isDeleted) {
+                    this.props.domain.removeAdmin(
+                        admin.name,
+                        (error) => {
+                            if (error) {
+                                response.title = 'Ha ocurrido un error.';
+                                response.type = 'error';
+                                response.confirmButtonText = 'Intentar de nuevo';
+                                response.confirmButtonColor = '#DD6B55';
+
+                                return sweetAlert(response);
+                            }
+
+                            DomainStore.removeAdmin(admin.id);
+                            return sweetAlert(response);
+                        }
+                    );
                 }
-            );
-        }
+            }
+        );
     }
+
     onAdminsChange() {
         const admins = DomainStore.getAdmins(this.props.domain);
         if (!admins) {
@@ -66,6 +89,7 @@ export default class DomainAdminList extends React.Component {
 
         return this.setState({admins});
     }
+
     componentDidMount() {
         DomainStore.addAdminsChangeListener(this.onAdminsChange);
 

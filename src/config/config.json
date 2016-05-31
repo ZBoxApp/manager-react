@@ -8,7 +8,7 @@
         "url": "http://zimbra.zboxapp.dev:9081/powerdns_proxy",
         "token": "otto"
     },
-    "maxResultOnRequestZimbra": 20000,
+    "maxResultOnRequestZimbra": 3000,
     "autoincrementOnFailRequestZimbra": 500,
     "plans": {
         "basic": {
@@ -72,7 +72,18 @@
         "domains": {
             "attrs": {
                 "zimbraDomainStatus": true,
-                "description": true
+                "description": true,
+                "businessCategory": true,
+                "zimbraCreateTimestamp": true,
+                "zimbraDomainType": true,
+                "zimbraMailCatchAllForwardingAddress": true
+            }
+        },
+        "search": {
+            "attrs": {
+                "zimbraDomainType": true,
+                "zimbraMailCatchAllForwardingAddress": true,
+                "objectClass": true
             }
         }
     },

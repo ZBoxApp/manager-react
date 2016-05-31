@@ -61,6 +61,7 @@ export default class SearchView extends React.Component {
     }
 
     makeSearch(query) {
+      const attrsNeeded = Utils.getAttrsBySectionFromConfig('search');
       let advanceQuery = false;
       try {
         advanceQuery = JSON.parse(query).advance_query;
@@ -74,7 +75,7 @@ export default class SearchView extends React.Component {
             maxResults: window.manager_config.maxResultOnRequestZimbra,
             query: `(|(mail=*${query}*)(cn=*${query}*)(sn=*${query}*)(gn=*${query}*)(displayName=*${query}*)(zimbraMailDeliveryAddress=*${query}*)(zimbraDomainName=*${query}*)(uid=*${query}*)(zimbraMailAlias=*${query}*)(uid=*${query}*)(zimbraDomainName=*${query}*)(cn=*${query}*))`,
             types: 'accounts,distributionlists,domains',
-            attrs: 'objectClass'
+            attrs: attrsNeeded
         };
         this.runSearch(queryObject);
       }
@@ -101,17 +102,19 @@ export default class SearchView extends React.Component {
                 const id = item.id;
 
                 switch (type) {
-                case 'domain':
+                case 'domain': {
+                    const label = item.isAliasDomain ? 'Dominio Alias' : 'Dominio';
                     tipo = (
                         <div>
                             <i className='fa fa-globe fa-lg'></i>
-                            <span className='margin-left'>{'Dominio'}</span>
+                            <span className='margin-left'>{label}</span>
                         </div>
                     );
 
                     url = `/domains/${id}`;
                     objectDomain[item.name] = id;
                     break;
+                }
                 case 'account':
                     tipo = (
                         <div>
