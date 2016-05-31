@@ -5,7 +5,7 @@
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
     "webMailUrl": "https://192.168.1.8:8443",
     "dns": {
-        "url": "http://zimbra.zboxapp.dev:9081//powerdns_proxy/",
+        "url": "http://zimbra.zboxapp.dev:9081/powerdns_proxy",
         "token": "otto"
     },
     "maxResultOnRequestZimbra": 20000,
@@ -14,17 +14,20 @@
         "basic": {
             "statusCos": "btn-success",
             "label": "Básica",
-            "isEnabledToEdit": true
+            "isEnabledToEdit": true,
+            "forRights": true
         },
         "premium": {
             "statusCos": "btn-primary2",
             "label": "Premium",
-            "isEnabledToEdit": true
+            "isEnabledToEdit": true,
+            "forRights": true
         },
         "professional": {
             "statusCos": "btn-primary",
             "label": "Profesional",
-            "isEnabledToEdit": true
+            "isEnabledToEdit": true,
+            "forRights": true
         },
         "default": false,
         "archiving": {
