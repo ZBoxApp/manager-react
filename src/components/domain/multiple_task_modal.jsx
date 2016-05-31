@@ -7,6 +7,7 @@ import {Modal} from 'react-bootstrap';
 import DateTimeField from 'react-bootstrap-datetimepicker';
 import * as Client from '../../utils/client.jsx';
 import Promise from 'bluebird';
+import EventStore from '../../stores/event_store.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Utils from '../../utils/utils.jsx';
 
@@ -157,7 +158,16 @@ export default class MultipleTaskModal extends React.Component {
 
             return null;
         }, (error) => {
-            console.log(error); //eslint-disable-line no-console
+            EventStore.emitToast({
+                type: 'error',
+                title: 'Dominio - Mensaje Masivo',
+                body: error.message,
+                options: {
+                    timeOut: 4000,
+                    extendedTimeOut: 2000,
+                    closeButton: true
+                }
+            });
             if (this.props.show) {
                 this.props.onHide();
             }
