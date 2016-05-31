@@ -24,7 +24,8 @@
             "statusCos": "btn-primary2",
             "label": "Premium",
             "isEnabledToEdit": true,
-            "forRights": true
+            "forRights": true,
+            "archiving": true
         },
         "professional": {
             "statusCos": "btn-primary",
