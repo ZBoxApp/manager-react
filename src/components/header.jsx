@@ -91,6 +91,7 @@ export default class Header extends React.Component {
                                 <li className='dropdown'>
                                     <Link
                                         to='/logout'
+                                        title='Cerrar Sesión'
                                     >
                                         <i className='fa fa-sign-out'></i>
                                     </Link>

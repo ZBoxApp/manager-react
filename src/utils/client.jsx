@@ -154,6 +154,7 @@ export function logout(callback) {
 
     if (callback && typeof callback === 'function') {
         callback();
+        return window.location.replace('/login');
     }
 }
 

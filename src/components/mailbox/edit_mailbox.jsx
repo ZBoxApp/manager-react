@@ -317,7 +317,7 @@ export default class EditMailBox extends React.Component {
     }
 
     handleRenameAccount(email) {
-        const account = this.isStoreEnabled ? MailboxStore.getCurrent() : null;
+        const account = this.isStoreEnabled ? MailboxStore.getCurrent() : this.state.data || null;
 
         if (account) {
             const oldName = this.refs.rename.innerHTML;
