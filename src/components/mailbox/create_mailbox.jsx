@@ -318,7 +318,7 @@ export default class CreateMailBox extends React.Component {
     }
 
     getAllDomains() {
-        const max = 200;
+        const max = 1000;
 
         new Promise((resolve, reject) => {
             Client.getAllDomains(
@@ -336,7 +336,6 @@ export default class CreateMailBox extends React.Component {
             const rightsDomains = Utils.getDomainsCleaned(domains.domain);
             domains.domain = rightsDomains;
             domains.total = rightsDomains.length;
-            console.log(domains);
 
             const response = {
                 plans: this.cos,
@@ -345,7 +344,8 @@ export default class CreateMailBox extends React.Component {
 
             if (this.props.params.id) {
                 let defaultDomain = null;
-                if (DomainStore.getCurrent()) {
+
+                if (this.isStoreEnabled && DomainStore.getCurrent()) {
                     defaultDomain = DomainStore.getCurrent();
                 }
 
