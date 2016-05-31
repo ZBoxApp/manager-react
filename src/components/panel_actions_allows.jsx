@@ -56,11 +56,8 @@ export default class PanelActions extends React.Component {
         const search = this.refs.search.value;
 
         const arrayFiltered = this.props.data.filter((strArray) => {
-            if (strArray.match(search)) {
-                return strArray;
-            }
-
-            return false;
+            const strToTest = typeof strArray.name === 'string' ? strArray.name : strArray.id;
+            return strToTest.match(search);
         });
 
         const states = {};
@@ -98,11 +95,13 @@ export default class PanelActions extends React.Component {
         }
     }
 
-    handleDelete(e, item) {
+    handleDelete(e, element) {
         e.preventDefault();
-        this.remove.push(item);
-        this.forRemove.push(item);
-        this.props.onDelete(item);
+        this.remove.push(element);
+        this.forRemove.push(element);
+        if (this.props.onDelete) {
+            this.props.onDelete(element);
+        }
     }
 
     reset() {
@@ -196,11 +195,10 @@ export default class PanelActions extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         this.pagination.setArray(nextProps.data);
-        this.pagination.reset();
 
         const states = {};
 
-        states['items' + this.props.name] = nextProps.data;
+        states['items' + this.props.name] = this.pagination.reset();
         states['pagination' + this.props.name] = this.pagination.getResults();
 
         this.setState(states);
@@ -239,7 +237,7 @@ export default class PanelActions extends React.Component {
         const length = array.length;
         if (length > 0) {
             for (let i = 0; i < length; i++) {
-                if (item === array[i]) {
+                if (item.id === array[i].id) {
                     array.splice(i, 1);
                     return true;
                 }
@@ -281,7 +279,9 @@ export default class PanelActions extends React.Component {
             response.refresh = this.refresh;
         }
 
-        this.props.onApplyChanges(response);
+        if (this.props.onApplyChanges) {
+            this.props.onApplyChanges(response);
+        }
     }
 
     render() {
@@ -367,10 +367,14 @@ export default class PanelActions extends React.Component {
         } else {
             const data = this.state['items' + this.props.name];
             rows = data.map((row, index) => {
+                const name = row.name || row.id;
+                const hasError = row.name ? '' : 'alert-danger';
+                const labelError = row.name ? '' : '(Este elemento no tiene nombre)';
+
                 return (
                     <tr key={index}>
-                        <td>
-                            {row}
+                        <td className={`${hasError}`}>
+                            {`${name} ${labelError}`}
 
                             <Button
                                 btnAttrs={
@@ -447,6 +451,7 @@ export default class PanelActions extends React.Component {
 
             if (this.remove.length > 0) {
                 itemsForRemove = this.remove.map((element, key) => {
+                    const nameForRemove = element.name || element.id;
                     return (
                         <label
                             className='list-inline listed-field'
@@ -455,12 +460,12 @@ export default class PanelActions extends React.Component {
                             <input
                                 type='checkbox'
                                 defaultChecked={'checked'}
-                                data-value={element}
+                                data-value={element.id}
                                 onChange={(e) => {
                                     this.handleChange(e, element, 'remove');
                                 }}
                             />
-                            {element}
+                            {nameForRemove}
                         </label>
                     );
                 });
