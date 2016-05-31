@@ -22,6 +22,11 @@
     padding: 10px 4px;
     transition: all .3s;
 
+    > div {
+      max-width: 50%;
+      width: 100%;
+    }
+
     .heading-buttons {
       max-width: 50%;
     }

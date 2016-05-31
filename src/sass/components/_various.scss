@@ -616,7 +616,7 @@ a {
   float: left;
   height: 52px;
   padding: 0;
-  width: 70%;
+  width: 85%;
 
   .form-control {
     background: none repeat scroll 0 0 $transparent;
@@ -1639,4 +1639,8 @@ label {
 .format-text {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.overflow {
+  overflow: hidden;
 }
