@@ -217,7 +217,7 @@ export default class EditDomain extends React.Component {
             const maxCosAccounts = Utils.parseMaxCOSAccounts(domain.attrs.zimbraDomainCOSMaxAccounts);
             let total = 0;
             const ownPlans = enabledPlans.map((p) => {
-                const planId = maxCosAccounts[plans[p]];
+                const planId = maxCosAccounts[plans[p]] || 0;
                 total += parseInt(planId, 10) || 0;
                 return (
                     <div
