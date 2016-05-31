@@ -32,3 +32,33 @@
     width: 100%;
   }
 }
+
+.tag-status[class^='btn'] {
+  border: 1px solid $border-color-tag;
+  border-radius: 0 0 0 10px;
+  color: $white;
+  display: block;
+  overflow: hidden;
+  padding-left: 5px;
+
+  span {
+    background: $white;
+    color: $black;
+    display: inline-block;
+    font-size: 12px;
+    margin-left: 10px;
+    padding: 2px;
+    position: relative;
+
+    &::before {
+      border: 5px solid transparent;
+      border-right-color: $white;
+      content: '';
+      display: block;
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+}

@@ -1508,6 +1508,10 @@ label {
 .pretty-input {
   padding-left: 0;
 
+  &.disabled {
+    opacity: .5;
+  }
+
   .pretty-radio {
     display: inline-block;
     vertical-align: middle;
@@ -1533,6 +1537,7 @@ label {
 
         &::before {
           background-color: $white;
+          border-radius: 50%;
           color: $white;
           content: '\2713';
           height: 100%;
