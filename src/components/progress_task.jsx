@@ -32,7 +32,7 @@ export default class ProgressTask extends React.Component {
                 if (arrTasks[i].id === params.id) {
                     this.tasks.splice(i, 1);
                     EventStore.emitToast({
-                        type: 'success',
+                        type: params.toast.type || 'success',
                         title: params.toast.title,
                         body: params.toast.message,
                         options: {

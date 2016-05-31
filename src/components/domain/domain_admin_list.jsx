@@ -50,8 +50,6 @@ export default class DomainAdminList extends React.Component {
         }
 
         return Client.getDomain(domain.name, (data) => {
-            this.props.domain = data;
-
             return data.getAdmins((err, res) => {
                 const admins = res.account || [];
                 if (this.isStoreEnabled) {

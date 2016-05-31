@@ -14,6 +14,9 @@ export default class ImportMassiveModal extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isDEV = window.manager_config.DEV;
+        this.createMassiveAccounts = this.createMassiveAccounts.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
         this.buildCols = this.buildCols.bind(this);
         this.options = {
             email: 'email',
@@ -287,7 +290,8 @@ export default class ImportMassiveModal extends React.Component {
 
         for (const account in accounts) {
             if (accounts.hasOwnProperty(account)) {
-                accounts[account].zimbraCOSId = this.plans[accounts[account].zimbraCOSId.toLowerCase()];
+                const zimbraCOS = this.isDEV ? accounts[account].zimbraCOSId.trim().toLowerCase() : Utils.titleCase(accounts[account].zimbraCOSId.trim());
+                accounts[account].zimbraCOSId = this.plans[zimbraCOS];
                 const email = accounts[account].email;
                 const passwd = accounts[account].passwd;
                 if (passwd.length < 8) {
@@ -350,6 +354,19 @@ export default class ImportMassiveModal extends React.Component {
             //Aqui va error batchrequest
             if (this.props.show) {
                 this.props.onHide();
+            }
+
+            if (response.Fault) {
+                const total = response.Fault.length;
+                const message = total === 1 ? `Hubo un error en ${total} casilla : ${response.Fault[0].Reason.Text}` : `Hubo un error en ${total} casillas`;
+                return GlobalActions.emitEndTask({
+                    id: 'casillamasiva',
+                    toast: {
+                        message,
+                        title: 'Mailbox - Carga Masiva',
+                        type: 'error'
+                    }
+                });
             }
 
             return GlobalActions.emitEndTask({
