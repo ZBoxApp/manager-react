@@ -23,6 +23,8 @@ import DomainStore from '../../stores/domain_store.jsx';
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 
+//import Constants from '../../utils/constants.jsx';
+
 export default class DomainDetails extends React.Component {
     constructor(props) {
         super(props);
@@ -170,6 +172,7 @@ export default class DomainDetails extends React.Component {
             const zonaDNS = (
                 <ZonaDNS
                     domain={domain}
+                    location={this.props.location}
                 />
             );
 
@@ -193,8 +196,9 @@ export default class DomainDetails extends React.Component {
                         titlePage='Dominios'
                         descriptionPage='Dominios de correos creados'
                     />
-                    {message}
+
                     <div className='content animate-panel'>
+                        {message}
                         <div className='row'>
                             <div className='layout-back clearfix'>
                                 <div className='back-left backstage'>

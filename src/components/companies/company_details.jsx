@@ -1,5 +1,6 @@
 // Copyright (c) 2016 ZBox, Spa. All Rights Reserved.
 // See LICENSE.txt for license information.
+//import CompanyAdmins from './company_admins.jsx';
 
 import $ from 'jquery';
 import React from 'react';
@@ -8,7 +9,6 @@ import Promise from 'bluebird';
 import CompanyInfo from './company_info.jsx';
 import CompanyMailboxPlans from './company_mailbox_plans.jsx';
 import CompanyDomains from './company_domains.jsx';
-import CompanyAdmins from './company_admins.jsx';
 import CompanyInvoices from './company_invoices.jsx';
 
 import MessageBar from '../message_bar.jsx';
@@ -136,12 +136,16 @@ export default class CompaniesDetails extends React.Component {
             );
         }
 
-        const tabAdmins = (
-            <CompanyAdmins
-                company={company}
-                location={this.props.location}
-            />
-        );
+        /*
+         'Administradores de dominio',
+         administradores_de_dominio: tabAdmins,
+         const tabAdmins = (
+         <CompanyAdmins
+         company={company}
+         location={this.props.location}
+         />
+         );
+         */
 
         const tabDomains = (
             <CompanyDomains
@@ -152,9 +156,8 @@ export default class CompaniesDetails extends React.Component {
 
         const panelTabs = (
             <PanelTab
-                tabNames={['Administradores de dominio', 'Dominios']}
+                tabNames={['Dominios']}
                 tabs={{
-                    administradores_de_dominio: tabAdmins,
                     dominios: tabDomains
                 }}
                 location={this.props.location}
@@ -170,11 +173,20 @@ export default class CompaniesDetails extends React.Component {
                 {message}
                 <div className='content animate-panel'>
                     <div className='row'>
-                        <div className='col-md-6 central-content'>
-                            <CompanyInfo company={company}/>
-                        </div>
-                        <div className='col-md-6 central-content'>
-                            <CompanyMailboxPlans company={company}/>
+                        <div className='layout-back clearfix'>
+                            <div className='back-left backstage'>
+                                <div className='backbg'></div>
+                            </div>
+                            <div className='back-right backstage'>
+                                <div className='backbg'></div>
+                            </div>
+
+                            <div className='col-md-6 central-content'>
+                                <CompanyInfo company={company}/>
+                            </div>
+                            <div className='col-md-6 central-content'>
+                                <CompanyMailboxPlans company={company}/>
+                            </div>
                         </div>
                     </div>
                     <div className='row'>
