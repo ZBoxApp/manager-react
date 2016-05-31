@@ -86,12 +86,12 @@ export default class CreateMailBox extends React.Component {
                     return domainName.includes(value) && domainName.length === value.length;
                 });
 
-                if (thatDomainExists.name === this.cacheDomain) {
+                if (thatDomainExists && thatDomainExists.name === this.cacheDomain) {
                     return null;
                 }
 
                 if (thatDomainExists) {
-                    this.cacheDomain = thatDomainExists.name;
+                    this.cacheDomain = value;
                     const maxCosAccounts = Utils.parseMaxCOSAccounts(thatDomainExists.attrs.zimbraDomainCOSMaxAccounts);
                     this.setState({
                         loadingEnableAccounts: true,
@@ -157,6 +157,7 @@ export default class CreateMailBox extends React.Component {
                         });
                 }
 
+                this.cacheDomain = null;
                 return GlobalActions.emitMessage({
                     message: `El dominio: ${value}, no existe, por favor verifíque.`,
                     typeError: messageType.ERROR
