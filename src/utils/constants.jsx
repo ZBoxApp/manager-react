@@ -105,5 +105,27 @@ export default {
         'TSIG',
         'TXT',
         'WKS'
-    ]
+    ],
+    status: {
+        active: {
+            label: 'Activa',
+            isEnabledOnCreate: true,
+            classes: 'label-success mailbox-status'
+        },
+        locked: {
+            label: 'Inactiva',
+            isEnabledOnCreate: true,
+            classes: 'label-warning mailbox-status'
+        },
+        lockout: {
+            label: 'Bloqueada',
+            isEnabledOnCreate: false,
+            classes: 'label-warning mailbox-status'
+        },
+        closed: {
+            label: 'Cerrada',
+            isEnabledOnCreate: true,
+            classes: 'label-default mailbox-status'
+        }
+    }
 };

@@ -75,7 +75,7 @@ export default class AntiSpam extends React.Component {
 
         if (invalidInput.test(value)) {
             EventStore.emitMessage({
-                message: 'El valor de esta lista no puede contener caracteres "Ñ".',
+                message: 'El valor de esta lista no puede contener caracteres especiales.',
                 typeError: MessageType.ERROR
             });
             return false;

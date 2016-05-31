@@ -51,12 +51,7 @@ export default class Mailboxes extends React.Component {
         this.cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
         this.cosById = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
         this.isRefreshing = true;
-        this.optionStatus = {
-            active: 'Active',
-            locked: 'Inactiva',
-            lockout: 'Bloqueada',
-            closed: 'Cerrada'
-        };
+        this.optionStatus = Constants.status;
         this.optionPlans = window.manager_config.plans;
         this.domainId = null;
         this.domainName = null;
@@ -602,7 +597,7 @@ export default class Mailboxes extends React.Component {
                         key={`status-${i}`}
                         value={`${item}`}
                     >
-                        {Utils.titleCase(this.optionStatus[item])}
+                        {Utils.titleCase(this.optionStatus[item].label)}
                     </option>
                 );
             });

@@ -54,6 +54,7 @@
                 "zimbraCOSId": true,
                 "zimbraAccountStatus": true,
                 "zimbraMailHost": true,
+                "zimbraMailQuota": true,
                 "zimbraArchiveAccount": true,
                 "zimbraMailAlias": true,
                 "zimbraPrefOutOfOfficeReplyEnabled": true,
