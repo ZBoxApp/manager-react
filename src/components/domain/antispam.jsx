@@ -16,10 +16,11 @@ export default class AntiSpam extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.handleDelete = this.handleDelete.bind(this);
         this.handleSave = this.handleSave.bind(this);
         this.alterDomain = this.alterDomain.bind(this);
-        this.domain = DomainStore.getCurrent();
+        this.domain = this.isStoreEnabled ? DomainStore.getCurrent() : this.props.data;
         this.blackList = [];
         this.whiteList = [];
 
@@ -141,7 +142,9 @@ export default class AntiSpam extends React.Component {
                 return reject(error);
             });
         }).then((res) => {
-            DomainStore.setCurrent(res);
+            if (this.isStoreEnabled) {
+                DomainStore.setCurrent(res);
+            }
             returns = res.attrs[key] ? res.attrs[key] : [];
             returns = Array.isArray(returns) ? returns : [returns];
 

@@ -37,7 +37,7 @@ export default class CompanyMailboxPlans extends React.Component {
             return cos[c];
         });
 
-        const domains = company.domains;
+        const domains = company.domains || [];
 
         const plans = {};
         let noLimitError;

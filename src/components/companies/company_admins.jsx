@@ -16,6 +16,7 @@ export default class CompanyAdmins extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getCompanyAdmins = this.getCompanyAdmins.bind(this);
         this.getAdmins = this.getAdmins.bind(this);
 
@@ -70,7 +71,9 @@ export default class CompanyAdmins extends React.Component {
                         d.admins = [];
                     }
 
-                    CompanyStore.addDomainAdmins(company.id, d);
+                    if (this.isStoreEnabled) {
+                        CompanyStore.addDomainAdmins(company.id, d);
+                    }
                     Reflect.apply(Array.prototype.push, admins, d.admins);
                 });
 

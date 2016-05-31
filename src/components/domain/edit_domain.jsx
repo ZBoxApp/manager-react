@@ -21,6 +21,7 @@ export default class EditDomain extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getDomain = this.getDomain.bind(this);
         this.getCompanies = this.getCompanies.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -33,9 +34,8 @@ export default class EditDomain extends React.Component {
     }
 
     getDomain() {
-        //const domain = DomainStore.getCurrent();
+        const domain = this.isStoreEnabled ? DomainStore.getCurrent() : null;
         const domainId = this.props.params.id;
-        const domain = null;
 
         if (domain && domain.id === domainId) {
             return this.getCompanies(domain);
@@ -54,7 +54,7 @@ export default class EditDomain extends React.Component {
     }
 
     getCompanies(domain) {
-        const companies = CompanyStore.getCompanies();
+        const companies = this.isStoreEnabled ? CompanyStore.getCompanies() : null;
 
         if (companies) {
             this.setState({
@@ -115,8 +115,10 @@ export default class EditDomain extends React.Component {
             Client.modifyDomain(
                 domain,
                 (data) => {
-                    CompanyStore.modifyDomain(prevCompanyId, data);
-                    DomainStore.setCurrent(data);
+                    if (this.isStoreEnabled) {
+                        CompanyStore.modifyDomain(prevCompanyId, data);
+                        DomainStore.setCurrent(data);
+                    }
                     browserHistory.push(`/domains/${data.id}`);
                 },
                 (error) => {

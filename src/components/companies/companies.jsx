@@ -27,6 +27,7 @@ export default class Companies extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getCompanies = this.getCompanies.bind(this);
         this.getDomains = this.getDomains.bind(this);
         this.getPlans = this.getPlans.bind(this);
@@ -43,13 +44,15 @@ export default class Companies extends React.Component {
     }
 
     gotoCompany(e, company) {
-        CompaniesStore.setCurrent(company);
+        if (this.isStoreEnabled) {
+            CompaniesStore.setCurrent(company);
+        }
         Utils.handleLink(e, `/companies/${company.id}`, this.props.location);
     }
 
     getCompanies() {
         const self = this;
-        const companies = CompaniesStore.getCompanies();
+        const companies = this.isStoreEnabled ? CompaniesStore.getCompanies() : null;
         if (companies) {
             self.setState({
                 companies
@@ -66,7 +69,9 @@ export default class Companies extends React.Component {
                 });
 
                 return Promise.all(domains).then((comps) => {
-                    CompaniesStore.setCompanies(comps);
+                    if (this.isStoreEnabled) {
+                        CompaniesStore.setCompanies(comps);
+                    }
 
                     self.setState({
                         companies: comps,
@@ -87,10 +92,14 @@ export default class Companies extends React.Component {
             });
         }
 
-        if (DomainStore.getDomains()) {
-            const domain = DomainStore.getDomainByName(mydomain);
+        const domains = this.isStoreEnabled ? DomainStore.getDomains() : null;
+
+        if (domains) {
+            const domain = this.isStoreEnabled ? DomainStore.getDomainByName(mydomain) : null;
             Client.getCompany(domain.attrs.businessCategory, (company) => {
-                CompaniesStore.setCompanies(company);
+                if (this.isStoreEnabled) {
+                    CompaniesStore.setCompanies(company);
+                }
             }, (error) => {
                 self.setState({error: {
                     message: error,

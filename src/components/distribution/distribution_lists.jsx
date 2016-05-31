@@ -27,6 +27,7 @@ export default class DistributionLists extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = true;
         this.getDistributionLists = this.getDistributionLists.bind(this);
         this.showMessage = this.showMessage.bind(this);
         this.onDeleteMember = this.onDeleteMember.bind(this);
@@ -61,15 +62,14 @@ export default class DistributionLists extends React.Component {
     }
 
     getDistributionLists() {
-        //const domain = DomainStore.getCurrent();
+        const domain = this.isStoreEnabled ? DomainStore.getCurrent() : null;
         const id = this.props.params.id;
         const response = {};
-        const domain = null;
 
         return new Promise((resolve, reject) => {
             if (domain) {
                 response.domain = domain;
-                const dl = DomainStore.getDistributionListById(id, domain);
+                const dl = this.isStoreEnabled ? DomainStore.getDistributionListById(id, domain) : null;
                 response.distributionsList = dl;
 
                 dl.getOwners((error, owners) => {
@@ -102,13 +102,15 @@ export default class DistributionLists extends React.Component {
                 reject(error);
             });
         }).then((data) => {
-            DomainStore.setOwners(data.owners);
-            DomainStore.setMembers(data.distributionsList.members);
+            if (this.isStoreEnabled) {
+                DomainStore.setOwners(data.owners);
+                DomainStore.setMembers(data.distributionsList.members);
+            }
 
             this.setState({
                 distributionsList: data.distributionsList,
-                members: DomainStore.getMembers(),
-                owners: DomainStore.getOwners(),
+                members: this.isStoreEnabled ? DomainStore.getMembers() : data.distributionsList.members,
+                owners: this.isStoreEnabled ? DomainStore.getOwners() : data.owners,
                 domain: data.domain
             });
         }).catch((error) => {
@@ -124,12 +126,14 @@ export default class DistributionLists extends React.Component {
     onSubmitOwners(response) {
         if (response.refresh) {
             response.refresh.forEach((member) => {
-                DomainStore.addOwners(member);
+                if (this.isStoreEnabled) {
+                    DomainStore.addOwners(member);
+                }
             });
         }
 
         this.multipleActionsOwners(response, this.state.distributionsList).then((res) => {
-            //const newOwners = DomainStore.getOwners();
+            //const newOwners = this.isStoreEnabled ? DomainStore.getOwners() : null;
             const errors = [];
             const limit = res.length;
 
@@ -156,7 +160,9 @@ export default class DistributionLists extends React.Component {
                 Client.getDistributionList(id, (success) => {
                     success.getOwners((error, owners) => {
                         if (owners) {
-                            DomainStore.setOwners(owners);
+                            if (this.isStoreEnabled) {
+                                DomainStore.setOwners(owners);
+                            }
                             this.setState({
                                 owners,
                                 error: errors
@@ -175,12 +181,14 @@ export default class DistributionLists extends React.Component {
     onSubmitMembers(response) {
         if (response.refresh) {
             response.refresh.forEach((member) => {
-                DomainStore.addMember(member);
+                if (this.isStoreEnabled) {
+                    DomainStore.addMember(member);
+                }
             });
         }
 
         this.multipleActionsMembers(response, this.state.distributionsList).then((res) => {
-            const newMembers = DomainStore.getMembers();
+            const newMembers = this.isStoreEnabled ? DomainStore.getMembers() : null;
             const errors = [];
             const limit = res.length;
 
@@ -227,7 +235,9 @@ export default class DistributionLists extends React.Component {
                         }
 
                         response.add.forEach((member) => {
-                            DomainStore.addMember(member);
+                            if (this.isStoreEnabled) {
+                                DomainStore.addMember(member);
+                            }
                         });
 
                         res.isCompleted = true;
@@ -253,7 +263,9 @@ export default class DistributionLists extends React.Component {
                         }
 
                         response.remove.forEach((member) => {
-                            DomainStore.removeMember(member);
+                            if (this.isStoreEnabled) {
+                                DomainStore.removeMember(member);
+                            }
                         });
 
                         res.isCompleted = true;
@@ -334,8 +346,10 @@ export default class DistributionLists extends React.Component {
     }
 
     onDeleteMember(member) {
-        DomainStore.removeMember(member);
-        const currentMembers = DomainStore.getMembers();
+        if (this.isStoreEnabled) {
+            DomainStore.removeMember(member);
+        }
+        const currentMembers = this.isStoreEnabled ? DomainStore.getMembers() : null;
 
         this.setState({
             members: currentMembers,
@@ -346,10 +360,12 @@ export default class DistributionLists extends React.Component {
     onCancelMember(response) {
         if (response && response.length > 0) {
             response.forEach((member) => {
-                DomainStore.addMember(member);
+                if (this.isStoreEnabled) {
+                    DomainStore.addMember(member);
+                }
             });
 
-            const newMembers = DomainStore.getMembers();
+            const newMembers = this.isStoreEnabled ? DomainStore.getMembers() : null;
 
             this.setState({
                 members: newMembers,
@@ -361,8 +377,10 @@ export default class DistributionLists extends React.Component {
     }
 
     onDeleteOwner(owner) {
-        DomainStore.removeOwner(owner);
-        const currentOwners = DomainStore.getOwners();
+        if (this.isStoreEnabled) {
+            DomainStore.removeOwner(owner);
+        }
+        const currentOwners = this.isStoreEnabled ? DomainStore.getOwners() : null;
 
         this.setState({
             owners: currentOwners,
@@ -373,10 +391,12 @@ export default class DistributionLists extends React.Component {
     onCancelOwner(response) {
         if (response && response.length > 0) {
             response.forEach((member) => {
-                DomainStore.addOwners(member);
+                if (this.isStoreEnabled) {
+                    DomainStore.addOwners(member);
+                }
             });
 
-            const newOwners = DomainStore.getOwners();
+            const newOwners = this.isStoreEnabled ? DomainStore.getOwners() : null;
 
             this.setState({
                 owners: newOwners,
@@ -581,20 +601,29 @@ export default class DistributionLists extends React.Component {
                 <div className='content animate-panel'>
                     {message}
                     <div className='row'>
-                        <div className='col-md-6 central-content'>
-                            <Panel
-                                title='Información General'
-                                btnsHeader={btnsGeneralInfo}
-                                children={generalData}
-                                classHeader='with-min-height'
-                            />
-                        </div>
-                        <div className='col-md-6 central-content'>
-                            <Panel
-                                title='Dominio'
-                                children={domainInfo}
-                                classHeader='with-min-height'
-                            />
+                        <div className='layout-back clearfix'>
+                            <div className='back-left backstage'>
+                                <div className='backbg'></div>
+                            </div>
+                            <div className='back-right backstage'>
+                                <div className='backbg'></div>
+                            </div>
+
+                            <div className='col-md-6 central-content'>
+                                <Panel
+                                    title='Información General'
+                                    btnsHeader={btnsGeneralInfo}
+                                    children={generalData}
+                                    classHeader='with-min-height'
+                                />
+                            </div>
+                            <div className='col-md-6 central-content'>
+                                <Panel
+                                    title='Dominio'
+                                    children={domainInfo}
+                                    classHeader='with-min-height'
+                                />
+                            </div>
                         </div>
                     </div>
                     <div className='row'>

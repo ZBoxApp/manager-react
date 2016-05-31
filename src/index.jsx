@@ -149,6 +149,14 @@ function renderRootComponent() {
                             component={Mailboxes}
                         />
                         <Route
+                            path='domains/:domain_id/mailboxes/:id'
+                            component={MailboxDetails}
+                        />
+                        <Route
+                            path='domains/:domain_id/mailboxes/:id/edit'
+                            component={EditMailBox}
+                        />
+                        <Route
                             path='domains/:domain_id/distribution_lists/:id'
                             component={DistributionLists}
                         />

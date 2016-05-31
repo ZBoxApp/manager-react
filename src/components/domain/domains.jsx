@@ -26,6 +26,7 @@ export default class Domains extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getDomains = this.getDomains.bind(this);
 
         const page = parseInt(this.props.location.query.page, 10) || 1;
@@ -45,7 +46,7 @@ export default class Domains extends React.Component {
             maxResults: window.manager_config.maxResultOnRequestZimbra
         };
 
-        /*if (DomainStore.getDomains()) {
+        if (this.isStoreEnabled && DomainStore.getDomains()) {
             const data = DomainStore.getDomains();
 
             GlobalActions.emitEndLoading();
@@ -54,7 +55,7 @@ export default class Domains extends React.Component {
                 data,
                 loading: false
             });
-        }*/
+        }
 
         const attrneeded = Utils.getAttrsBySectionFromConfig('domains');
         attrs.attrs = attrneeded;

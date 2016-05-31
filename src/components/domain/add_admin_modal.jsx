@@ -19,6 +19,7 @@ export default class AddAdminModal extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.handleSearch = this.handleSearch.bind(this);
         this.handleAddAdmin = this.handleAddAdmin.bind(this);
 
@@ -45,7 +46,7 @@ export default class AddAdminModal extends React.Component {
                 (data) => {
                     const admins = DomainStore.getAdmins(this.props.domain);
                     let users = [];
-                    if (admins) {
+                    if (this.isStoreEnabled && admins) {
                         if (data.account) {
                             data.account.forEach((u) => {
                                 if (!admins.hasOwnProperty(u.id)) {
@@ -88,15 +89,20 @@ export default class AddAdminModal extends React.Component {
 
                 if (this.props.show) {
                     this.props.onHide();
-                    setTimeout(() => {
-                        GlobalActions.emitMessage({
-                            message: 'Se ha agregado su administrador éxitoxamente.',
-                            type: Constants.MessageType.SUCCESS
-                        });
-                    }, 1000);
+                    GlobalActions.emitToast({
+                        type: 'success',
+                        title: 'Dominio',
+                        body: `Se ha agrega el administrador: ${user}, éxitosamente.`,
+                        options: {
+                            timeOut: 4000,
+                            extendedTimeOut: 2000,
+                            closeButton: true
+                        }
+                    });
                 }
 
-                return DomainStore.addAdmin(user);
+                DomainStore.emitAdminsChange();
+                return this.isStoreEnabled && DomainStore.addAdmin(user) ? DomainStore.addAdmin(user) : true;
             }
         );
     }

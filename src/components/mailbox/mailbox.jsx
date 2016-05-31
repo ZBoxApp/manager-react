@@ -35,11 +35,13 @@ export default class Mailboxes extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.showMessage = this.showMessage.bind(this);
         this.refreshAllAccounts = this.refreshAllAccounts.bind(this);
         this.handleChangeFilter = this.handleChangeFilter.bind(this);
         this.handleTabChanged = this.handleTabChanged.bind(this);
         this.makeFilter = this.makeFilter.bind(this);
+        this.c = 0;
 
         const page = parseInt(this.props.location.query.page, 10) || 1;
         this.mailboxes = null;
@@ -124,8 +126,10 @@ export default class Mailboxes extends React.Component {
 
     handleExportAsCSV(e) {
         e.preventDefault();
-        if (MailboxStore.getMailboxByDomainId(this.domainId)) {
-            const accounts = MailboxStore.getMailboxByDomainId(this.domainId);
+        const mailboxesByDomainId = this.isStoreEnabled ? MailboxStore.getMailboxByDomainId(this.domainId) : null;
+        const accountsFromState = this.state.accounts;
+        if (mailboxesByDomainId || accountsFromState) {
+            const accounts = mailboxesByDomainId || accountsFromState;
             const title = `Casillas de ${accounts.account[0].domain}`;
             return Utils.exportAsCSV(accounts.account, 'domain', title, true);
         }
@@ -169,7 +173,7 @@ export default class Mailboxes extends React.Component {
     domainInfo(domainId) {
         return new Promise(
             (resolve, reject) => {
-                const domain = DomainStore.getCurrent();
+                const domain = this.isStoreEnabled ? DomainStore.getCurrent() : null;
                 if (domain && domainId === domain.id) {
                     return resolve();
                 }
@@ -177,11 +181,13 @@ export default class Mailboxes extends React.Component {
                 return Client.getDomain(
                     domainId,
                     (data) => {
-                        DomainStore.setCurrent(data);
-                        return resolve();
+                        if (this.isStoreEnabled) {
+                            DomainStore.setCurrent(data);
+                        }
+                        return resolve(data);
                     },
-                    () => {
-                        return reject();
+                    (error) => {
+                        return reject(error);
                     }
                 );
             }
@@ -208,7 +214,7 @@ export default class Mailboxes extends React.Component {
 
         new Promise((resolve, reject) => {
             if (domainName) {
-                const hasMailboxForDomain = MailboxStore.getMailboxByDomainId(this.domainId);
+                const hasMailboxForDomain = this.isStoreEnabled ? MailboxStore.getMailboxByDomainId(this.domainId) : null;
 
                 if (hasMailboxForDomain) {
                     return resolve(hasMailboxForDomain);
@@ -216,7 +222,13 @@ export default class Mailboxes extends React.Component {
 
                 return Client.getAllAccounts(attrs, (success) => {
                     const data = Utils.extractLockOuts(success);
-                    MailboxStore.setMailboxesByDomain(this.domainId, data);
+                    if (this.isStoreEnabled) {
+                        MailboxStore.setMailboxesByDomain(this.domainId, data);
+                    } else {
+                        this.setState({
+                            accounts: data
+                        });
+                    }
 
                     return resolve(success);
                 }, (error) => {
@@ -224,13 +236,16 @@ export default class Mailboxes extends React.Component {
                 });
             }
 
-            if (MailboxStore.hasMailboxes()) {
+            const hasMailboxes = this.isStoreEnabled ? MailboxStore.hasMailboxes() : null;
+            if (hasMailboxes) {
                 return resolve(MailboxStore.getMailboxes());
             }
 
             return Client.getAllAccounts(attrs, (success) => {
                 const data = Utils.extractLockOuts(success);
-                MailboxStore.setMailboxes(data);
+                if (this.isStoreEnabled) {
+                    MailboxStore.setMailboxes(data);
+                }
 
                 return resolve(data);
             }, (error) => {
@@ -285,8 +300,8 @@ export default class Mailboxes extends React.Component {
 
     getAllMailboxes(domainId) {
         if (domainId) {
-            return this.domainInfo(domainId).then(() => {
-                const domain = DomainStore.getCurrent();
+            return this.domainInfo(domainId).then((data) => {
+                const domain = this.isStoreEnabled ? DomainStore.getCurrent() : data;
                 this.getAccounts(domain.name, window.manager_config.maxResultOnRequestZimbra);
             });
         }
@@ -295,7 +310,7 @@ export default class Mailboxes extends React.Component {
     }
 
     refreshAllAccounts() {
-        const mailboxes = MailboxStore.getMailboxes();
+        const mailboxes = this.isStoreEnabled ? MailboxStore.getMailboxes() : null;
         const tables = this.buildTableFromData(mailboxes, ['Todas', 'Bloqueadas']);
 
         if (tables.lockedAlert) {
@@ -343,13 +358,9 @@ export default class Mailboxes extends React.Component {
             tipo = 'Desconocido';
         }
 
-        if (attrs.displayName) {
-            displayName = attrs.displayName.trim();
-        } else if (attrs.cn || attrs.sn) {
-            const cn = attrs.cn || '';
-            const sn = attrs.sn || '';
-            displayName = `${cn.trim()} ${sn.trim()}`;
-        }
+        displayName = attrs.displayName || `${attrs.givenName || attrs.cn} ${attrs.sn}`;
+
+        const editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
 
         return (
             <tr
@@ -363,7 +374,7 @@ export default class Mailboxes extends React.Component {
                         btnAttrs={
                             {
                                 className: 'mailbox-link',
-                                onClick: (e) => Utils.handleLink(e, 'mailboxes/' + id)
+                                onClick: (e) => Utils.handleLink(e, `${editUrlFromParams}${id}`)
                             }
                         }
                     >
@@ -384,7 +395,7 @@ export default class Mailboxes extends React.Component {
                         btnAttrs={
                             {
                                 className: 'btn btn-xs btn-default',
-                                onClick: (e) => Utils.handleLink(e, '/mailboxes/' + id + '/edit')
+                                onClick: (e) => Utils.handleLink(e, `${editUrlFromParams}${id}/edit`)
                             }
                         }
                     >
@@ -664,7 +675,10 @@ export default class Mailboxes extends React.Component {
 
         if (this.state.loading) {
             content = (
-                <div className='text-center'>
+                <div
+                    className='text-center'
+                    key={'mailboxes-loading'}
+                >
                     <i className='fa fa-spinner fa-spin fa-4x fa-fw'></i>
                     <p>{'Cargando Casillas...'}</p>
                 </div>

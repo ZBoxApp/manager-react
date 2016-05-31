@@ -18,6 +18,7 @@ export default class DNSZoneForm extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.addDNSRow = this.addDNSRow.bind(this);
         this.removeRow = this.removeRow.bind(this);
         this.handleChangeInput = this.handleChangeInput.bind(this);
@@ -26,7 +27,7 @@ export default class DNSZoneForm extends React.Component {
         this.showSweetConfirm = this.showSweetConfirm.bind(this);
         this.handleSearchByName = this.handleSearchByName.bind(this);
 
-        this.zoneDNS = DomainStore.getZoneDNS();
+        this.zoneDNS = this.isStoreEnabled ? DomainStore.getZoneDNS() : this.props.zone;
 
         this.instanceRow = {
             name: '',
@@ -122,7 +123,11 @@ export default class DNSZoneForm extends React.Component {
                 return Client.getZone(domain.name, (zone) => {
                     this.newRows = [];
 
-                    DomainStore.setZoneDNS(zone);
+                    if (this.isStoreEnabled) {
+                        DomainStore.setZoneDNS(zone);
+                    } else {
+                        DomainStore.emitZoneDNSChange(zone);
+                    }
 
                     Utils.toggleStatusButtons('.savedns', false);
                     button.innerHTML = oldContent;
@@ -202,6 +207,7 @@ export default class DNSZoneForm extends React.Component {
 
         sweetAlert({
                 title: 'Esta seguro que desea borrar el DNS?',
+                text: `Desea borrar el record ${object.name}`,
                 type: 'info',
                 showCancelButton: true,
                 confirmButtonColor: '#DD6B55',
@@ -211,7 +217,7 @@ export default class DNSZoneForm extends React.Component {
             },
             (isDeleted) => {
                 if (isDeleted) {
-                    if (zoneDNS && zoneDNS.records[index]) {
+                    if (zoneDNS) {
                         return zoneDNS.deleteRecords(object, (error, success) => {
                             if (error) {
                                 response.title = 'Ha ocurrido un error.';
@@ -222,7 +228,9 @@ export default class DNSZoneForm extends React.Component {
                                 return sweetAlert(response);
                             }
 
-                            DomainStore.setZoneDNS(success);
+                            if (this.isStoreEnabled) {
+                                DomainStore.setZoneDNS(success);
+                            }
 
                             this.defaultRows.splice(index, 1);
 
@@ -238,15 +246,27 @@ export default class DNSZoneForm extends React.Component {
         );
     }
 
-    removeRow(e, index, from) {
+    removeRow(e, object) {
         e.preventDefault();
-        const refer = from || null;
+        let index = null;
 
-        if (this.defaultRows[index] && !refer) {
-            return this.showSweetConfirm(this.defaultRows[index], index);
+        if (typeof object === 'object') {
+            const element = this.defaultRows.filter((item, i) => {
+                const isRightName = item.name === object.name;
+                if (isRightName) {
+                    index = i;
+                    return isRightName;
+                }
+                return isRightName;
+            });
+
+            if (element.length > 0) {
+                const item = element.pop();
+                return this.showSweetConfirm(item, index);
+            }
         }
 
-        this.newRows.splice(index, 1);
+        this.newRows.splice(object, 1);
 
         return this.setState({
             update: true
@@ -302,13 +322,6 @@ export default class DNSZoneForm extends React.Component {
         let header = null;
         let inputSearch = null;
         let pagination = null;
-        //
-        // No show records
-        //
-        const inMutableFields = window.manager_config.dns.inmutable;
-        const mutableFields = this.state.fields.filter((record) => {
-          return !inMutableFields.includes(record.type.toLowerCase());
-        });
         const types = this.types.map((item) => {
             return (
                 <option
@@ -361,19 +374,19 @@ export default class DNSZoneForm extends React.Component {
                         <strong>Nombre</strong>
                     </div>
 
-                    <div className='col-xs-2'>
+                    <div className='col-xs-1'>
                         <strong>Tipo</strong>
                     </div>
 
-                    <div className='col-xs-4'>
+                    <div className='col-xs-3'>
                         <strong>Contenido</strong>
                     </div>
 
-                    <div className='col-xs-1'>
+                    <div className='col-xs-2'>
                         <strong>Prioridad</strong>
                     </div>
 
-                    <div className='col-xs-1'>
+                    <div className='col-xs-2'>
                         <strong>TTL</strong>
                     </div>
 
@@ -403,7 +416,7 @@ export default class DNSZoneForm extends React.Component {
                             />
                         </div>
 
-                        <div className='col-xs-2'>
+                        <div className='col-xs-1'>
                             <select
                                 className='form-control'
                                 defaultValue={newElement.type}
@@ -416,7 +429,7 @@ export default class DNSZoneForm extends React.Component {
                             </select>
                         </div>
 
-                        <div className='col-xs-4'>
+                        <div className='col-xs-3'>
                             <input
                                 type='text'
                                 className='form-control'
@@ -427,7 +440,7 @@ export default class DNSZoneForm extends React.Component {
                             />
                         </div>
 
-                        <div className='col-xs-1'>
+                        <div className='col-xs-2'>
                             <input
                                 type='number'
                                 className='form-control'
@@ -438,7 +451,7 @@ export default class DNSZoneForm extends React.Component {
                             />
                         </div>
 
-                        <div className='col-xs-1'>
+                        <div className='col-xs-2'>
                             <input
                                 type='number'
                                 className='form-control'
@@ -453,7 +466,7 @@ export default class DNSZoneForm extends React.Component {
                             <button
                                 className='btn btn-danger'
                                 onClick={(e) => {
-                                    this.removeRow(e, index, 'new');
+                                    this.removeRow(e, index);
                                 }}
                             >
                                 <i
@@ -469,7 +482,7 @@ export default class DNSZoneForm extends React.Component {
 
             if (this.state.fields.length > 0) {
                 const length = this.state.fields.length;
-                fields = mutableFields.map((element, i) => {
+                fields = this.state.fields.map((element, i) => {
                     const isDisabled = element.enabled ? null : true;
                     return (
                         <div
@@ -482,27 +495,20 @@ export default class DNSZoneForm extends React.Component {
                                     type='text'
                                     defaultValue={element.name}
                                     className='form-control'
-                                    onChange={(e) => {
-                                    this.handleChangeInput(e, i, Labels.name);
-                                }}
                                     disabled={isDisabled}
                                 />
                             </div>
 
-                            <div className='col-xs-2'>
-                                <select
+                            <div className='col-xs-1'>
+                                <input
                                     className='form-control'
+                                    type='text'
                                     defaultValue={element.type}
-                                    onChange={(e) => {
-                                    this.handleChangeInput(e, i, Labels.type);
-                                }}
                                     disabled={isDisabled}
-                                >
-                                    {types}
-                                </select>
+                                />
                             </div>
 
-                            <div className='col-xs-4'>
+                            <div className='col-xs-3'>
                                 <input
                                     type='text'
                                     className='form-control'
@@ -513,7 +519,7 @@ export default class DNSZoneForm extends React.Component {
                                 />
                             </div>
 
-                            <div className='col-xs-1'>
+                            <div className='col-xs-2'>
                                 <input
                                     type='number'
                                     className='form-control'
@@ -524,7 +530,7 @@ export default class DNSZoneForm extends React.Component {
                                 />
                             </div>
 
-                            <div className='col-xs-1'>
+                            <div className='col-xs-2'>
                                 <input
                                     type='number'
                                     className='form-control'
@@ -539,7 +545,7 @@ export default class DNSZoneForm extends React.Component {
                                 <button
                                     className='btn btn-danger'
                                     onClick={(e) => {
-                                    this.removeRow(e, i);
+                                    this.removeRow(e, element);
                                 }}
                                 >
                                     <i
@@ -609,5 +615,9 @@ export default class DNSZoneForm extends React.Component {
 
 DNSZoneForm.propTypes = {
     domain: React.PropTypes.object,
+    zone: React.PropTypes.oneOfType([
+        React.PropTypes.string,
+        React.PropTypes.object
+    ]),
     location: React.PropTypes.object
 };

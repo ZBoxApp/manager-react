@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import {browserHistory} from 'react-router';
 
 import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
@@ -23,16 +24,24 @@ import DomainStore from '../../stores/domain_store.jsx';
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 
-//import Constants from '../../utils/constants.jsx';
+import Constants from '../../utils/constants.jsx';
+const QueryOptions = Constants.QueryOptions;
 
 export default class DomainDetails extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getDomain = this.getDomain.bind(this);
         this.showMessage = this.showMessage.bind(this);
+        this.handleClickOnTab = this.handleClickOnTab.bind(this);
 
         this.state = {};
+    }
+
+    handleClickOnTab(tab) {
+        const path = this.props.location.pathname;
+        browserHistory.push(`${path}?tab=${tab}`);
     }
 
     showMessage(attrs) {
@@ -45,8 +54,7 @@ export default class DomainDetails extends React.Component {
     }
 
     getDomain() {
-        //const domain = DomainStore.getCurrent();
-        const domain = null;
+        const domain = this.isStoreEnabled ? DomainStore.getCurrent() : null;
         const states = {};
 
         if (domain && domain.id === this.props.params.id) {
@@ -57,13 +65,15 @@ export default class DomainDetails extends React.Component {
             this.setState(states);
 
             Client.getZone(domain.name, (zone) => {
-                DomainStore.setZoneDNS(zone);
+                states.zone = this.isStoreEnabled ? DomainStore.setZoneDNS(zone) : zone;
 
                 this.setState(states);
 
                 GlobalActions.emitEndLoading();
             }, () => {
-                DomainStore.setZoneDNS(null);
+                if (this.isStoreEnabled) {
+                    DomainStore.setZoneDNS(null);
+                }
 
                 this.setState(states);
 
@@ -73,11 +83,13 @@ export default class DomainDetails extends React.Component {
             Client.getDomain(
                 this.props.params.id,
                 (data) => {
-                    DomainStore.setCurrent(data);
+                    if (this.isStoreEnabled) {
+                        DomainStore.setCurrent(data);
+                    }
                     states.domain = data;
 
                     Client.getZone(data.name, (zone) => {
-                        DomainStore.setZoneDNS(zone);
+                        states.zone = this.isStoreEnabled ? DomainStore.setZoneDNS(zone) : zone;
 
                         this.setState(states);
 
@@ -104,6 +116,17 @@ export default class DomainDetails extends React.Component {
         if (condition) {
             this.props.params.id = nextProps.params.id;
             this.getDomain();
+        }
+
+        const isPaging = this.props.location.query.page !== nextProps.location.query.page;
+
+        if (isPaging) {
+            const page = parseInt(nextProps.location.query.page, 10) || 1;
+
+            this.setState({
+                page,
+                offset: ((page - 1) * QueryOptions.DEFAULT_LIMIT)
+            });
         }
     }
 
@@ -189,6 +212,7 @@ export default class DomainDetails extends React.Component {
                 <ZonaDNS
                     domain={domain}
                     location={this.props.location}
+                    zone={this.state.zone}
                 />
             );
 
@@ -214,6 +238,7 @@ export default class DomainDetails extends React.Component {
                     tabNames={tabNames}
                     tabs={tabs}
                     location={this.props.location}
+                    onClick={this.handleClickOnTab}
                 />
             );
 

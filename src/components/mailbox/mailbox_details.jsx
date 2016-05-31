@@ -31,6 +31,7 @@ export default class MailboxDetails extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getMailbox = this.getMailbox.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
         this.showMessage = this.showMessage.bind(this);
@@ -84,7 +85,8 @@ export default class MailboxDetails extends React.Component {
     }
 
     getMailbox(id) {
-        if (MailboxStore.hasMailboxes()) {
+        const hasMailboxes = this.isStoreEnabled ? MailboxStore.hasMailboxes() : null;
+        if (hasMailboxes) {
             const account = MailboxStore.getMailboxById(id);
             MailboxStore.setCurrent(account);
             let items = account.attrs.zimbraMailAlias;
@@ -122,6 +124,7 @@ export default class MailboxDetails extends React.Component {
                 });
             }).then((result) => {
                 MailboxStore.setCurrent(result);
+
                 let items = result.attrs.zimbraMailAlias;
 
                 if (items) {
@@ -318,12 +321,14 @@ export default class MailboxDetails extends React.Component {
                 />
             );
 
+            const editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
+
             btnsGeneralInfo = [
                 {
                     props: {
                         className: 'btn btn-xs btn-default action-info-btns',
                         onClick: (e) => {
-                            this.handleEdit(e, `/mailboxes/${this.state.data.id}/edit`, this.props.location);
+                            this.handleEdit(e, `${editUrlFromParams}${this.state.data.id}/edit`, this.props.location);
                         }
                     },
                     label: 'Editar'

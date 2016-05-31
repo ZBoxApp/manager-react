@@ -12,36 +12,56 @@ import AddDistributionListModal from './add_distribution_list_modal.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
+import Constants from '../../utils/constants.jsx';
+const defaultLimit = Constants.QueryOptions.DEFAULT_LIMIT;
+import Pagination from '../pagination.jsx';
 
 export default class DomainDistributionList extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getLists = this.getLists.bind(this);
         this.handleRemoveAdmin = this.handleRemoveAdmin.bind(this);
         this.onListsChange = this.onListsChange.bind(this);
-        this.state = this.getStateFromStores();
+        this.handleSearchByName = this.handleSearchByName.bind(this);
+        this.listscache = null;
+
+        const page = parseInt(this.props.location.query.page, 10) || 1;
+        this.state = {
+            lists: this.getStateFromStores(),
+            page,
+            offset: ((page - 1) * defaultLimit)
+        };
     }
     getStateFromStores() {
-        const lists = DomainStore.getDistributionLists(this.props.domain);
+        const lists = this.isStoreEnabled ? DomainStore.getDistributionLists(this.props.domain) : null;
 
-        return {
-            lists
-        };
+        return lists;
     }
     getLists() {
         const domain = this.props.domain;
         domain.getAllDistributionLists(
             (err, lists) => {
-                DomainStore.setDistibutionLists(domain, lists);
+                if (this.isStoreEnabled) {
+                    DomainStore.setDistibutionLists(domain, lists);
+                }
+                this.listscache = lists;
                 this.setState({lists});
             }
         );
     }
+    componentWillReceiveProps(nextProps) {
+        const page = parseInt(nextProps.location.query.page, 10) || 1;
+        this.setState({
+            page,
+            offset: ((page - 1) * defaultLimit)
+        });
+    }
     onListsChange() {
-        const lists = DomainStore.getDistributionLists(this.props.domain);
+        const lists = this.isStoreEnabled ? DomainStore.getDistributionLists(this.props.domain) : null;
         if (!lists) {
-            return this.getAdmins();
+            return this.getLists();
         }
 
         return this.setState({lists});
@@ -68,7 +88,11 @@ export default class DomainDistributionList extends React.Component {
                     Client.removeDistributionList(
                         list.id,
                         () => {
-                            DomainStore.removeDistributionList(list.id);
+                            if (this.isStoreEnabled) {
+                                DomainStore.removeDistributionList(list.id);
+                            } else {
+                                DomainStore.emitDistributionListsChange();
+                            }
 
                             return sweetAlert(response);
                         },
@@ -85,6 +109,22 @@ export default class DomainDistributionList extends React.Component {
             }
         );
     }
+    handleSearchByName(e) {
+        const value = e.target.value.trim();
+
+        if (!this.listscache) {
+            return null;
+        }
+
+        const newLists = this.listscache.filter((dl) => {
+            const name = dl.name || dl.id;
+            return name.match(value);
+        });
+
+        this.setState({
+            lists: newLists
+        });
+    }
     componentDidMount() {
         DomainStore.addDistributionListsChangeListener(this.onListsChange);
 
@@ -96,8 +136,18 @@ export default class DomainDistributionList extends React.Component {
         DomainStore.removeDistributionListsChangeListener(this.onListsChange);
     }
     render() {
+        let pagination = null;
+        let filter = null;
         if (!this.state.lists) {
-            return <div/>;
+            return (
+                <div
+                    className='text-center'
+                    key={'dl-loading'}
+                >
+                    <i className='fa fa-spinner fa-spin fa-4x fa-fw'></i>
+                    <p>{'Cargando Listas de Distribución...'}</p>
+                </div>
+            );
         }
 
         const domain = this.props.domain;
@@ -116,7 +166,21 @@ export default class DomainDistributionList extends React.Component {
             )
         }];
 
-        const listsRows = this.state.lists.map((dl) => {
+        let lists = this.state.lists;
+        if (lists.length > defaultLimit) {
+            const totalPages = Math.ceil(lists.length / defaultLimit);
+            lists = lists.slice(this.state.offset, this.state.page * defaultLimit);
+            pagination = (
+                <Pagination
+                    key='DlPagination'
+                    url={this.props.location.pathname}
+                    currentPage={this.state.page}
+                    totalPages={totalPages}
+                />
+            );
+        }
+
+        const listsRows = lists.map((dl) => {
             return (
                 <tr
                     key={`dl-${dl.id}`}
@@ -151,6 +215,29 @@ export default class DomainDistributionList extends React.Component {
 
         let panelBody;
         if (listsRows.length > 0) {
+            filter = (
+                <div className='col-xs-12'>
+                    <div className='input-group'>
+                        <span className='input-group-btn'>
+                            <button
+                                className='btn btn-primary'
+                                type='button'
+                            >
+                                Buscar
+                            </button>
+                        </span>
+                        <input
+                            type='text'
+                            className='form-control'
+                            placeholder='Búsqueda por nombre'
+                            onKeyUp={(e) => {
+                                this.handleSearchByName(e);
+                            }}
+                        />
+                    </div>
+                </div>
+            );
+
             panelBody = (
                 <div className='table-responsive'>
                     <table
@@ -169,6 +256,7 @@ export default class DomainDistributionList extends React.Component {
                         {listsRows}
                         </tbody>
                     </table>
+                    {pagination}
                 </div>
             );
         } else {
@@ -185,6 +273,7 @@ export default class DomainDistributionList extends React.Component {
             <Panel
                 hasHeader={true}
                 btnsHeader={headerButtons}
+                filter={filter}
                 children={panelBody}
             />
         );

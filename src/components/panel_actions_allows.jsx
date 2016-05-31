@@ -55,6 +55,10 @@ export default class PanelActions extends React.Component {
     onSearch() {
         const search = this.refs.search.value;
 
+        if (!this.props.data) {
+            return null;
+        }
+
         const arrayFiltered = this.props.data.filter((strArray) => {
             const strToTest = typeof strArray.name === 'string' ? strArray.name : strArray.id;
             return strToTest.match(search);

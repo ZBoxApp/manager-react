@@ -17,6 +17,7 @@ export default class CreateDomainForm extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.planSize = this.planSize.bind(this);
         this.getCompanies = this.getCompanies.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -40,7 +41,7 @@ export default class CreateDomainForm extends React.Component {
         const companyId = this.props.params.id;
         const companies = CompanyStore.getCompanies();
 
-        if (companies) {
+        if (this.isStoreEnabled && companies) {
             this.setState({
                 plans: Utils.getEnabledPlansByCos(ZimbraStore.getAllCos()),
                 companies,
@@ -114,8 +115,10 @@ export default class CreateDomainForm extends React.Component {
             Client.createDomain(
                 domain,
                 (data) => {
-                    CompanyStore.addDomain(businessCategory, data);
-                    DomainStore.setCurrent(data);
+                    if (this.isStoreEnabled) {
+                        CompanyStore.addDomain(businessCategory, data);
+                        DomainStore.setCurrent(data);
+                    }
 
                     if (this.props.state.total === this.props.state.step) {
                         browserHistory.push(`/domains/${data.id}`);
