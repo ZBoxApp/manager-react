@@ -28,16 +28,16 @@ export default class DistributionLists extends React.Component {
     constructor(props) {
         super(props);
 
-        this.isStoreEnabled = true;
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getDistributionLists = this.getDistributionLists.bind(this);
         this.showMessage = this.showMessage.bind(this);
         this.onDeleteMember = this.onDeleteMember.bind(this);
         this.onDeleteOwner = this.onDeleteOwner.bind(this);
-        this.onSubmitMembers = this.onSubmitMembers.bind(this);
         this.onCancelMember = this.onCancelMember.bind(this);
         this.onCancelOwner = this.onCancelOwner.bind(this);
         this.onExportMembers = this.onExportMembers.bind(this);
         this.onExportAllowers = this.onExportAllowers.bind(this);
+        this.makeRequest = this.makeRequest.bind(this);
         this.domain = null;
         this.isGlobalAdmin = UserStore.isGlobalAdmin();
 
@@ -61,6 +61,54 @@ export default class DistributionLists extends React.Component {
     onExportAllowers(data) {
         const title = `Permitidos de la lista de distribución '${this.state.distributionsList.name}' de ${this.state.domain.name}`;
         Utils.exportAsCSV(data, 'allowers', title, true);
+    }
+
+    makeRequest(response, dl, resolve, store) {
+        const keys = Object.keys(response).sort();
+        const item = keys[0];
+        const res = store || {};
+        const action = item.match(/(remove|add)/gi);
+        if (action) {
+            var element = response[item];
+            if (element && element.length) {
+                const pop = element.pop();
+                const target = typeof pop === 'object' ? pop.name || pop.id : pop;
+                const label = action[0] === 'remove' ? 'eliminar' : 'agregar';
+                return dl[item](target, (er, success) => {
+                    if (success) {
+                        if (res.completed) {
+                            res.completed.push({
+                                action: label,
+                                target
+                            });
+                        } else {
+                            res.completed = [{
+                                action: label,
+                                target
+                            }];
+                        }
+                        const api = success.api ? success : dl;
+                        return this.makeRequest(response, api, resolve, res);
+                    }
+
+                    er.action = label;
+                    er.target = target;
+                    if (res.error) {
+                        res.error.push(er);
+                    } else {
+                        res.error = [er];
+                    }
+
+                    return this.makeRequest(response, dl, resolve, res);
+                });
+            } else {
+                Reflect.deleteProperty(response, item);
+                return this.makeRequest(response, dl, resolve, res);
+            }
+        }
+
+        res.data = dl;
+        return resolve(res);
     }
 
     getDistributionLists() {
@@ -109,7 +157,7 @@ export default class DistributionLists extends React.Component {
                 DomainStore.setMembers(data.distributionsList.members);
             }
 
-            this.setState({
+            return this.setState({
                 distributionsList: data.distributionsList,
                 members: this.isStoreEnabled ? DomainStore.getMembers() : data.distributionsList.members,
                 owners: this.isStoreEnabled ? DomainStore.getOwners() : data.owners,
@@ -125,233 +173,73 @@ export default class DistributionLists extends React.Component {
         });
     }
 
-    onSubmitOwners(response) {
-        if (response.refresh) {
-            response.refresh.forEach((member) => {
-                if (this.isStoreEnabled) {
-                    DomainStore.addOwners(member);
-                }
-            });
-        }
-
-        this.multipleActionsOwners(response, this.state.distributionsList).then((res) => {
-            //const newOwners = this.isStoreEnabled ? DomainStore.getOwners() : null;
+    onSubmitActions(response) {
+        return new Promise((resolve) => {
+            return this.makeRequest(response, this.state.distributionsList, resolve);
+        }).then((data) => {
             const errors = [];
-            const limit = res.length;
-
-            for (let i = 0; i < limit; i++) {
-                const items = res[i];
-                if (items.error) {
-                    const action = (items.action === 'remove') ? 'eliminar' : 'agregar';
+            if (data.error) {
+                data.error.forEach((err) => {
                     errors.push({
-                        error: `Hubo un error al ${action} ${items.item}, debido a : ${items.error.extra.reason}`,
+                        error: `Hubo un error al ${err.action} ${err.target}, debido a : ${err.extra.reason}`,
                         type: MessagesType.ERROR
                     });
-                }
+                });
             }
 
-            if (errors.length !== limit) {
+            if (data.completed) {
                 errors.push({
-                    error: 'Se han guardado los datos para permitidos éxitosamente.',
+                    error: 'Se han guardado los datos éxitosamente.',
                     type: MessagesType.SUCCESS
                 });
             }
 
-            if (this.state.domain) {
-                const id = this.props.params.id;
-                Client.getDistributionList(id, (success) => {
-                    success.getOwners((error, owners) => {
-                        if (owners) {
-                            if (this.isStoreEnabled) {
-                                DomainStore.setOwners(owners);
-                            }
-                            this.setState({
-                                owners,
-                                error: errors
-                            });
+            const dl = data.data;
 
-                            response.reset();
-                        }
-                    });
-                }, (err) => {
-                    return err;
-                });
-            }
-        });
-    }
-
-    onSubmitMembers(response) {
-        if (response.refresh) {
-            response.refresh.forEach((member) => {
-                if (this.isStoreEnabled) {
-                    DomainStore.addMember(member);
-                }
-            });
-        }
-
-        this.multipleActionsMembers(response, this.state.distributionsList).then((res) => {
-            const newMembers = this.isStoreEnabled ? DomainStore.getMembers() : null;
-            const errors = [];
-            const limit = res.length;
-
-            for (let i = 0; i < limit; i++) {
-                const items = res[i];
-                if (items.error) {
-                    const action = (items.action === 'remove') ? 'eliminar' : 'agregar';
-                    errors.push({
-                        error: `Hubo un error al ${action} ${items.item}, debido a : ${items.error.extra.reason}`,
-                        type: MessagesType.ERROR
-                    });
-                }
-            }
-
-            if (errors.length !== limit) {
-                errors.push({
-                    error: 'Se han guardado los datos para miembros éxitosamente.',
-                    type: MessagesType.SUCCESS
+            if (response.target.match(/owner/gi)) {
+                return dl.getOwners((err, owners) => {
+                    if (owners) {
+                        this.setState({
+                            owners,
+                            error: errors.length > 0 ? errors : null,
+                            distributionsList: dl
+                        });
+                    }
                 });
             }
 
-            this.setState({
-                members: newMembers,
-                error: errors
-            });
+            const id = this.props.params.id;
+            return Client.getDistributionList(id, (success) => {
+                const dl = success;
 
+                return this.setState({
+                    error: errors.length > 0 ? errors : null,
+                    distributionsList: dl,
+                    members: dl.members
+                });
+            }, (error) => {
+                return GlobalActions.emitMessage({
+                    error: error.message,
+                    typeError: MessagesType.ERROR
+                });
+            });
+        }).finally(() => {
             response.reset();
         });
-    }
-
-    multipleActionsMembers(response, account) {
-        const promises = [];
-        if (response.add || response.remove) {
-            if (response.add) {
-                const add = new Promise((resolve) => {
-                    account.addMembers(response.add, (error) => {
-                        const res = {};
-                        if (error) {
-                            res.isCompleted = false;
-                            res.action = 'add';
-                            res.error = error;
-
-                            return resolve(res);
-                        }
-
-                        response.add.forEach((member) => {
-                            if (this.isStoreEnabled) {
-                                DomainStore.addMember(member);
-                            }
-                        });
-
-                        res.isCompleted = true;
-                        res.action = 'add';
-
-                        return resolve(res);
-                    });
-                });
-
-                promises.push(add);
-            }
-
-            if (response.remove) {
-                const remove = new Promise((resolve) => {
-                    account.removeMembers(response.remove, (error) => {
-                        const res = {};
-                        if (error) {
-                            res.isCompleted = false;
-                            res.action = 'remove';
-                            res.error = error;
-
-                            return resolve(res);
-                        }
-
-                        response.remove.forEach((member) => {
-                            if (this.isStoreEnabled) {
-                                DomainStore.removeMember(member);
-                            }
-                        });
-
-                        res.isCompleted = true;
-                        res.action = 'remove';
-
-                        return resolve(res);
-                    });
-                });
-
-                promises.push(remove);
-            }
-        }
-        return Promise.all(promises);
-    }
-
-    multipleActionsOwners(response, account) {
-        const promises = [];
-
-        for (const key in response) {
-            if (response.hasOwnProperty(key) && key === 'add') {
-                const array = response[key];
-                const limit = array.length;
-
-                for (let index = 0; index < limit; index++) {
-                    const res = {};
-                    const newPermitido = array[index];
-                    const promesa = new Promise((resolve) => {
-                        account.addOwner(newPermitido, (error) => {
-                            if (error) {
-                                res.isCompleted = false;
-                                res.item = newPermitido;
-                                res.action = key;
-                                res.error = error;
-                            } else {
-                                res.isCompleted = true;
-                                res.item = newPermitido;
-                                res.action = key;
-                            }
-
-                            return resolve(res);
-                        });
-                    });
-
-                    promises.push(promesa);
-                }
-            }
-
-            if (response.hasOwnProperty(key) && key === 'remove') {
-                const array = response[key];
-                const limit = array.length;
-
-                for (let index = 0; index < limit; index++) {
-                    const res = {};
-                    const permitido = array[index].name || array[index].id;
-                    const promesa = new Promise((resolve) => {
-                        account.removeOwner(permitido, (error) => {
-                            if (error) {
-                                res.isCompleted = false;
-                                res.item = response[key][index];
-                                res.action = key;
-                                res.error = error;
-                            } else {
-                                res.isCompleted = true;
-                                res.item = response[key][index];
-                                res.action = key;
-                            }
-
-                            return resolve(res);
-                        });
-                    });
-
-                    promises.push(promesa);
-                }
-            }
-        }
-
-        return Promise.all(promises);
     }
 
     onDeleteMember(member) {
         if (this.isStoreEnabled) {
             DomainStore.removeMember(member);
         }
-        const currentMembers = this.isStoreEnabled ? DomainStore.getMembers() : null;
+
+        let currentMembers = this.isStoreEnabled ? DomainStore.getMembers() : null;
+
+        if (!currentMembers) {
+            currentMembers = this.state.members.filter((target) => {
+                return target !== member;
+            });
+        }
 
         this.setState({
             members: currentMembers,
@@ -367,7 +255,12 @@ export default class DistributionLists extends React.Component {
                 }
             });
 
-            const newMembers = this.isStoreEnabled ? DomainStore.getMembers() : null;
+            let newMembers = this.isStoreEnabled ? DomainStore.getMembers() : null;
+
+            if (!newMembers) {
+                newMembers = this.state.members;
+                newMembers.push(...response);
+            }
 
             this.setState({
                 members: newMembers,
@@ -382,7 +275,14 @@ export default class DistributionLists extends React.Component {
         if (this.isStoreEnabled) {
             DomainStore.removeOwner(owner);
         }
-        const currentOwners = this.isStoreEnabled ? DomainStore.getOwners() : null;
+
+        let currentOwners = this.isStoreEnabled ? DomainStore.getOwners() : null;
+
+        if (!currentOwners) {
+            currentOwners = this.state.owners.filter((target) => {
+                return target !== owner;
+            });
+        }
 
         this.setState({
             owners: currentOwners,
@@ -398,7 +298,11 @@ export default class DistributionLists extends React.Component {
                 }
             });
 
-            const newOwners = this.isStoreEnabled ? DomainStore.getOwners() : null;
+            let newOwners = this.isStoreEnabled ? DomainStore.getOwners() : null;
+            if (!newOwners) {
+                newOwners = this.state.owners;
+                newOwners.push(...response);
+            }
 
             this.setState({
                 owners: newOwners,
@@ -435,7 +339,7 @@ export default class DistributionLists extends React.Component {
             const domain = this.state.domain;
             const owners = this.state.owners;
             const arrayMembers = this.state.members;
-            const membersFormatted = Utils.getMembers(data.members, 'Miembros');
+            const membersFormatted = Utils.getMembers(arrayMembers, 'Miembros');
 
             if (owners.length > 0) {
                 isPrivate = (
@@ -489,7 +393,7 @@ export default class DistributionLists extends React.Component {
                     name={'Miembros'}
                     data={arrayMembers}
                     onApplyChanges={(response) => {
-                        this.onSubmitMembers(response);
+                        this.onSubmitActions(response);
                     }}
                     hasExport={true}
                     isEmail={true}
@@ -502,6 +406,7 @@ export default class DistributionLists extends React.Component {
                     onExport={(members) => {
                         this.onExportMembers(members);
                     }}
+                    nameFunc={'Members'}
                 />
             );
 
@@ -510,7 +415,7 @@ export default class DistributionLists extends React.Component {
                     name={'Permitidos'}
                     data={owners}
                     onApplyChanges={(response) => {
-                        this.onSubmitOwners(response);
+                        this.onSubmitActions(response);
                     }}
                     hasExport={true}
                     isEmail={true}
@@ -523,6 +428,7 @@ export default class DistributionLists extends React.Component {
                     onExport={(allowers) => {
                         this.onExportAllowers(allowers);
                     }}
+                    nameFunc={'Owner'}
                 />
             );
         }
@@ -581,14 +487,14 @@ export default class DistributionLists extends React.Component {
             permitidos: allows
         };
 
-        const not = false;
+        /*const not = false;
         //if (!this.isGlobalAdmin) {
         if (not) {
             tabNamesArray = ['Miembros'];
             tabs = {
                 miembros: members
             };
-        }
+        }*/
 
         panelTabs = (
             <PanelTab
