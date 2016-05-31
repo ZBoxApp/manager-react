@@ -13,17 +13,25 @@
     "plans": {
         "basic": {
             "statusCos": "btn-success",
-            "label": "Básica"
+            "label": "Básica",
+            "isEnabledToEdit": true
         },
         "premium": {
             "statusCos": "btn-primary2",
-            "label": "Premium"
+            "label": "Premium",
+            "isEnabledToEdit": true
         },
         "professional": {
             "statusCos": "btn-primary",
-            "label": "Profesional"
+            "label": "Profesional",
+            "isEnabledToEdit": true
         },
-        "default": false
+        "default": false,
+        "archiving": {
+            "statusCos": "btn-warning",
+            "label": "Archiving",
+            "isEnabledToEdit": false
+        }
     },
     "multiFormDomain": {
         "hasMailCleaner": false,

@@ -47,7 +47,7 @@ export default class AntiSpam extends React.Component {
             break;
         }
 
-        this.alterDomain(attrs);
+        this.alterDomain(attrs, action);
     }
 
     searchItemToRemove(array, item) {
@@ -65,11 +65,21 @@ export default class AntiSpam extends React.Component {
         const attrs = {};
         const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         const isDomain = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+        const invalidInput = /ñ/gi;
         const target = action === 'black' ? 'lista negra' : 'lista blanca';
+        let clone = null;
         e.preventDefault();
 
         const input = this.refs[`${action}-item`];
         const value = input.value.trim();
+
+        if (invalidInput.test(value)) {
+            EventStore.emitMessage({
+                message: 'El valor de esta lista no puede contener caracteres "Ñ".',
+                typeError: MessageType.ERROR
+            });
+            return false;
+        }
 
         if (!value || value === '') {
             EventStore.emitMessage({
@@ -91,24 +101,28 @@ export default class AntiSpam extends React.Component {
 
         switch (action) {
         case 'black':
-            this.blackList.push(value);
-            attrs.amavisBlacklistSender = this.blackList;
+            clone = this.blackList.slice();
+            clone.push(value);
+            attrs.amavisBlacklistSender = clone;
             break;
         case 'white':
-            this.whiteList.push(value);
-            attrs.amavisWhitelistSender = this.whiteList;
+            clone = this.whiteList.slice();
+            clone.push(value);
+            attrs.amavisWhitelistSender = clone;
             break;
         }
 
-        return this.alterDomain(attrs, e.target, input);
+        return this.alterDomain(attrs, action, e.target, input);
     }
 
-    alterDomain(attrs, button, input) {
+    alterDomain(attrs, action, button, input) {
         const domain = this.domain;
         const hasButton = button || false;
         const hasInput = input || false;
         let oldContent = null;
         let id = null;
+        let returns;
+        const key = Object.keys(attrs).pop();
 
         if (hasButton) {
             oldContent = button.innerHTML;
@@ -128,6 +142,15 @@ export default class AntiSpam extends React.Component {
             });
         }).then((res) => {
             DomainStore.setCurrent(res);
+            returns = res.attrs[key] ? res.attrs[key] : [];
+            returns = Array.isArray(returns) ? returns : [returns];
+
+            if (action === 'black') {
+                this.blackList = returns;
+            } else {
+                this.whiteList = returns;
+            }
+
             this.setState({
                 update: true
             });
