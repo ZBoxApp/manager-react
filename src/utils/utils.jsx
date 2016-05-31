@@ -171,7 +171,7 @@ export function validateInputRequired(refs) {
         }
 
         for (const ref in refs) {
-            if (refs.hasOwnProperty(ref) && refs[ref].hasAttribute) {
+            if (refs.hasOwnProperty(ref)) {
                 if (refs[ref].hasAttribute('data-required') && refs[ref].getAttribute('data-required') === 'true' && refs[ref].value === '') {
                     let message;
                     if (refs[ref].getAttribute('data-message') && refs[ref].getAttribute('data-message').length > 0) {
@@ -672,4 +672,20 @@ export function extractLockOuts(object) {
     }
 
     return object;
+}
+
+export function parseMaxCOSAccounts(maxCosAccounts) {
+    const response = {};
+    const arrCos = maxCosAccounts || false;
+
+    if (arrCos) {
+        arrCos.forEach((p) => {
+            const splitter = p.split(':');
+            response[splitter.shift()] = splitter[0] || 0;
+        });
+
+        return response;
+    }
+
+    return arrCos;
 }
