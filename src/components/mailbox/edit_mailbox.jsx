@@ -90,122 +90,120 @@ export default class EditMailBox extends React.Component {
             });
         }
 
-        if (UserStore.isGlobalAdmin()) {
-            const options = {
-                title: 'Plan sin cupo',
-                text: `Actualmente el plan <strong>${Utils.titleCase(data.plan)}</strong> no tiene cupo para completar la acción solicitada, por lo cual es necesario que compre más casillas`,
-                html: true,
-                confirmButtonText: 'Obtener Precio',
-                showLoaderOnConfirm: true,
-                closeOnConfirm: false
-            };
+        const options = {
+            title: 'Plan sin cupo',
+            text: `Actualmente el plan <strong>${Utils.titleCase(data.plan)}</strong> no tiene cupo para completar la acción solicitada, por lo cual es necesario que compre más casillas`,
+            html: true,
+            confirmButtonText: 'Obtener Precio',
+            showLoaderOnConfirm: true,
+            closeOnConfirm: false
+        };
 
-            const domainId = this.domainId || this.props.params.domain_id || null;
+        const domainId = this.domainId || this.props.params.domain_id || null;
 
-            const dataJSON = {
-                domainId,
-                type: 'standar',
-                currency: this.currency,
-                cosId: val,
-                anualRenovation: true,
-                upgrade: true
-            };
+        const dataJSON = {
+            domainId,
+            type: 'standar',
+            currency: this.currency,
+            cosId: val,
+            anualRenovation: true,
+            upgrade: true
+        };
 
-            const request = {
-                domainId: this.domainId,
-                adminEmail: UserStore.getCurrentUser().name,
-                upgrade: true,
-                currency: this.currency
-            };
+        const request = {
+            domainId: this.domainId,
+            adminEmail: UserStore.getCurrentUser().name,
+            upgrade: true,
+            currency: this.currency
+        };
 
-            const account = this.state.data;
+        const account = this.state.data;
 
-            Utils.alertToBuy((isConfirmed) => {
-                if (isConfirmed) {
-                    Client.getPrices(dataJSON, (success) => {
-                        const prices = success.result.prices;
-                        const price = prices[data.plan] ? currencyFormatter.format(prices[data.plan], this.currencyParams) + ' ' + this.currency : 0;
-                        const options = {
-                            title: 'Cambio de Plan',
-                            text: `Al presionar <strong>Aceptar</strong>, está autorizando la emisión de una factura por un total de <strong>${price}</strong> correspondiente a : <br> <ul class="list-buy-dialog"><li>Asunto: Cambio de Plan</li><li>Casilla: <strong>${account.name}</strong></li><li>Plan Original: <strong>${Utils.titleCase(this.currentPlan)}</strong></li><li>Nuevo Plan: <strong>${Utils.titleCase(data.plan)}</strong></li></ul>`,
-                            html: true,
-                            confirmButtonText: 'Si, Cambiar Plan',
-                            showLoaderOnConfirm: true,
-                            closeOnConfirm: false
-                        };
+        Utils.alertToBuy((isConfirmed) => {
+            if (isConfirmed) {
+                Client.getPrices(dataJSON, (success) => {
+                    const prices = success.result.prices;
+                    const price = prices[data.plan] ? currencyFormatter.format(prices[data.plan], this.currencyParams) + ' ' + this.currency : 0;
+                    const options = {
+                        title: 'Cambio de Plan',
+                        text: `Al presionar <strong>Aceptar</strong>, está autorizando la emisión de una factura por un total de <strong>${price}</strong> correspondiente a : <br> <ul class="list-buy-dialog"><li>Asunto: Cambio de Plan</li><li>Casilla: <strong>${account.name}</strong></li><li>Plan Original: <strong>${Utils.titleCase(this.currentPlan)}</strong></li><li>Nuevo Plan: <strong>${Utils.titleCase(data.plan)}</strong></li></ul>`,
+                        html: true,
+                        confirmButtonText: 'Si, Cambiar Plan',
+                        showLoaderOnConfirm: true,
+                        closeOnConfirm: false
+                    };
 
-                        Utils.alertToBuy((isConfirmed) => {
-                            if (isConfirmed) {
-                                const item = {};
+                    Utils.alertToBuy((isConfirmed) => {
+                        if (isConfirmed) {
+                            const item = {};
 
-                                item.basic = {
-                                    type: 'Producto',
-                                    quantity: 1,
-                                    price: prices[data.plan],
-                                    description: `Cambio de plan de la casilla: ${account.name} de ${this.currentPlan} a ${data.plan}`,
-                                    id: data.cosId
-                                };
+                            item.basic = {
+                                type: 'Producto',
+                                quantity: 1,
+                                price: prices[data.plan],
+                                description: `Cambio de plan de la casilla: ${account.name} de ${this.currentPlan} a ${data.plan}`,
+                                id: data.cosId
+                            };
 
-                                request.items = item;
+                            request.items = item;
 
-                                const requestObject = JSON.stringify(request);
+                            const requestObject = JSON.stringify(request);
 
-                                Client.makeSale(requestObject, () => {
-                                    Utils.alertToBuy((isConfirmed) => {
-                                        if (isConfirmed) {
-                                            const enabledAccounts = this.state.enabledAccounts;
+                            Client.makeSale(requestObject, () => {
+                                Utils.alertToBuy((isConfirmed) => {
+                                    if (isConfirmed) {
+                                        const enabledAccounts = this.state.enabledAccounts;
 
-                                            enabledAccounts.forEach((plan) => {
-                                                if (plan.cosId === data.cosId) {
-                                                    plan.enabled++;
-                                                    plan.total++;
-                                                    currentEvent.target.checked = true;
-                                                }
-                                            });
+                                        enabledAccounts.forEach((plan) => {
+                                            if (plan.cosId === data.cosId) {
+                                                plan.enabled++;
+                                                plan.total++;
+                                                currentEvent.target.checked = true;
+                                            }
+                                        });
 
-                                            this.setState({
-                                                enabledAccounts,
-                                                zimbraCOSId: data.cosId
-                                            });
-                                        }
-                                    }, {
-                                        title: 'Cambio de Plan',
-                                        text: 'Su compra se ha realizado con éxito.',
-                                        showCancelButton: false,
-                                        confirmButtonColor: '#4EA5EC',
-                                        confirmButtonText: 'Muy bien',
-                                        type: 'success'
-                                    });
-                                }, (error) => {
-                                    Utils.alertToBuy(() => {
-                                        return null;
-                                    }, {
-                                        title: 'Error',
-                                        text: error.message || error.error.message || 'Ha ocurrido un error desconocido.',
-                                        showCancelButton: false,
-                                        confirmButtonColor: '#4EA5EC',
-                                        confirmButtonText: 'Entiendo',
-                                        type: 'error',
-                                        closeOnConfirm: true
-                                    });
+                                        this.setState({
+                                            enabledAccounts,
+                                            zimbraCOSId: data.cosId
+                                        });
+                                    }
+                                }, {
+                                    title: 'Cambio de Plan',
+                                    text: 'Su compra se ha realizado con éxito.',
+                                    showCancelButton: false,
+                                    confirmButtonColor: '#4EA5EC',
+                                    confirmButtonText: 'Muy bien',
+                                    type: 'success'
                                 });
-                            }
-                        }, options);
-                    }, (error) => {
-                        return EventStore.emitToast({
-                            type: 'error',
-                            title: 'Compras - Precios',
-                            body: error.message || 'Ha ocurrido un error al intentar obtener los precios, vuelva a intentarlo por favor.',
-                            options: {
-                                timeOut: 4000,
-                                extendedTimeOut: 2000,
-                                closeButton: true
-                            }
-                        });
+                            }, (error) => {
+                                Utils.alertToBuy(() => {
+                                    return null;
+                                }, {
+                                    title: 'Error',
+                                    text: error.message || error.error.message || 'Ha ocurrido un error desconocido.',
+                                    showCancelButton: false,
+                                    confirmButtonColor: '#4EA5EC',
+                                    confirmButtonText: 'Entiendo',
+                                    type: 'error',
+                                    closeOnConfirm: true
+                                });
+                            });
+                        }
+                    }, options);
+                }, (error) => {
+                    return EventStore.emitToast({
+                        type: 'error',
+                        title: 'Compras - Precios',
+                        body: error.message || 'Ha ocurrido un error al intentar obtener los precios, vuelva a intentarlo por favor.',
+                        options: {
+                            timeOut: 4000,
+                            extendedTimeOut: 2000,
+                            closeButton: true
+                        }
                     });
-                }
-            }, options);
-        }
+                });
+            }
+        }, options);
     }
 
     removeAccount() {

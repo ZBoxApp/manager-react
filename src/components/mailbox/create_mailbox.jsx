@@ -14,7 +14,6 @@ import EventStore from '../../stores/event_store.jsx';
 import MailboxStore from '../../stores/mailbox_store.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
 import ZimbraStore from '../../stores/zimbra_store.jsx';
-import UserStore from '../../stores/user_store.jsx';
 
 import Constants from '../../utils/constants.jsx';
 
@@ -298,23 +297,21 @@ export default class CreateMailBox extends React.Component {
             });
         }
 
-        if (UserStore.isGlobalAdmin()) {
-            const options = {
-                title: 'Comprar Casilla',
-                text: `Por ahora no tienes más cupo para crear una casilla tipo <strong>${Utils.titleCase(data.plan)}</strong>, ¿Deseas comprar más?`,
-                html: true,
-                confirmButtonText: 'Si, compraré'
-            };
+        const options = {
+            title: 'Comprar Casilla',
+            text: `Por ahora no tienes más cupo para crear una casilla tipo <strong>${Utils.titleCase(data.plan)}</strong>, ¿Deseas comprar más?`,
+            html: true,
+            confirmButtonText: 'Si, compraré'
+        };
 
-            return Utils.alertToBuy((isConfirmed) => {
-                if (isConfirmed) {
-                    const {id} = this.cacheDomain;
-                    if (id) {
-                        return Utils.handleLink(null, `/sales/${id}/mailboxes`);
-                    }
+        return Utils.alertToBuy((isConfirmed) => {
+            if (isConfirmed) {
+                const {id} = this.cacheDomain;
+                if (id) {
+                    return Utils.handleLink(null, `/sales/${id}/mailboxes`);
                 }
-            }, options);
-        }
+            }
+        }, options);
     }
 
     getAllDomains() {
