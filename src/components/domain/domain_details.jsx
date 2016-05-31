@@ -82,10 +82,6 @@ export default class DomainDetails extends React.Component {
                 }
             );
         }).then((success) => {
-            /*if (this.isStoreEnabled) {
-                //logic
-            }*/
-
             this.setState({
                 domain: success
             });
