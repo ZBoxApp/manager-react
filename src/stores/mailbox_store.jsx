@@ -3,6 +3,7 @@
 
 import EventEmitter from 'events';
 import Constants from '../utils/constants.jsx';
+import * as Utils from '../utils/utils.jsx';
 
 const eventTypes = Constants.EventTypes;
 
@@ -24,7 +25,6 @@ class MailboxStoreClass extends EventEmitter {
     setMailboxesByDomain(id, mailboxes) {
         if (mailboxes) {
             this.mailboxesByDomain[id] = mailboxes;
-            //console.log('setMailboxesByDomain', this.mailboxesByDomain);
             return true;
         }
 
@@ -58,31 +58,22 @@ class MailboxStoreClass extends EventEmitter {
 
     setMailbox(mailbox) {
         if (mailboxesArray) {
-            const currentTotal = mailboxesArray.account.push(mailbox);
-            if (currentTotal > mailboxesArray.total) {
-                mailboxesArray.total = currentTotal;
-            }
+            mailboxesArray.account.push(mailbox);
+            mailboxesArray.total++;
+            mailboxesArray.account.sort(Utils.sortByNames);
         }
     }
 
-    hasThisPage(page) {
-        if (page && this.currentPage[page]) {
-            return this.currentPage[page];
+    setMailboxByDomain(domainId, mailbox) {
+        if (!domainId) {
+            return null;
         }
 
-        return false;
-    }
-
-    setCurrentPage(page) {
-        this.currentPage[page] = true;
-    }
-
-    getMailboxByPage(page) {
-        if (page && this.currentPage[page]) {
-            return this.currentPage[page];
+        if (this.mailboxesByDomain && this.mailboxesByDomain[domainId]) {
+            this.mailboxesByDomain[domainId].account.push(mailbox);
+            this.mailboxesByDomain[domainId].total++;
+            this.mailboxesByDomain[domainId].account.sort(Utils.sortByNames);
         }
-
-        return false;
     }
 
     setCurrent(account) {
@@ -103,17 +94,19 @@ class MailboxStoreClass extends EventEmitter {
 
             if (index > -1) {
                 accounts[index] = newMailbox;
+                accounts.sort(Utils.sortByNames);
             }
         }
 
         if (domainId && this.mailboxesByDomain[domainId]) {
-            const accountsFromDomain = this.mailboxesByDomain.account;
+            const accountsFromDomain = this.mailboxesByDomain[domainId].account;
             const indexOfMailbox = accountsFromDomain.findIndex((mailbox) => {
                 return mailbox.id === mailboxId;
             });
 
             if (indexOfMailbox > -1) {
                 accountsFromDomain[indexOfMailbox] = newMailbox;
+                accountsFromDomain.sort(Utils.sortByNames);
             }
         }
 

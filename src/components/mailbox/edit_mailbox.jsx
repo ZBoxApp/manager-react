@@ -35,6 +35,7 @@ export default class EditMailBox extends React.Component {
         this.showMessage = this.showMessage.bind(this);
         this.handleRenameAccount = this.handleRenameAccount.bind(this);
         this.editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
+        this.domainId = null;
 
         this.state = {
             zimbraCOSId: ''
@@ -92,7 +93,6 @@ export default class EditMailBox extends React.Component {
                             MailboxStore.removeAccount(account);
                         }
                         response.text = 'Será redireccionado a Casillas.';
-                        this.editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
                         return sweetAlert(
                             response,
                             () => {
@@ -271,10 +271,10 @@ export default class EditMailBox extends React.Component {
                 );
             }).then((account) => {
                 if (this.isStoreEnabled) {
-                    MailboxStore.changeAccount(account);
+                    MailboxStore.updateMailbox(account.id, account, this.domainId);
                 }
 
-                console.log('disable', shouldDisabledArchiving, 'enable', shouldEnableArchiving); //eslint-disable-line no-console
+                console.log(account); //eslint-disable-line no-console
 
                 if (shouldDisabledArchiving && !shouldEnableArchiving) {
                     account.disableArchiving((err) => {
@@ -381,8 +381,8 @@ export default class EditMailBox extends React.Component {
                     {
                         limit: max
                     },
-                    (domain) => {
-                        return resolve(domain);
+                    (data) => {
+                        return resolve(data);
                     },
                     (error) => {
                         return reject(error);
@@ -394,11 +394,14 @@ export default class EditMailBox extends React.Component {
 
             Promise.all(promises).then((result) => {
                 const account = result.shift();
+                const domains = Utils.getDomainsCleaned(result.shift().domain);
+
+                this.domainId = Utils.findDomaindIdFromAccount(account, domains);
 
                 this.setState({
                     data: account,
                     zimbraCOSId: account.attrs.zimbraCOSId,
-                    domains: result.shift().domain,
+                    domains,
                     cos
                 });
 

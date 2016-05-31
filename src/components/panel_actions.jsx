@@ -200,11 +200,10 @@ export default class PanelActions extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         this.pagination.setArray(nextProps.data);
-        this.pagination.reset();
 
         const states = {};
 
-        states['items' + this.props.name] = nextProps.data;
+        states['items' + this.props.name] = this.pagination.reset();
         states['pagination' + this.props.name] = this.pagination.getResults();
 
         this.setState(states);
@@ -276,8 +275,8 @@ export default class PanelActions extends React.Component {
         response.reset = this.reset;
         response.target = this.props.nameFunc;
 
-        /*this.refs.savebutton.setAttribute('disabled', 'disabled');
-        this.refs.savebutton.innerHTML = 'Aplicando Cambios...';*/
+        this.refs.savebutton.setAttribute('disabled', 'disabled');
+        this.refs.savebutton.innerHTML = 'Aplicando Cambios...';
 
         if (this.forAdd.length > 0) {
             response['add' + Utils.titleCase(this.props.nameFunc)] = this.forAdd;
@@ -286,10 +285,6 @@ export default class PanelActions extends React.Component {
         if (this.forRemove.length > 0) {
             response['remove' + Utils.titleCase(this.props.nameFunc)] = this.forRemove;
         }
-
-        /*if (this.refresh.length > 0) {
-            response.refresh = this.refresh;
-        }*/
 
         this.props.onApplyChanges(response);
     }

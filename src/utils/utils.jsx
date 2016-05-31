@@ -692,3 +692,86 @@ export function parseMaxCOSAccounts(maxCosAccounts) {
 
     return response;
 }
+
+export function getDomainsCleaned(domains) {
+    const rightsDomains = domains.filter((domain) => {
+        return !domain.isAliasDomain && !domain.name.match('archive');
+    });
+
+    return rightsDomains;
+}
+
+export function findDomaindIdFromAccount(account, domains) {
+    const name = account === 'object' ? account.domain : account;
+    const rightsDomains = domains.filter((domain) => {
+        return name === domain.name;
+    });
+
+    const domainReturned = rightsDomains.length === 1 ? rightsDomains.pop() : null;
+
+    return domainReturned ? domainReturned.id : null;
+}
+
+export function sortByNames(a, b) {
+    const name1 = typeof a === 'object' ? a.name || a.domain : a;
+    const name2 = typeof b === 'object' ? b.name || b.domain : b;
+
+    if (name1 < name2) {
+        return -1;
+    }
+
+    if (name1 > name2) {
+        return 1;
+    }
+
+    return 0;
+}
+
+export function makeRequest(response, dl, resolve, returnAPI, store) {
+    const APIReturn = returnAPI || true;
+    const keys = Object.keys(response).sort();
+    const item = keys[0];
+    const res = store || {};
+    const action = item.match(/(remove|add)/gi);
+    if (action) {
+        var element = response[item];
+        if (element && element.length) {
+            const pop = element.pop();
+            const target = typeof pop === 'object' ? pop.name || pop.id : pop;
+            const label = action[0] === 'remove' ? 'eliminar' : 'agregar';
+            return dl[item](target, (er, success) => {
+                if (success) {
+                    if (res.completed) {
+                        res.completed.push({
+                            action: label,
+                            target
+                        });
+                    } else {
+                        res.completed = [{
+                            action: label,
+                            target
+                        }];
+                    }
+                    const api = success.api && APIReturn ? success : dl;
+                    return this.makeRequest(response, api, resolve, APIReturn, res);
+                }
+
+                er.action = label;
+                er.target = target;
+                if (res.error) {
+                    res.error.push(er);
+                } else {
+                    res.error = [er];
+                }
+
+                return this.makeRequest(response, dl, resolve, APIReturn, res);
+            });
+        } else {
+            Reflect.deleteProperty(response, item);
+            return this.makeRequest(response, dl, resolve, APIReturn, res);
+        }
+    }
+
+    res.data = dl;
+    return resolve(res);
+}

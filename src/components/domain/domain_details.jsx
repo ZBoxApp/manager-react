@@ -4,6 +4,7 @@
 import $ from 'jquery';
 import React from 'react';
 import {browserHistory} from 'react-router';
+import Promise from 'bluebird';
 
 import MessageBar from '../message_bar.jsx';
 import PageInfo from '../page_info.jsx';
@@ -19,6 +20,7 @@ import AntiSpamComponent from './antispam.jsx';
 import ZonaDNS from './domain_admin_dns.jsx';
 import EventStore from '../../stores/event_store.jsx';
 import UserStore from '../../stores/user_store.jsx';
+import bytesConvertor from 'bytes';
 
 import DomainStore from '../../stores/domain_store.jsx';
 
@@ -36,14 +38,70 @@ export default class DomainDetails extends React.Component {
         this.getDomain = this.getDomain.bind(this);
         this.showMessage = this.showMessage.bind(this);
         this.handleClickOnTab = this.handleClickOnTab.bind(this);
-        this.isGlobalAdmin = UserStore.isGlobalAdmin();
+        this.slideLimitDomainAttach = this.slideLimitDomainAttach.bind(this);
+        this.handleUpdatePreferences = this.handleUpdatePreferences.bind(this);
 
+        this.isGlobalAdmin = UserStore.isGlobalAdmin();
+        this.DomainAttachmentLimit = window.manager_config.maxAttachmentLimit;
+        this.sizeOfAttatch = this.DomainAttachmentLimit.min;
         this.state = {};
     }
 
     handleClickOnTab(tab) {
         const path = this.props.location.pathname;
         browserHistory.push(`${path}?tab=${tab}`);
+    }
+
+    slideLimitDomainAttach(e) {
+        const bytes = parseInt(e.target.value, 10);
+        this.sizeOfAttatch = bytes;
+        const sizeOfAttatch = bytesConvertor(bytes);
+        this.refs.outputBytes.value = sizeOfAttatch;
+        this.refs.amavisMessageSizeLimit.value = this.sizeOfAttatch;
+    }
+
+    handleUpdatePreferences(e) {
+        e.preventDefault();
+        const domain = {
+            id: this.state.domain.id,
+            attrs: {
+                amavisMessageSizeLimit: this.refs.amavisMessageSizeLimit.value
+            }
+        };
+
+        GlobalActions.emitStartLoading();
+
+        new Promise((resolve, reject) => {
+            Client.modifyDomain(
+                domain,
+                (data) => {
+                    resolve(data);
+                },
+                (error) => {
+                    reject(error);
+                }
+            );
+        }).then((success) => {
+            /*if (this.isStoreEnabled) {
+                //logic
+            }*/
+
+            this.setState({
+                domain: success
+            });
+
+            GlobalActions.emitMessage({
+                message: 'Se han guardado sus preferencias con éxtio.',
+                typeError: Constants.MessageType.SUCCESS
+            });
+        }).catch((error) => {
+            GlobalActions.emitMessage({
+                message: error.message,
+                typeError: Constants.MessageType.ERROR
+            });
+        }).finally(() => {
+            GlobalActions.emitEndLoading();
+        });
     }
 
     showMessage(attrs) {
@@ -61,6 +119,8 @@ export default class DomainDetails extends React.Component {
 
         if (domain && domain.id === this.props.params.id) {
             states.domain = domain;
+
+            this.sizeOfAttatch = domain.attrs.amavisMessageSizeLimit || this.DomainAttachmentLimit.min;
 
             GlobalActions.emitEndLoading();
 
@@ -89,6 +149,8 @@ export default class DomainDetails extends React.Component {
                         DomainStore.setCurrent(data);
                     }
                     states.domain = data;
+
+                    this.sizeOfAttatch = data.attrs.amavisMessageSizeLimit || this.DomainAttachmentLimit.min;
 
                     Client.getZone(data.name, (zone) => {
                         states.zone = this.isStoreEnabled ? DomainStore.setZoneDNS(zone) : zone;
@@ -182,22 +244,80 @@ export default class DomainDetails extends React.Component {
                 />
             );
 
-            const tabTareasMasivas = (
-                <div>
-                    <ul className='list-inline'>
-                        <li>
-                            <ToggleModalButton
-                                role='button'
-                                className=''
-                                dialogType={MultipleTaskModal}
-                                dialogProps={{
+            const sizOfArratchment = this.sizeOfAttatch && typeof this.sizeOfAttatch === 'number' ? bytesConvertor(this.sizeOfAttatch, 10) : bytesConvertor(parseInt(this.sizeOfAttatch, 10));
+
+            const tabPreferencesBtns = [
+                <ToggleModalButton
+                    role='button'
+                    className='btn btn-info'
+                    dialogType={MultipleTaskModal}
+                    dialogProps={{
                                     data: domain
                                 }}
-                                key='change-passwd-import'
-                            >
-                                {'Mensaje fuera de Oficina'}
-                            </ToggleModalButton>
-                        </li>
+                    key='change-passwd-import'
+                >
+                    {'Mensaje fuera de Oficina'}
+                </ToggleModalButton>,
+                <div
+                    key='range-max-attachment'
+                    className='row'
+                >
+                    <div className='col-xs-6'>
+                        <div className='input-group'>
+                            <div className='input-group-addon'>Tamaño Adjunto</div>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    ref='outputBytes'
+                                    readOnly='readOnly'
+                                    value={sizOfArratchment}
+                                />
+                                <input
+                                    type='hidden'
+                                    ref='amavisMessageSizeLimit'
+                                    value={this.sizeOfAttatch}
+                                />
+                        </div>
+                    </div>
+
+                    <div className='col-xs-6'>
+                        <input
+                            type='range'
+                            className='range-size'
+                            placeholder='Amount'
+                            max={this.DomainAttachmentLimit.max}
+                            min={this.DomainAttachmentLimit.min}
+                            onChange={this.slideLimitDomainAttach}
+                            step={this.DomainAttachmentLimit.step}
+                            defaultValue={this.sizeOfAttatch}
+                        />
+                    </div>
+                </div>
+            ];
+
+            const listsBtns = tabPreferencesBtns.map((btn, i) => {
+                return (
+                    <li
+                        key={`preference-${i}`}
+                        className='list-group-item'
+                    >
+                        {btn}
+                    </li>
+                );
+            });
+
+            const tabPreferences = (
+                <div>
+                    <div className='text-right'>
+                        <button
+                            className='btn btn-info'
+                            onClick={this.handleUpdatePreferences}
+                        >
+                            Guardar Preferencias
+                        </button>
+                    </div>
+                    <ul className='list-group clearfix set-margin-up'>
+                        {listsBtns}
                     </ul>
                 </div>
             );
@@ -218,21 +338,21 @@ export default class DomainDetails extends React.Component {
                 />
             );
 
-            tabNames = ['Administradores', 'AntiSpam', 'Listas De Distribución', 'Tareas Masivas', 'Zona DNS'];
+            tabNames = ['Administradores', 'AntiSpam', 'Listas De Distribución', 'Preferencias', 'Zona DNS'];
             tabs = {
                 administradores: tabAdmin,
                 antispam: tabAntiSpam,
                 listas_de_distribución: tabDistribution,
-                tareas_masivas: tabTareasMasivas,
+                preferencias: tabPreferences,
                 zona_dns: zonaDNS
             };
 
             if (!this.isGlobalAdmin) {
-                tabNames = ['Administradores', 'Listas De Distribución', 'Tareas Masivas', 'Zona DNS'];
+                tabNames = ['Administradores', 'Listas De Distribución', 'Preferencias', 'Zona DNS'];
                 tabs = {
                     administradores: tabAdmin,
                     listas_de_distribución: tabDistribution,
-                    tareas_masivas: tabTareasMasivas,
+                    preferencias: tabPreferences,
                     zona_dns: zonaDNS
                 };
             }

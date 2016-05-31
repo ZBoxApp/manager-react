@@ -61,6 +61,7 @@ export default class Mailboxes extends React.Component {
         this.optionStatus = Constants.status;
         this.optionPlans = window.manager_config.plans;
         this.domainName = null;
+        this.createUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/new` : '/mailboxes/new';
 
         this.state = {
             page,
@@ -579,7 +580,7 @@ export default class Mailboxes extends React.Component {
                 {
                     props: {
                         className: 'btn btn-success',
-                        onClick: (e) => Utils.handleLink(e, '/mailboxes/new')
+                        onClick: (e) => Utils.handleLink(e, this.createUrlFromParams)
                     },
                     label: '+ Nueva Casilla'
                 }

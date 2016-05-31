@@ -13,6 +13,7 @@ import * as Utils from '../../utils/utils.jsx';
 import EventStore from '../../stores/event_store.jsx';
 import MailboxStore from '../../stores/mailbox_store.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 import Constants from '../../utils/constants.jsx';
 
@@ -22,6 +23,7 @@ export default class CreateMailBox extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.handleSubmit = this.handleSubmit.bind(this);
         this.getAllDomains = this.getAllDomains.bind(this);
         this.showMessage = this.showMessage.bind(this);
@@ -29,6 +31,7 @@ export default class CreateMailBox extends React.Component {
         this.controllerDataList = this.controllerDataList.bind(this);
         this.handlePasswd = this.handlePasswd.bind(this);
         this.getEnableAccountsFromDomain = this.getEnableAccountsFromDomain.bind(this);
+        this.cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
 
         this.reset = null;
         this.cacheDomain = null;
@@ -36,7 +39,6 @@ export default class CreateMailBox extends React.Component {
         this.state = {
             zimbraCOSId: ''
         };
-        this.s = true;
     }
 
     handlePasswd(e) {
@@ -89,12 +91,12 @@ export default class CreateMailBox extends React.Component {
                     return domainName.includes(value) && domainName.length === value.length;
                 });
 
-                if (thatDomainExists && thatDomainExists.name === this.cacheDomain) {
+                if (thatDomainExists && this.cacheDomain && thatDomainExists.name === this.cacheDomain.name) {
                     return null;
                 }
 
                 if (thatDomainExists) {
-                    this.cacheDomain = value;
+                    this.cacheDomain = thatDomainExists;
                     const maxCosAccounts = Utils.parseMaxCOSAccounts(thatDomainExists.attrs.zimbraDomainCOSMaxAccounts);
                     this.setState({
                         loadingEnableAccounts: true,
@@ -236,7 +238,11 @@ export default class CreateMailBox extends React.Component {
                     document.getElementById('createAccount').reset();
                     this.reset.toggleOptions();
 
-                    MailboxStore.setMailbox(data);
+                    if (this.isStoreEnabled) {
+                        const domainId = this.props.params.domainId || this.cacheDomain.id || null;
+                        MailboxStore.setMailbox(data);
+                        MailboxStore.setMailboxByDomain(domainId, data);
+                    }
 
                     if (shouldEnableArchive) {
                         data.enableArchiving(plan, (err) => {
@@ -249,11 +255,6 @@ export default class CreateMailBox extends React.Component {
                     } else {
                         return Utils.handleLink(event, `/mailboxes/${data.id}`, this.props.location);
                     }
-
-                    /*GlobalActions.emitMessage({
-                        message: 'Se ha creado su cuenta con éxito.',
-                        typeError: messageType.SUCCESS
-                    });*/
                 },
                 (error) => {
                     GlobalActions.emitMessage({
@@ -281,48 +282,29 @@ export default class CreateMailBox extends React.Component {
     }
 
     getAllDomains() {
-        const promises = [];
         const max = 200;
 
-        const doms = new Promise((resolve, reject) => {
+        new Promise((resolve, reject) => {
             Client.getAllDomains(
                 {
                     limit: max
                 },
                 (data) => {
-                    const rightsDomains = data.domain.filter((domain) => {
-                        return !domain.isAliasDomain && !domain.name.match('archive');
-                    });
-                    data.domain = rightsDomains;
                     resolve(data);
                 },
                 (error) => {
                     reject(error);
                 }
             );
-        });
+        }).then((domains) => {
+            const rightsDomains = Utils.getDomainsCleaned(domains.domain);
+            domains.domain = rightsDomains;
+            domains.total = rightsDomains.length;
 
-        const cos = new Promise((resolve, reject) => {
-            Client.getAllCos((success) => {
-                resolve(success);
-            }, (error) => {
-                reject(error);
-            });
-        });
-
-        promises.push(doms, cos);
-
-        Promise.all(promises).then((success) => {
-            const response = {};
-            success.map((pos) => {
-                if (Array.isArray(pos)) {
-                    const arrPlans = Utils.getEnabledPlansByCos(pos);
-                    response.plans = arrPlans;
-                } else {
-                    response.domains = pos;
-                }
-                return true;
-            });
+            const response = {
+                plans: this.cos,
+                domains
+            };
 
             if (this.props.params.id) {
                 let defaultDomain = null;
@@ -349,15 +331,12 @@ export default class CreateMailBox extends React.Component {
             if (response.currentDomain) {
                 this.getEnableAccountsFromDomain(null, response.currentDomain);
             }
-
-            GlobalActions.emitEndLoading();
-
-            Utils.toggleStatusButtons('.action-save', false);
         }, (error) => {
             GlobalActions.emitMessage({
                 error: error.message,
                 typeError: error.type
             });
+        }).finally(() => {
             GlobalActions.emitEndLoading();
             Utils.toggleStatusButtons('.action-save', false);
         });
@@ -368,19 +347,7 @@ export default class CreateMailBox extends React.Component {
         Utils.toggleStatusButtons('.action-save', true);
         $('#sidebar-mailboxes').addClass('active');
         this.getAllDomains();
-        GlobalActions.emitEndLoading();
         this.addBlurListeneronInput();
-        /*console.log(this.s);
-
-        setTimeout(() => {
-            console.log('setTimeout', this.s);
-            if (this.s) {
-                console.log('set state');
-                this.setState({
-                    flag: true
-                })
-            }
-        }, 10000);*/
     }
 
     componentWillUnmount() {
@@ -389,7 +356,6 @@ export default class CreateMailBox extends React.Component {
         this.cacheDomain = null;
         const parent = document.getElementById('add-mailbox');
         parent.removeEventListener('focusout', null);
-        this.s = false;
     }
 
     controllerDataList(controller) {
@@ -432,32 +398,6 @@ export default class CreateMailBox extends React.Component {
                     counterPlans--;
                 }
             });
-            /*if (accounts.length > 0) {
-                const response = accounts.map((account) => {
-                    return (
-                        <li
-                            key={`${account.plan}-status`}
-                        >
-                            <span className={`${account.classCss} tag-status`}>
-                                {Utils.titleCase(account.plan)}
-                                <span>
-                                    {`Usadas: ${account.used} | Disponibles: ${account.enabled}`}
-                                </span>
-                            </span>
-                        </li>
-                    );
-                });
-
-                enableAccounts = (
-                    <div className='row'>
-                        <div className='col-xs-12 text-center'>
-                            <ul className='list-inline'>
-                                {response}
-                            </ul>
-                        </div>
-                    </div>
-                );
-            }*/
         }
 
         if (this.state.domains) {
@@ -552,60 +492,6 @@ export default class CreateMailBox extends React.Component {
                     checkboxes.push(item);
                 }
             });
-
-            /*for (let plan in plans) {
-                if (plans.hasOwnProperty(plan)) {
-                    let isDisabled = null;
-                    let classCss = null;
-                    let info = null;
-                    if (this.state.enabledAccounts) {
-                        this.state.enabledAccounts.forEach((p) => {
-                            if (plans[plan] === p.cosId) {
-                                isDisabled = p.enabled < 1 ? true : null;
-                                classCss = p.classCss;
-                                info = (
-                                    <div>
-                                        <span>
-                                            Usadas: {p.used}
-                                        </span>
-                                        <span> - </span>
-                                        <span className={p.enabled <= 0 ? 'text-danger' : 'text-success'}>
-                                            Libres: {p.enabled}
-                                        </span>
-                                    </div>
-                                );
-                            }
-                        });
-                    }
-                    const disabledCss = isDisabled ? 'disabled' : '';
-
-                    const item = (
-                        <label
-                            className={`radio radio-info radio-inline pretty-input ${disabledCss}`}
-                            key={plan}
-                        >
-                            <div className='pretty-radio'>
-                                <input
-                                    type='radio'
-                                    className='pretty'
-                                    name='mailbox'
-                                    onChange={() => {
-                                        this.handleRadioChanged(plans[plan]);
-                                    }}
-                                    disabled={isDisabled}
-                                />
-                                <span></span>
-                            </div>
-
-                            <span className={`${classCss} status-plan`}>
-                                {Utils.titleCase(plan)}
-                            </span>
-                            {info}
-                        </label>
-                    );
-                    checkboxes.push(item);
-                }
-            }*/
 
             form = (
                 <form

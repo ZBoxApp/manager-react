@@ -69,23 +69,26 @@ export default class MailboxDetails extends React.Component {
     }
 
     onRemoveAlias(alias) {
-        MailboxStore.removeAlias(alias);
+        const allAlias = this.state.alias.filter((item) => {
+            return alias !== item;
+        });
 
-        const items = MailboxStore.getAlias();
+        allAlias.sort(Utils.sortByNames);
 
         this.setState({
-            alias: items,
+            alias: allAlias,
             error: false
         });
     }
 
     onCancelAlias(arrAlias) {
-        MailboxStore.refreshAlias(arrAlias);
+        const {alias} = this.state;
 
-        const items = MailboxStore.getAlias();
+        alias.push(...arrAlias);
+        alias.sort(Utils.sortByNames);
 
         this.setState({
-            alias: items,
+            alias,
             error: false
         });
     }
@@ -115,6 +118,8 @@ export default class MailboxDetails extends React.Component {
                     items = [items];
                 }
             }
+
+            items.sort(Utils.sortByNames);
 
             mailbox.viewMailPath(global.window.manager_config.webmailLifetime, (error, res) => {
                 if (res) {
@@ -154,104 +159,40 @@ export default class MailboxDetails extends React.Component {
     }
 
     onAliasSubmit(response) {
-        if (response.refresh) {
-            MailboxStore.refreshAlias(response.refresh);
-        }
-
-        this.multipleActions(response, this.state.data).then((result) => {
-            const limit = result.length;
+        return new Promise((resolve) => {
+            return Utils.makeRequest(response, this.state.data, resolve, false);
+        }).then((data) => {
             const errors = [];
-            for (let index = 0; index < limit; index++) {
-                const res = result[index];
-                if (result[index].error) {
-                    const action = (res.action === 'remove') ? 'eliminar' : 'agregar';
+            const {alias} = this.state;
+
+            if (data.error) {
+                data.error.forEach((err) => {
                     errors.push({
-                        error: `Hubo un error al ${action} el alias: ${res.item}, debido a ${res.error.extra.reason}`,
+                        error: `Hubo un error al ${err.action} ${err.target}, debido a : ${err.extra.reason}`,
                         type: MessageTypes.ERROR
                     });
-                }
-
-                if (res.isCompleted && res.action === 'add') {
-                    MailboxStore.setAlias(res.item);
-                }
+                });
             }
 
-            if (errors.length !== limit) {
+            if (data.completed) {
                 errors.push({
                     error: 'Se han guardado los datos éxitosamente.',
                     type: MessageTypes.SUCCESS
                 });
+
+                data.completed.forEach((obj) => {
+                    alias.push(obj.target);
+                });
+                alias.sort(Utils.sortByNames);
             }
 
-            this.setState({
-                error: errors,
-                alias: MailboxStore.getAlias()
+            return this.setState({
+                error: errors.length > 0 ? errors : null,
+                alias
             });
-
+        }).finally(() => {
             response.reset();
         });
-    }
-
-    multipleActions(response, account) {
-        const promises = [];
-
-        for (const key in response) {
-            if (response.hasOwnProperty(key) && key === 'add') {
-                const array = response[key];
-                const limit = array.length;
-
-                for (let index = 0; index < limit; index++) {
-                    const res = {};
-                    const promesa = new Promise((resolve) => {
-                        account.addAccountAlias(array[index], (error) => {
-                            if (error) {
-                                res.isCompleted = false;
-                                res.item = response[key][index];
-                                res.action = key;
-                                res.error = error;
-                            } else {
-                                res.isCompleted = true;
-                                res.item = response[key][index];
-                                res.action = key;
-                            }
-
-                            return resolve(res);
-                        });
-                    });
-
-                    promises.push(promesa);
-                }
-            }
-
-            if (response.hasOwnProperty(key) && key === 'remove') {
-                const array = response[key];
-                const limit = array.length;
-
-                for (let index = 0; index < limit; index++) {
-                    const res = {};
-                    const promesa = new Promise((resolve) => {
-                        account.removeAccountAlias(array[index], (error) => {
-                            if (error) {
-                                res.isCompleted = false;
-                                res.item = response[key][index];
-                                res.action = key;
-                                res.error = error;
-                            } else {
-                                res.isCompleted = true;
-                                res.item = response[key][index];
-                                res.action = key;
-                            }
-
-                            return resolve(res);
-                        });
-                    });
-
-                    promises.push(promesa);
-                }
-            }
-        }
-
-        return Promise.all(promises);
     }
 
     render() {
@@ -373,6 +314,7 @@ export default class MailboxDetails extends React.Component {
                     onApplyChanges={(response) => {
                         this.onAliasSubmit(response);
                     }}
+                    nameFunc={'AccountAlias'}
                 />
             );
 

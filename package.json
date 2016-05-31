@@ -23,6 +23,7 @@
     "react-bootstrap-datetimepicker": "0.0.22",
     "react-datalist": "^3.0.0",
     "react-dom": "15.0.1",
+    "react-input-range": "^0.9.0",
     "react-password-strength-meter": "johuder33/react-password-strength-meter",
     "react-router": "2.3.0",
     "react-textarea-autosize": "4.0.0",
