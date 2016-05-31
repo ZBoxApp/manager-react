@@ -30,20 +30,23 @@ import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 const QueryOptions = Constants.QueryOptions;
 const messageType = Constants.MessageType;
+const codes = Constants.ZimbraCodes;
 
 export default class Mailboxes extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isMounted = true;
         this.isStoreEnabled = window.manager_config.enableStores;
         this.archivingConfig = window.manager_config.plans.archiving;
+        this.domainId = this.props.params.domain_id || null;
+
         this.regexp = new RegExp(this.archivingConfig.regexp, 'gi');
         this.showMessage = this.showMessage.bind(this);
         this.refreshAllAccounts = this.refreshAllAccounts.bind(this);
         this.handleChangeFilter = this.handleChangeFilter.bind(this);
         this.handleTabChanged = this.handleTabChanged.bind(this);
         this.makeFilter = this.makeFilter.bind(this);
-        this.c = 0;
 
         const page = parseInt(this.props.location.query.page, 10) || 1;
         this.mailboxes = null;
@@ -57,7 +60,6 @@ export default class Mailboxes extends React.Component {
         this.isRefreshing = true;
         this.optionStatus = Constants.status;
         this.optionPlans = window.manager_config.plans;
-        this.domainId = null;
         this.domainName = null;
 
         this.state = {
@@ -86,8 +88,6 @@ export default class Mailboxes extends React.Component {
             this.selectedStatusFilter = selected.length > 0 ? selected : '';
         }
 
-        /*const domainId = this.domainId;
-        this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);*/
         browserHistory.push(this.props.location.pathname);
     }
 
@@ -141,10 +141,9 @@ export default class Mailboxes extends React.Component {
 
     componentWillReceiveProps(newProps) {
         const condition = this.props.location.query.page !== newProps.location.query.page;
-        let domainId = null;
+        const samePath = this.props.location.pathname === newProps.location.pathname;
 
-        //this.domainName = null;
-        if (condition) {
+        if (condition && samePath) {
             const page = parseInt(newProps.location.query.page, 10) || 1;
 
             GlobalActions.emitStartLoading();
@@ -155,20 +154,15 @@ export default class Mailboxes extends React.Component {
                 loading: true
             };
 
-            domainId = this.domainId;
+            this.domainId = this.props.params.domain_id || newProps.params.domain_id || null;
 
-            if (this.props.params.domain_id) {
-                domainId = this.props.params.domain_id;
-                this.domainId = domainId;
-            }
-
-            this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);
+            this.getAllMailboxes(this.domainId, window.manager_config.maxResultOnRequestZimbra);
         } else {
             GlobalActions.emitStartLoading();
 
-            domainId = newProps.params.domain_id;
+            this.domainId = newProps.params.domain_id;
 
-            this.getAllMailboxes(domainId, window.manager_config.maxResultOnRequestZimbra);
+            this.getAllMailboxes(this.domainId, window.manager_config.maxResultOnRequestZimbra);
         }
     }
 
@@ -198,16 +192,16 @@ export default class Mailboxes extends React.Component {
 
     getAccounts(domainName, maxResult) {
         //const promises = [];
+        const attrneeded = Utils.getAttrsBySectionFromConfig('mailboxes');
         const attrs = {
-            maxResults: maxResult,
-            limit: 5000
+            maxResults: maxResult
         };
 
-        this.setState({
-            loading: true
-        });
-
-        const attrneeded = Utils.getAttrsBySectionFromConfig('mailboxes');
+        if (!this.state.loading) {
+            this.setState({
+                loading: true
+            });
+        }
 
         if (attrneeded) {
             attrs.attrs = attrneeded;
@@ -219,21 +213,26 @@ export default class Mailboxes extends React.Component {
         }
 
         new Promise((resolve, reject) => {
+            // if domain name exists, just search all mailbox from this domain
             if (domainName) {
                 const hasMailboxForDomain = this.isStoreEnabled ? MailboxStore.getMailboxByDomainId(this.domainId) : null;
 
+                // if mailbox by domain exists return it
                 if (hasMailboxForDomain) {
                     return resolve(hasMailboxForDomain);
                 }
 
+                // get all mailboxes from domain
                 return Client.getAllAccounts(attrs, (success) => {
-                    const data = Utils.extractLockOuts(success);
-                    if (this.isStoreEnabled) {
-                        MailboxStore.setMailboxesByDomain(this.domainId, data);
-                    } else {
-                        this.setState({
-                            accounts: data
-                        });
+                    if (success.total) {
+                        const data = Utils.extractLockOuts(success);
+                        if (this.isStoreEnabled) {
+                            MailboxStore.setMailboxesByDomain(this.domainId, data);
+                        } else {
+                            this.setState({
+                                accounts: data
+                            });
+                        }
                     }
 
                     return resolve(success);
@@ -242,12 +241,17 @@ export default class Mailboxes extends React.Component {
                 });
             }
 
+            // if all mailbox exists just return it
             const hasMailboxes = this.isStoreEnabled ? MailboxStore.hasMailboxes() : null;
+
             if (hasMailboxes) {
                 return resolve(MailboxStore.getMailboxes());
             }
+
+            // if all mailboxes doesn't exist just search them.
             return Client.getAllAccounts(attrs, (success) => {
                 const data = Utils.extractLockOuts(success);
+
                 if (this.isStoreEnabled) {
                     MailboxStore.setMailboxes(data);
                 }
@@ -264,7 +268,6 @@ export default class Mailboxes extends React.Component {
 
                 const items = this.makeFilter() || this.mailboxes;
 
-                //const tables = this.buildTableFromData(items, ['Todas', 'Bloqueadas']);
                 const tables = this.buildTableFromData(items);
 
                 if (items.lockout) {
@@ -287,7 +290,7 @@ export default class Mailboxes extends React.Component {
                 loading: false
             });
         }).catch((error) => {
-            if (error.code === 'account.TOO_MANY_SEARCH_RESULTS') {
+            if (error.code === codes.TOO_MANY_SEARCH_RESULTS) {
                 this.isRefreshing = true;
                 const newMaxResult = (parseInt(maxResult, 10) + window.manager_config.autoincrementOnFailRequestZimbra);
                 window.manager_config.maxResultOnRequestZimbra = newMaxResult;
@@ -332,18 +335,14 @@ export default class Mailboxes extends React.Component {
                 data: tables
             });
         }
-        const domainId = this.props.params.domain_id;
-        this.domainId = domainId;
-        return this.getAllMailboxes(domainId);
+        return this.getAllMailboxes(this.domainId);
     }
 
     componentDidMount() {
         $('#sidebar-mailboxes').addClass('active');
         EventStore.addMessageListener(this.showMessage);
         MailboxStore.addListenerAddMassive(this.refreshAllAccounts);
-        const domainId = this.props.params.domain_id;
-        this.domainId = domainId;
-        this.getAllMailboxes(domainId);
+        this.getAllMailboxes(this.domainId);
     }
 
     componentWillUnmount() {
@@ -351,6 +350,8 @@ export default class Mailboxes extends React.Component {
         MailboxStore.removeListenerAddMassive(this.showMessage);
         $('#sidebar-mailboxes').removeClass('active');
         this.domainName = null;
+        this.isMounted = false;
+        this.domainId = null;
     }
 
     buildRow(row, classes, status) {

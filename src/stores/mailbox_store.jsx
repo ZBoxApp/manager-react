@@ -12,7 +12,7 @@ class MailboxStoreClass extends EventEmitter {
     constructor() {
         super();
         this.current = null;
-        this.mailboxesByDomain = null;
+        this.mailboxesByDomain = {};
     }
 
     resetThisStore() {
@@ -23,11 +23,12 @@ class MailboxStoreClass extends EventEmitter {
 
     setMailboxesByDomain(id, mailboxes) {
         if (mailboxes) {
-            this.mailboxesByDomain = {};
             this.mailboxesByDomain[id] = mailboxes;
+            //console.log('setMailboxesByDomain', this.mailboxesByDomain);
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     getMailboxByDomainId(id) {
@@ -85,7 +86,38 @@ class MailboxStoreClass extends EventEmitter {
     }
 
     setCurrent(account) {
-        this.current = account;
+        if (account) {
+            this.current = account;
+            //console.log('setCurrent', this.current);
+            return true;
+        }
+        return false;
+    }
+
+    updateMailbox(mailboxId, newMailbox, domainId) {
+        if (mailboxesArray) {
+            const accounts = mailboxesArray.account;
+            const index = accounts.findIndex((mailbox) => {
+                return mailbox.id === mailboxId;
+            });
+
+            if (index > -1) {
+                accounts[index] = newMailbox;
+            }
+        }
+
+        if (domainId && this.mailboxesByDomain[domainId]) {
+            const accountsFromDomain = this.mailboxesByDomain.account;
+            const indexOfMailbox = accountsFromDomain.findIndex((mailbox) => {
+                return mailbox.id === mailboxId;
+            });
+
+            if (indexOfMailbox > -1) {
+                accountsFromDomain[indexOfMailbox] = newMailbox;
+            }
+        }
+
+        return true;
     }
 
     getCurrent() {
@@ -108,9 +140,15 @@ class MailboxStoreClass extends EventEmitter {
         return mailboxesArray;
     }
 
+    getMailboxByIdInDomain() {
+        return false;
+    }
+
     setMailboxes(mailboxes) {
         if (mailboxes) {
             mailboxesArray = mailboxes;
+            //console.log('setMailboxes', mailboxesArray);
+            return true;
         }
 
         return false;

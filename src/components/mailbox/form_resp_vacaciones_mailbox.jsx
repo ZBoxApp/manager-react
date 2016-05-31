@@ -7,6 +7,8 @@ import Constants from '../../utils/constants.jsx';
 
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 
+import MailboxStore from '../../stores/mailbox_store.jsx';
+
 const messageType = Constants.MessageType;
 
 export default class FormVacacionesMailbox extends React.Component {
@@ -18,6 +20,8 @@ export default class FormVacacionesMailbox extends React.Component {
         this.dateStart = null;
         this.dateEnd = null;
         this.initialDate = Utils.setInitialDate();
+
+        this.domain_id = this.props.domainId || null;
     }
 
     handleChangeDate(x, from) {
@@ -62,7 +66,8 @@ export default class FormVacacionesMailbox extends React.Component {
             attrs.zimbraPrefOutOfOfficeReplyEnabled = isEnabled.toString().toUpperCase();
         }
 
-        Client.modifyAccount(data.id, attrs, () => {
+        Client.modifyAccount(data.id, attrs, (mailbox) => {
+            MailboxStore.updateMailbox(data.id, mailbox, this.domain_id);
             GlobalActions.emitMessage({
                 error: 'Se ha modificado su respuesta de vacaciones con éxito.',
                 typeError: messageType.SUCCESS
@@ -120,7 +125,7 @@ export default class FormVacacionesMailbox extends React.Component {
                 onSubmit={(e) => {
                     this.handleSubmit(e);
                 }}
-                id='createAccount'
+                id='resp-vacations'
             >
                 <div className='form-group string'>
                     <label className='string required col-sm-3 control-label'>
@@ -238,5 +243,6 @@ FormVacacionesMailbox.propTypes = {
     data: React.PropTypes.oneOfType([
         React.PropTypes.object,
         React.PropTypes.string
-    ])
+    ]),
+    domainId: React.PropTypes.string
 };

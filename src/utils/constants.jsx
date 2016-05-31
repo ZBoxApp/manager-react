@@ -46,7 +46,8 @@ export default {
 
     ZimbraCodes: {
         AUTH_EXPIRED: 'service.AUTH_EXPIRED',
-        AUTH__REQUIRED: 'service.AUTH_REQUIRED'
+        AUTH__REQUIRED: 'service.AUTH_REQUIRED',
+        TOO_MANY_SEARCH_RESULTS: 'account.TOO_MANY_SEARCH_RESULTS'
     },
 
     ZimbraSearchs: {
