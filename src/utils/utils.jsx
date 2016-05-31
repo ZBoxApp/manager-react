@@ -5,6 +5,7 @@ import {browserHistory} from 'react-router';
 import * as GlobalActions from '../action_creators/global_actions.jsx';
 import Constants from './constants.jsx';
 import ZimbraStore from '../stores/zimbra_store.jsx';
+import sweetAlert from 'sweetalert';
 
 const messageType = Constants.MessageType;
 
@@ -140,7 +141,10 @@ export function areMapsEqual(a, b) {
 }
 
 export function handleLink(e, path, location) {
-    e.preventDefault();
+    if (e) {
+        e.preventDefault();
+    }
+
     if (location) {
         if (`/${location.pathname}` !== path) {
             GlobalActions.emitStartLoading();
@@ -802,4 +806,38 @@ export function addEventListenerFixed(element, type, callback) {
     };
 
     element.addEventListener(type, callback, typeof (fixEvents[type]) !== 'undefined');
+}
+
+export function alertToBuy(callback, options) {
+    const defaults = {
+        title: 'Alerta',
+        type: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Si, continuar',
+        closeOnConfirm: true,
+        showLoaderOnConfirm: false,
+        animation: 'slide-from-top'
+    };
+
+    const optsExtended = options ? Object.assign(defaults, options) : defaults;
+
+    sweetAlert(optsExtended,
+        (isConfirmed) => {
+            if (callback && typeof callback === 'function') {
+                callback(isConfirmed, sweetAlert);
+            }
+        }
+    );
+}
+
+export function getDaysFromDate2Date(dateFrom, dateTo) {
+    // check if it receive and real object date or just string
+    const from = typeof dateFrom === 'object' ? dateFrom : new Date(dateFrom);
+    const to = typeof dateTo === 'object' ? dateTo : new Date(dateTo);
+    // get timestamp of each date and then subtract them. just get the absolute result
+    var timeDiff = Math.abs(from.getTime() - to.getTime());
+    // round to up the result, and divide result of subtract with the amount of milliseconds of one day.
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return diffDays;
 }

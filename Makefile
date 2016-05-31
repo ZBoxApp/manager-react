@@ -58,12 +58,12 @@ stop-server:
 		kill $$PROCID; \
 	done
 
-	@for PROCID in $$(ps -ef | grep "[b]abel-node.*companies" | awk '{ print $$2 }'); do \
-  		echo stopping server $$PROCID; \
-  		kill $$PROCID; \
-  	done
+	@for PROCID in $$(ps -ef | grep "[b]abel-node.*sales" | awk '{ print $$2 }'); do \
+  	echo stopping server $$PROCID; \
+  	kill $$PROCID; \
+  done
 
 start-server:
 	@echo Starting ZBox Manager 2.0 Test Server
 	@npm run server &
-	@npm run companies-service &
+	@npm run sales-service &

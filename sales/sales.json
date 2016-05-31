@@ -1,0 +1,47 @@
+[
+    {
+        "domainId": "fda37354-fbec-47f5-bb26-383cf2ffe7a2",
+        "currency": "CLP",
+        "prices": {
+            "basic": 1.490,
+            "professional": 1.990,
+            "premium": 3.490
+        }
+    },
+    {
+        "domainId": "3d450d43-54b9-401d-bc48-a77f80baf152",
+        "currency": "CLP",
+        "prices": {
+            "basic": 1.490,
+            "professional": 1.990,
+            "premium": 3.490
+        }
+    },
+    {
+        "domainId": null,
+        "currency": "CLP",
+        "prices": {
+            "basic": 20.000,
+            "professional": 23.000,
+            "premium": 40.000
+        }
+    },
+    {
+        "domainId": null,
+        "currency": "CLP",
+        "prices": {
+            "basic": 20.000,
+            "professional": 23.000,
+            "premium": 40.000
+        }
+    },
+    {
+        "domainId": null,
+        "currency": "CLP",
+        "prices": {
+            "basic": 20.000,
+            "professional": 23.000,
+            "premium": 40.000
+        }
+    }
+]

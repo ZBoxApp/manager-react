@@ -1644,3 +1644,9 @@ label {
 .overflow {
   overflow: hidden;
 }
+
+.alert {
+  &.margin-bottom {
+    margin-bottom: 15px;
+  }
+}

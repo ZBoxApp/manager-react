@@ -75,6 +75,7 @@
     "run": "webpack --progress --watch",
     "run-fullmap": "webpack --progress --watch",
     "companies-service": "babel-node companies-service.js",
-    "server": "babel-node server.js"
+    "server": "babel-node server.js",
+    "sales-service": "babel-node sales-services.js"
   }
 }

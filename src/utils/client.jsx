@@ -779,3 +779,48 @@ export function deleteRecords(zoneUrl, record, success, error) {
         return success(data);
     });
 }
+
+export function getPrices(data, success, error) {
+    const appId = window.manager_config.salesAPI.appId;
+    const endpoints = window.manager_config.salesAPI;
+    const url = endpoints.base + endpoints.getPrices;
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: data,
+        headers: {
+            'X-Parse-Application-Id': appId
+        },
+        dataType: 'json',
+        success: function onSuccess(response) {
+            success(response);
+        },
+        error: function onError(err) {
+            error(err.responseJSON || err);
+        }
+    });
+}
+
+export function makeSale(data, success, error) {
+    const appId = window.manager_config.salesAPI.appId;
+    const endpoints = window.manager_config.salesAPI;
+    const url = endpoints.base + endpoints.makeSale;
+
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: data,
+        contentType: 'application/json',
+        headers: {
+            'X-Parse-Application-Id': appId,
+            'X-Parse-REST-API-Key': 'master'
+        },
+        dataType: 'json',
+        success: function onSuccess(response) {
+            success(response);
+        },
+        error: function onError(err) {
+            error(err.responseJSON || err);
+        }
+    });
+}

@@ -9,6 +9,7 @@ import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
 import DataList from 'react-datalist';
 import Promise from 'bluebird';
+import currencyFormatter from 'currency-formatter';
 
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
@@ -39,7 +40,11 @@ export default class EditMailBox extends React.Component {
 
         this.cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
         this.editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
+        this.currency = window.manager_config.invoiceAPI.currency;
+        const precision = this.currency === 'CLP' ? 0 : 2;
+        this.currencyParams = {code: this.currency, symbol: '', precision};
         this.domainId = null;
+        this.currentPlan = '';
 
         this.state = {
             zimbraCOSId: ''
@@ -53,10 +58,153 @@ export default class EditMailBox extends React.Component {
         });
     }
 
-    handleRadioChanged(val) {
-        this.setState({
-            zimbraCOSId: val
-        });
+    handleRadioChanged(e, val) {
+        const {enabledAccounts} = this.state;
+        let needToUpgrade = false;
+        let data = null;
+        const currentEvent = Object.assign({}, e);
+
+        if (enabledAccounts) {
+            if (val && val.trim().length > 0) {
+                enabledAccounts.forEach((plan) => {
+                    if (plan.cosId === val && plan.enabled < 1) {
+                        needToUpgrade = true;
+                        data = plan;
+                    }
+                });
+            }
+        }
+
+        if (!needToUpgrade) {
+            return this.setState({
+                zimbraCOSId: val
+            });
+        }
+
+        currentEvent.target.checked = false;
+        const {zimbraCOSId} = this.state;
+
+        if (zimbraCOSId.length > 0) {
+            this.setState({
+                zimbraCOSId: ''
+            });
+        }
+
+        if (UserStore.isGlobalAdmin()) {
+            const options = {
+                title: 'Plan sin cupo',
+                text: `Actualmente el plan <strong>${Utils.titleCase(data.plan)}</strong> no tiene cupo para completar la acción solicitada, por lo cual es necesario que compre más casillas`,
+                html: true,
+                confirmButtonText: 'Obtener Precio',
+                showLoaderOnConfirm: true,
+                closeOnConfirm: false
+            };
+
+            const domainId = this.domainId || this.props.params.domain_id || null;
+
+            const dataJSON = {
+                domainId,
+                type: 'standar',
+                currency: this.currency,
+                cosId: val,
+                anualRenovation: true,
+                upgrade: true
+            };
+
+            const request = {
+                domainId: this.domainId,
+                adminEmail: UserStore.getCurrentUser().name,
+                upgrade: true,
+                currency: this.currency
+            };
+
+            const account = this.state.data;
+
+            Utils.alertToBuy((isConfirmed) => {
+                if (isConfirmed) {
+                    Client.getPrices(dataJSON, (success) => {
+                        const prices = success.result.prices;
+                        const price = prices[data.plan] ? currencyFormatter.format(prices[data.plan], this.currencyParams) + ' ' + this.currency : 0;
+                        const options = {
+                            title: 'Cambio de Plan',
+                            text: `Al presionar <strong>Aceptar</strong>, está autorizando la emisión de una factura por un total de <strong>${price}</strong> correspondiente a : <br> <ul class="text-left"><li>Asunto: Cambio de Plan</li><li>Casilla: <strong>${account.name}</strong></li><li>Plan Original: <strong>${this.currentPlan}</strong></li><li>Nuevo Plan: <strong>${data.plan}</strong></li></ul>`,
+                            html: true,
+                            confirmButtonText: 'Si, Cambiar Plan',
+                            showLoaderOnConfirm: true,
+                            closeOnConfirm: false
+                        };
+
+                        Utils.alertToBuy((isConfirmed) => {
+                            if (isConfirmed) {
+                                const item = {};
+
+                                item.basic = {
+                                    type: 'Producto',
+                                    quantity: 1,
+                                    price: prices[data.plan],
+                                    description: `Cambio de plan de la casilla: ${account.name} de ${this.currentPlan} a ${data.plan}`,
+                                    id: data.cosId
+                                };
+
+                                request.items = item;
+
+                                const requestObject = JSON.stringify(request);
+
+                                Client.makeSale(requestObject, () => {
+                                    Utils.alertToBuy((isConfirmed) => {
+                                        if (isConfirmed) {
+                                            const enabledAccounts = this.state.enabledAccounts;
+
+                                            enabledAccounts.forEach((plan) => {
+                                                if (plan.cosId === data.cosId) {
+                                                    plan.enabled++;
+                                                    plan.total++;
+                                                    currentEvent.target.checked = true;
+                                                }
+                                            });
+
+                                            this.setState({
+                                                enabledAccounts
+                                            });
+                                        }
+                                    }, {
+                                        title: 'Cambio de Plan',
+                                        text: 'Su compra se ha realizado con éxito.',
+                                        showCancelButton: false,
+                                        confirmButtonColor: '#4EA5EC',
+                                        confirmButtonText: 'Muy bien',
+                                        type: 'success'
+                                    });
+                                }, (error) => {
+                                    Utils.alertToBuy(() => {
+                                        return null;
+                                    }, {
+                                        title: 'Error',
+                                        text: error.message || error.error.message || 'Ha ocurrido un error desconocido.',
+                                        showCancelButton: false,
+                                        confirmButtonColor: '#4EA5EC',
+                                        confirmButtonText: 'Entiendo',
+                                        type: 'error',
+                                        closeOnConfirm: true
+                                    });
+                                });
+                            }
+                        }, options);
+                    }, (error) => {
+                        return EventStore.emitToast({
+                            type: 'error',
+                            title: 'Compras - Precios',
+                            body: error.message || 'Ha ocurrido un error al intentar obtener los precios, vuelva a intentarlo por favor.',
+                            options: {
+                                timeOut: 4000,
+                                extendedTimeOut: 2000,
+                                closeButton: true
+                            }
+                        });
+                    });
+                }
+            }, options);
+        }
     }
 
     removeAccount() {
@@ -652,12 +800,13 @@ export default class EditMailBox extends React.Component {
             keyPlans.forEach((plan) => {
                 if (cos[plan]) {
                     let isChecked = false;
-                    let isDisabled = null;
+                    //let isDisabled = null;
                     let classCss = null;
                     let info = null;
                     let hasPlan = false;
                     if (id) {
                         if (cos[plan] === id) {
+                            this.currentPlan = plan;
                             isChecked = 'checked';
                         }
                     }
@@ -665,7 +814,7 @@ export default class EditMailBox extends React.Component {
                         this.state.enabledAccounts.forEach((p) => {
                             if (cos[plan] === p.cosId) {
                                 hasPlan = true;
-                                isDisabled = p.enabled < 1 ? true : null;
+                                //isDisabled = p.enabled < 1 ? true : null;
                                 classCss = p.classCss;
                                 info = (
                                     <div>
@@ -683,7 +832,7 @@ export default class EditMailBox extends React.Component {
                     }
 
                     if (this.state.enabledAccounts && !hasPlan && null) {
-                        isDisabled = true;
+                        //isDisabled = true;
                         info = (
                             <div>
                                 <span className='text-danger'>
@@ -693,22 +842,21 @@ export default class EditMailBox extends React.Component {
                         );
                     }
 
-                    let disabledCss = isDisabled ? 'disabled' : '';
+                    //let disabledCss = isDisabled ? 'disabled' : '';
 
                     const item = (
                         <label
-                            className={`radio radio-info radio-inline pretty-input ${disabledCss}`}
+                            className='radio radio-info radio-inline pretty-input'
                             key={plan}
                         >
                             <div className='pretty-radio'>
                                 <input
                                     type='radio'
-                                    className={`pretty ${disabledCss}`}
+                                    className='pretty'
                                     name='mailbox'
-                                    onChange={() => {
-                                        this.handleRadioChanged(cos[plan]);
+                                    onChange={(e) => {
+                                        this.handleRadioChanged(e, cos[plan]);
                                     }}
-                                    disabled={isDisabled}
                                     defaultChecked={isChecked}
                                 />
                                 <span></span>
