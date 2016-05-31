@@ -70,7 +70,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         if (this.sizeEnabled.hasOwnProperty('attrs') && this.sizeEnabled.attrs.zimbraMailQuota) {
             const sizeOfPlan = typeof this.sizeEnabled.attrs.zimbraMailQuota === 'string' ? parseInt(this.sizeEnabled.attrs.zimbraMailQuota, 10) : this.sizeEnabled.attrs.zimbraMailQuota;
 
-            sizeEnaled = (sizeOfPlan) ? 'Ilimitado' : bytesConvertor(sizeOfPlan);
+            sizeEnaled = (sizeOfPlan) ? bytesConvertor(sizeOfPlan) : 'Ilimitado';
         }
 
         return (
