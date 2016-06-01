@@ -86,6 +86,16 @@ export default class AddAdminModal extends React.Component {
                     });
                 }
 
+                if (this.props.show) {
+                    this.props.onHide();
+                    setTimeout(() => {
+                        GlobalActions.emitMessage({
+                            message: 'Se ha agregado su administrador éxitoxamente.',
+                            type: Constants.MessageType.SUCCESS
+                        });
+                    }, 1000);
+                }
+
                 return DomainStore.addAdmin(user);
             }
         );

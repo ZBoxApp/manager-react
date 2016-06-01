@@ -193,27 +193,30 @@ export default class Companies extends React.Component {
     }
 
     render() {
-        if (!this.state.companies) {
-            return <div/>;
-        }
-
-        let panelBody;
-        let noLimitError;
-        let pagination = null;
         const textLoading = this.isGlobalAdmin ? 'Cargando Empresas...' : 'Cargando Mi Empresa...';
 
-        if (this.state.loading) {
-            panelBody = (
-                <div className='text-center'>
+        if (!this.state.companies && this.state.loading) {
+            return (
+                <div
+                    key='panelbody-loading.company'
+                    className='text-center content animate-panel'
+                >
                     <i className='fa fa-spinner fa-spin fa-4x fa-fw'></i>
                     <p>{textLoading}</p>
                 </div>
             );
         }
 
+        let panelBody;
+        let noLimitError;
+        let pagination = null;
+
         if (this.state.companies.length === 0) {
             panelBody = (
-                <div className='center-block text-center'>
+                <div
+                    key='panelbody-nofound'
+                    className='center-block text-center'
+                >
                     <h5>
                         {'Actualmente no hay ninguna empresa registrada '}
                         <label style={{transform: 'rotate(90deg)'}}>
@@ -305,7 +308,10 @@ export default class Companies extends React.Component {
             });
 
             panelBody = (
-                <div className='table-responsive'>
+                <div
+                    key='panelbody-companies'
+                    className='table-responsive'
+                >
                     <div className='table-responsive'>
                         <table
                             cellPadding='1'

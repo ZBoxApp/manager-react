@@ -21,7 +21,7 @@ export default class LoginEmail extends React.Component {
 
         const email = this.refs.email.value.trim();
         const password = this.refs.password.value.trim();
-        this.props.submit(email, password);
+        this.props.submit(email, password, this.refs);
     }
     render() {
         let errorClass = '';
@@ -64,6 +64,7 @@ export default class LoginEmail extends React.Component {
                         <button
                             type='submit'
                             className='btn btn-success btn-block'
+                            ref='submitbutton'
                         >
                             {'Ingresar'}
                         </button>
