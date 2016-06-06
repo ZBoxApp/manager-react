@@ -46,7 +46,7 @@ function initZimbra() {
         (resolve, reject) => {
             const config = global.window.manager_config;
             const token = Utils.getCookie('token');
-            const session = JSON.parse(Utils.getCookie('session'));
+            const sessionId = Utils.getCookie('sessionId');
             let zimbra = ZimbraStore.getCurrent();
 
             if (zimbra && token) {
@@ -58,7 +58,7 @@ function initZimbra() {
                     url: config.zimbraUrl
                 });
                 zimbra.client.token = token;
-                zimbra.client.session = session;
+                zimbra.client.session = { id: sessionId };
                 ZimbraStore.setCurrent(zimbra);
                 window.manager_config.dns.token = token;
                 window.manager_config.user_token = token;
@@ -137,7 +137,7 @@ export function login(user, password, success, error) {
         }
 
         Utils.setCookie('token', zimbra.client.token);
-        Utils.setCookie('session', JSON.stringify(zimbra.client.session));
+        Utils.setCookie('sessionId', zimbra.client.session.id);
         return getMe(success, error);
     });
 }
