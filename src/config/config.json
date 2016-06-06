@@ -68,6 +68,12 @@
                 "zimbraLastLogonTimestamp": true,
                 "zimbraIsDelegatedAdminAccount": true
             }
+        },
+        "domains": {
+            "attrs": {
+                "zimbraDomainStatus": true,
+                "description": true
+            }
         }
     },
     "export" : {

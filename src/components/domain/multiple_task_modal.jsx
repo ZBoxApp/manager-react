@@ -83,10 +83,13 @@ export default class MultipleTaskModal extends React.Component {
         const attrs = {};
 
         if (isEnabled) {
+            const formatedStart = document.getElementById('zimbraPrefOutOfOfficeFromDate').value.split('/').reverse().join('') + '000000Z';
+            const formatedEnd = document.getElementById('zimbraPrefOutOfOfficeUntilDate').value.split('/').reverse().join('') + '000000Z';
+
             attrs.zimbraPrefOutOfOfficeReplyEnabled = isEnabled.toString().toUpperCase();
             attrs.zimbraPrefOutOfOfficeReply = refs.zimbraPrefOutOfOfficeReply.value;
-            attrs.zimbraPrefOutOfOfficeUntilDate = refs.zimbraPrefOutOfOfficeUntilDate.value;
-            attrs.zimbraPrefOutOfOfficeFromDate = refs.zimbraPrefOutOfOfficeFromDate.value;
+            attrs.zimbraPrefOutOfOfficeFromDate = formatedStart;
+            attrs.zimbraPrefOutOfOfficeUntilDate = formatedEnd;
         } else {
             attrs.zimbraPrefOutOfOfficeReplyEnabled = isEnabled.toString().toUpperCase();
         }
