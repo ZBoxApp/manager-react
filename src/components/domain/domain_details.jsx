@@ -46,26 +46,25 @@ export default class DomainDetails extends React.Component {
 
     getDomain() {
         const domain = DomainStore.getCurrent();
+        const states = {};
 
         if (domain && domain.id === this.props.params.id) {
+            states.domain = domain;
+
             GlobalActions.emitEndLoading();
-            this.setState({
-                domain
-            });
+
+            this.setState(states);
+
             Client.getZone(domain.name, (zone) => {
                 DomainStore.setZoneDNS(zone);
 
-                this.setState({
-                    domain
-                });
+                this.setState(states);
 
                 GlobalActions.emitEndLoading();
             }, () => {
                 DomainStore.setZoneDNS(null);
 
-                this.setState({
-                    domain
-                });
+                this.setState(states);
 
                 GlobalActions.emitEndLoading();
             });
@@ -74,19 +73,16 @@ export default class DomainDetails extends React.Component {
                 this.props.params.id,
                 (data) => {
                     DomainStore.setCurrent(data);
+                    states.domain = data;
 
                     Client.getZone(data.name, (zone) => {
                         DomainStore.setZoneDNS(zone);
 
-                        this.setState({
-                            domain: data
-                        });
+                        this.setState(states);
 
                         GlobalActions.emitEndLoading();
                     }, () => {
-                        this.setState({
-                            domain: data
-                        });
+                        this.setState(states);
 
                         GlobalActions.emitEndLoading();
                     });
@@ -98,6 +94,15 @@ export default class DomainDetails extends React.Component {
                     GlobalActions.emitEndLoading();
                 }
             );
+        }
+    }
+
+    componentWillReceiveProps(nextProps) {
+        const condition = nextProps.params.id !== this.props.params.id;
+
+        if (condition) {
+            this.props.params.id = nextProps.params.id;
+            this.getDomain();
         }
     }
 
@@ -114,9 +119,19 @@ export default class DomainDetails extends React.Component {
 
     render() {
         const domain = this.state.domain;
+        let message = null;
+        let classForCol = 'col-xs-6';
+        let isVisible = 'show';
+        let hasLayout = 'layout-back';
+        let tabNames = [];
+        let tabs = {};
 
         if (domain) {
-            let message;
+            if (domain.isAliasDomain) {
+                classForCol = 'col-xs-12';
+                isVisible = 'hide';
+            }
+
             if (this.state.error) {
                 message = (
                     <MessageBar
@@ -176,16 +191,27 @@ export default class DomainDetails extends React.Component {
                 />
             );
 
+            tabNames = ['Administradores', 'AntiSpam', 'Listas De Distribución', 'Tareas Masivas', 'Zona DNS'];
+            tabs = {
+                administradores: tabAdmin,
+                antispam: tabAntiSpam,
+                listas_de_distribución: tabDistribution,
+                tareas_masivas: tabTareasMasivas,
+                zona_dns: zonaDNS
+            };
+
+            if (domain.isAliasDomain) {
+                tabNames = ['Zona DNS'];
+                tabs = {
+                    zona_dns: zonaDNS
+                };
+                hasLayout = '';
+            }
+
             const panelTabs = (
                 <PanelTab
-                    tabNames={['Administradores', 'AntiSpam', 'Listas De Distribución', 'Tareas Masivas', 'Zona DNS']}
-                    tabs={{
-                        administradores: tabAdmin,
-                        antispam: tabAntiSpam,
-                        listas_de_distribución: tabDistribution,
-                        tareas_masivas: tabTareasMasivas,
-                        zona_dns: zonaDNS
-                    }}
+                    tabNames={tabNames}
+                    tabs={tabs}
                     location={this.props.location}
                 />
             );
@@ -200,27 +226,29 @@ export default class DomainDetails extends React.Component {
                     <div className='content animate-panel'>
                         {message}
                         <div className='row'>
-                            <div className='layout-back clearfix'>
-                                <div className='back-left backstage'>
+                            <div className={`${hasLayout} clearfix`}>
+                                <div className={`back-left backstage ${isVisible}`}>
                                     <div className='backbg'></div>
                                 </div>
-                                <div className='back-right backstage'>
+                                <div className={`back-right backstage ${isVisible}`}>
                                     <div className='backbg'></div>
                                 </div>
-                                <div className='col-md-6 central-content'>
+                                <div className={`${classForCol} central-content`}>
                                     <DomainGeneralInfo
                                         domain={domain}
                                         location={this.props.location}
                                         params={this.props.params}
                                     />
                                 </div>
-                                <div className='col-md-6 central-content'>
-                                    <DomainMailboxPlans
-                                        domain={domain}
-                                        location={this.props.location}
-                                        params={this.props.params}
-                                    />
-                                </div>
+                                {!domain.isAliasDomain && (
+                                    <div className={`${classForCol} central-content`}>
+                                        <DomainMailboxPlans
+                                            domain={domain}
+                                            location={this.props.location}
+                                            params={this.props.params}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className='row'>

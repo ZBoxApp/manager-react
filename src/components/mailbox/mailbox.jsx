@@ -190,9 +190,9 @@ export default class Mailboxes extends React.Component {
 
     getAccounts(domainName, maxResult) {
         //const promises = [];
-
         const attrs = {
-            maxResults: maxResult
+            maxResults: maxResult,
+            limit: 5000
         };
 
         const attrneeded = Utils.getAttrsBySectionFromConfig('mailboxes');

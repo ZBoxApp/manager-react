@@ -83,6 +83,12 @@ export default class DomainGeneralInfo extends React.Component {
     render() {
         const domain = this.props.domain;
         let editDomainButton = null;
+        let masterID = null;
+
+        if (domain.attrs.zimbraDomainAliasTargetId) {
+            masterID = domain.attrs.zimbraDomainAliasTargetId;
+        }
+
         const infoBody = (
             <div className='row'>
                 <div className='col-md-12'>
@@ -108,14 +114,31 @@ export default class DomainGeneralInfo extends React.Component {
                                 <strong>{'MX Record: '}</strong>
                                 {this.state.mx}
                             </li>
+                            {domain.isAliasDomain && domain.masterDomainName && (
+                                <li>
+                                    <strong>{'Dominio Maestro: '}</strong>
+                                    <a
+                                        className='account-name'
+                                        onClick={(e) => Utils.handleLink(e, `/domains/${masterID}`, this.props.location)}
+                                    >
+                                        {domain.masterDomainName}
+                                    </a>
+                                </li>
+                            )}
                             <li>
                                 <strong>{'Próxima renovación: '}</strong>
                                 {this.state.date}
                             </li>
-                            <li>
-                            </li>
                         </ul>
                         <ul className='list-inline list-unstyled'>
+                            {domain.isAliasDomain && (
+                                <li>
+                                    <StatusLabel
+                                        classes='btn btn-md btn-warning'
+                                        children='Dominio Alias'
+                                    />
+                                </li>
+                            )}
                             <li>
                                 <StatusLabel
                                     classes='btn btn-md btn-info'
@@ -128,7 +151,17 @@ export default class DomainGeneralInfo extends React.Component {
             </div>
         );
 
-        if (this.isGlobalAdmin) {
+        if (domain.isAliasDomain && domain.attrs.zimbraDomainAliasTargetId) {
+            editDomainButton = [{
+                label: 'Ir a Dominio Maestro',
+                props: {
+                    className: 'btn btn-info btn-xs',
+                    onClick: (e) => Utils.handleLink(e, `/domains/${masterID}/`, this.props.location)
+                }
+            }];
+        }
+
+        if (this.isGlobalAdmin && !domain.isAliasDomain) {
             editDomainButton = [{
                 label: 'Editar',
                 props: {
