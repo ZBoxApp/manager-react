@@ -115,7 +115,9 @@ export default class Domains extends React.Component {
         });
     }
     componentWillReceiveProps(newProps) {
-        if (this.props.location.query.page !== newProps.location.query.page) {
+        const condition = this.props.location.query.page !== newProps.location.query.page;
+
+        if (condition) {
             const page = parseInt(newProps.location.query.page, 10) || 1;
 
             GlobalActions.emitStartLoading();
@@ -127,6 +129,8 @@ export default class Domains extends React.Component {
             };
 
             this.getDomains();
+        } else {
+            GlobalActions.emitEndLoading();
         }
     }
     componentDidMount() {

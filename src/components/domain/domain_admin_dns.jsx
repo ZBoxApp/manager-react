@@ -1,13 +1,18 @@
 import React from 'react';
+import {FormGroup, Button, FormControl, InputGroup} from 'react-bootstrap';
+import sweetAlert from 'sweetalert';
 import * as Utils from '../../utils/utils.jsx';
 import Constants from '../../utils/constants.jsx';
+
+//import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import EventStore from '../../stores/event_store.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
 import Client from '../../utils/client.jsx';
+import Pagination from '../pagination.jsx';
 
 const Labels = Constants.Labels;
 
-const MessageType = Constants.MessageType;
+//const MessageType = Constants.MessageType;
 
 export default class DNSZoneForm extends React.Component {
     constructor(props) {
@@ -18,6 +23,8 @@ export default class DNSZoneForm extends React.Component {
         this.handleChangeInput = this.handleChangeInput.bind(this);
         this.addDNSRequest = this.addDNSRequest.bind(this);
         this.zoneDNSChange = this.zoneDNSChange.bind(this);
+        this.showSweetConfirm = this.showSweetConfirm.bind(this);
+        this.handleSearchByName = this.handleSearchByName.bind(this);
 
         this.zoneDNS = DomainStore.getZoneDNS();
 
@@ -31,12 +38,35 @@ export default class DNSZoneForm extends React.Component {
         };
 
         this.defaultRows = this.getRecords();
+        this.newRows = [];
+        this.DEFAULT_LIMIT = Constants.QueryOptions.DEFAULT_LIMIT;
 
         this.types = Constants.typesOfDNS;
+        const page = parseInt(this.props.location.query.page, 10) || 1;
 
         this.state = {
-            fields: this.defaultRows
+            fields: this.defaultRows,
+            page,
+            offset: ((page - 1) * Constants.QueryOptions.DEFAULT_LIMIT)
         };
+    }
+
+    handleSearchByName(e) {
+        const value = e.target.value.trim();
+        const isSearching = value === '' ? null : true;
+        const rowsFiltered = this.defaultRows.filter((item) => {
+            const string = item.name;
+            if (string.indexOf(value) > -1) {
+                return true;
+            }
+
+            return false;
+        });
+
+        this.setState({
+            fields: rowsFiltered,
+            isSearching
+        });
     }
 
     getRecords() {
@@ -50,7 +80,6 @@ export default class DNSZoneForm extends React.Component {
                 records.push(newObject);
             });
         }
-
         return records;
     }
 
@@ -63,31 +92,48 @@ export default class DNSZoneForm extends React.Component {
             nameservers: []
         };
 
+        if (this.newRows.length > 0) {
+            Array.prototype.push.apply(records, this.newRows);
+        }
+
         Utils.toggleStatusButtons('.savedns', true);
         const button = this.refs.savedns;
         const oldContent = button.innerHTML;
-        button.innerHTML = '<i class=\'fa fa-spinner fa-spin\'></i> Creando Zona DNS';
-
+        button.innerHTML = '<i className=\'fa fa-spinner fa-spin\'></i> Creando Zona DNS';
         if (zoneDNS) {
-            zoneDNS.createOrModifyRecords(records, (err, data) => {
+            return zoneDNS.createOrModifyRecords(records, (err, data) => {
                 if (err) {
                     Utils.toggleStatusButtons('.savedns', false);
                     button.innerHTML = oldContent;
 
-                    return EventStore.emitMessage({
-                        message: err.reason,
-                        typeError: MessageType.ERROR
+                    return EventStore.emitToast({
+                        type: 'error',
+                        title: 'Error',
+                        body: err.reason,
+                        options: {
+                            timeOut: 5000,
+                            extendedTimeOut: 2500,
+                            closeButton: true
+                        }
                     });
                 }
+
+                this.newRows = [];
 
                 DomainStore.setZoneDNS(data);
 
                 Utils.toggleStatusButtons('.savedns', false);
                 button.innerHTML = oldContent;
 
-                return EventStore.emitMessage({
-                    message: 'Se ha registrado su nuevo DNS éxitoxamente.',
-                    typeError: MessageType.SUCCESS
+                return EventStore.emitToast({
+                    type: 'success',
+                    title: 'Creación Zona DNS',
+                    body: 'Se ha registrado su nuevo DNS éxitoxamente.',
+                    options: {
+                        timeOut: 6000,
+                        extendedTimeOut: 2500,
+                        closeButton: true
+                    }
                 });
             });
         }
@@ -96,84 +142,115 @@ export default class DNSZoneForm extends React.Component {
             Utils.toggleStatusButtons('.savedns', false);
             button.innerHTML = oldContent;
 
-            EventStore.emitMessage({
-                message: 'Se ha creado su zona DNS éxitosamente.',
-                typeError: MessageType.SUCCESS
+            return EventStore.emitToast({
+                type: 'success',
+                title: 'Creación Zona DNS',
+                body: 'Se ha creado su zona DNS éxitosamente.',
+                options: {
+                    timeOut: 5000,
+                    extendedTimeOut: 2500,
+                    closeButton: true
+                }
             });
         }, (error) => {
-            EventStore.emitMessage({
-                message: error.extra.reason,
-                typeError: MessageType.ERROR
-            });
-
             Utils.toggleStatusButtons('.savedns', false);
             button.innerHTML = oldContent;
+
+            return EventStore.emitToast({
+                type: 'error',
+                title: 'Creación Zona DNS',
+                body: error.extra.reason,
+                options: {
+                    timeOut: 5000,
+                    extendedTimeOut: 2500,
+                    closeButton: true
+                }
+            });
         });
     }
 
     addDNSRow() {
         const copy = Object.assign({}, this.instanceRow);
         copy.enabled = true;
-        this.defaultRows.push(copy);
+        this.newRows.push(copy);
 
         this.setState({
-            fields: this.defaultRows
+            update: true
         });
     }
 
-    removeRow(e, index) {
-        e.preventDefault();
+    showSweetConfirm(object, index) {
         const zoneDNS = this.zoneDNS;
-        const button = e.target;
-        const old = button.innerHTML;
-        button.innerHTML = '<i class=\'fa fa-spinner fa-spin\'></i>';
-        button.setAttribute('disabled', 'disabled');
+        const response = {
+            title: 'Se ha borrado con éxito',
+            type: 'success'
+        };
 
-        if (this.defaultRows[index]) {
-            if (zoneDNS && zoneDNS.records[index]) {
-                return zoneDNS.deleteRecords(this.defaultRows[index], (error, success) => {
-                    if (error) {
-                        button.removeAttribute('disabled');
-                        button.innerHTML = old;
+        sweetAlert({
+                title: 'Esta seguro que desea borrar el DNS?',
+                type: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Si, deseo borrarlo!',
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true
+            },
+            (isDeleted) => {
+                if (isDeleted) {
+                    if (zoneDNS && zoneDNS.records[index]) {
+                        return zoneDNS.deleteRecords(object, (error, success) => {
+                            if (error) {
+                                response.title = 'Ha ocurrido un error.';
+                                response.type = 'error';
+                                response.confirmButtonText = 'Intentar de nuevo';
+                                response.confirmButtonColor = '#DD6B55';
 
-                        return EventStore.emitMessage({
-                            message: error.message,
-                            typeError: MessageType.ERROR
+                                return sweetAlert(response);
+                            }
+
+                            DomainStore.setZoneDNS(success);
+
+                            this.defaultRows.splice(index, 1);
+
+                            this.setState({
+                                fields: this.defaultRows
+                            });
+
+                            return sweetAlert(response);
                         });
                     }
-
-                    const name = this.defaultRows[index].name;
-                    DomainStore.setZoneDNS(success);
-
-                    return EventStore.emitMessage({
-                        message: `Se ha borrado su DNS ${name} éxitoxamente.`,
-                        typeError: MessageType.ERROR
-                    });
-                });
+                }
             }
+        );
+    }
 
-            this.defaultRows.splice(index, 1);
+    removeRow(e, index, from) {
+        e.preventDefault();
+        const refer = from || null;
 
-            this.setState({
-                fields: this.defaultRows
-            });
+        if (this.defaultRows[index] && !refer) {
+            return this.showSweetConfirm(this.defaultRows[index], index);
         }
 
-        return false;
+        this.newRows.splice(index, 1);
+
+        return this.setState({
+            update: true
+        });
     }
 
     handleChangeInput(e, index, ref) {
         const value = e.target.value;
-        if (this.defaultRows[index]) {
-            this.defaultRows[index][ref] = value;
+        if (this.newRows[index]) {
+            this.newRows[index][ref] = value;
             return true;
         }
 
-        return false;
+        return null;
     }
 
-    zoneDNSChange() {
-        this.zoneDNS = DomainStore.getZoneDNS();
+    zoneDNSChange(zone) {
+        this.zoneDNS = zone;
 
         this.defaultRows = this.getRecords();
 
@@ -190,11 +267,27 @@ export default class DNSZoneForm extends React.Component {
         DomainStore.addZoneDNSChangeListener(this.zoneDNSChange);
     }
 
+    componentWillReceiveProps(newProps) {
+        const condition = this.props.location.query.page !== newProps.location.query.page;
+
+        if (condition) {
+            const page = parseInt(newProps.location.query.page, 10) || 1;
+
+            this.setState({
+                page,
+                offset: ((page - 1) * Constants.QueryOptions.DEFAULT_LIMIT)
+            });
+        }
+    }
+
     render() {
         const textButton = this.zoneDNS ? 'Agregar otro registro' : 'Crear zona DNS';
         let isVisible = false;
         let fields = null;
+        let newFields = null;
         let header = null;
+        let inputSearch = null;
+        let pagination = null;
         const types = this.types.map((item) => {
             return (
                 <option
@@ -206,13 +299,40 @@ export default class DNSZoneForm extends React.Component {
             );
         });
 
-        fields = (
-            <div className='text-center'>
-                <h4>No existen Zonas DNS para su dominio : <strong>{this.props.domain.name}</strong></h4>
-            </div>
-        );
+        if (this.state.fields.length > 0 || this.state.isSearching) {
+            inputSearch = (
+                <FormGroup>
+                    <InputGroup>
+                        <InputGroup.Button>
+                            <Button bsStyle='primary'>Buscar</Button>
+                        </InputGroup.Button>
+                        <FormControl
+                            placeholder='Búsqueda por Nombre'
+                            type='text'
+                            onKeyUp={this.handleSearchByName}
+                        />
+                    </InputGroup>
+                </FormGroup>
+            );
+        }
 
-        if (this.defaultRows.length > 0) {
+        if (this.newRows.length < 1) {
+            fields = (
+                <div className='text-center'>
+                    <h4>No existen Zonas DNS para su dominio : <strong>{this.props.domain.name}</strong></h4>
+                </div>
+            );
+        }
+
+        if (this.state.isSearching && this.state.fields.length === 0) {
+            fields = (
+                <div className='text-center'>
+                    <h4>No existen Zonas DNS para su búsqueda</h4>
+                </div>
+            );
+        }
+
+        if (this.state.fields.length > 0 || this.newRows.length > 0) {
             isVisible = true;
             header = (
                 <div className='row'>
@@ -242,21 +362,21 @@ export default class DNSZoneForm extends React.Component {
                 </div>
             );
 
-            fields = this.defaultRows.map((element, i) => {
-                const isDisabled = element.enabled ? null : true;
+            newFields = this.newRows.map((newElement, index) => {
+                const isDisabled = newElement.enabled ? null : true;
                 return (
                     <div
                         className='row set-margin-up'
-                        key={`row-${new Date().getTime()}-${i}`}
-                        id={`row-dns-${new Date().getTime()}-${i}`}
+                        key={`row-new-${new Date().getTime()}-${index}`}
+                        id={`row-dns-new-${new Date().getTime()}-${index}`}
                     >
                         <div className='col-xs-3'>
                             <input
                                 type='text'
-                                defaultValue={element.name}
+                                defaultValue={newElement.name}
                                 className='form-control'
                                 onChange={(e) => {
-                                    this.handleChangeInput(e, i, Labels.name);
+                                    this.handleChangeInput(e, index, Labels.name);
                                 }}
                                 disabled={isDisabled}
                             />
@@ -265,9 +385,9 @@ export default class DNSZoneForm extends React.Component {
                         <div className='col-xs-1'>
                             <select
                                 className='form-control'
-                                defaultValue={element.type}
+                                defaultValue={newElement.type}
                                 onChange={(e) => {
-                                    this.handleChangeInput(e, i, Labels.type);
+                                    this.handleChangeInput(e, index, Labels.type);
                                 }}
                                 disabled={isDisabled}
                             >
@@ -279,9 +399,9 @@ export default class DNSZoneForm extends React.Component {
                             <input
                                 type='text'
                                 className='form-control'
-                                defaultValue={element.content}
+                                defaultValue={newElement.content}
                                 onChange={(e) => {
-                                    this.handleChangeInput(e, i, Labels.content);
+                                    this.handleChangeInput(e, index, Labels.content);
                                 }}
                             />
                         </div>
@@ -290,9 +410,9 @@ export default class DNSZoneForm extends React.Component {
                             <input
                                 type='number'
                                 className='form-control'
-                                defaultValue={element.priority}
+                                defaultValue={newElement.priority}
                                 onChange={(e) => {
-                                    this.handleChangeInput(e, i, Labels.priority);
+                                    this.handleChangeInput(e, index, Labels.priority);
                                 }}
                             />
                         </div>
@@ -301,9 +421,9 @@ export default class DNSZoneForm extends React.Component {
                             <input
                                 type='number'
                                 className='form-control'
-                                defaultValue={element.ttl}
+                                defaultValue={newElement.ttl}
                                 onChange={(e) => {
-                                    this.handleChangeInput(e, i, Labels.ttl);
+                                    this.handleChangeInput(e, index, Labels.ttl);
                                 }}
                             />
                         </div>
@@ -312,7 +432,7 @@ export default class DNSZoneForm extends React.Component {
                             <button
                                 className='btn btn-danger'
                                 onClick={(e) => {
-                                    this.removeRow(e, i);
+                                    this.removeRow(e, index, 'new');
                                 }}
                             >
                                 <i
@@ -325,25 +445,127 @@ export default class DNSZoneForm extends React.Component {
                     </div>
                 );
             });
+
+            if (this.state.fields.length > 0) {
+                const length = this.state.fields.length;
+                fields = this.state.fields.map((element, i) => {
+                    const isDisabled = element.enabled ? null : true;
+                    return (
+                        <div
+                            className='row set-margin-up'
+                            key={`row-${new Date().getTime()}-${i}`}
+                            id={`row-dns-${new Date().getTime()}-${i}`}
+                        >
+                            <div className='col-xs-3'>
+                                <input
+                                    type='text'
+                                    defaultValue={element.name}
+                                    className='form-control'
+                                    onChange={(e) => {
+                                    this.handleChangeInput(e, i, Labels.name);
+                                }}
+                                    disabled={isDisabled}
+                                />
+                            </div>
+
+                            <div className='col-xs-1'>
+                                <select
+                                    className='form-control'
+                                    defaultValue={element.type}
+                                    onChange={(e) => {
+                                    this.handleChangeInput(e, i, Labels.type);
+                                }}
+                                    disabled={isDisabled}
+                                >
+                                    {types}
+                                </select>
+                            </div>
+
+                            <div className='col-xs-3'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    defaultValue={element.content}
+                                    onChange={(e) => {
+                                    this.handleChangeInput(e, i, Labels.content);
+                                }}
+                                />
+                            </div>
+
+                            <div className='col-xs-2'>
+                                <input
+                                    type='number'
+                                    className='form-control'
+                                    defaultValue={element.priority}
+                                    onChange={(e) => {
+                                    this.handleChangeInput(e, i, Labels.priority);
+                                }}
+                                />
+                            </div>
+
+                            <div className='col-xs-2'>
+                                <input
+                                    type='number'
+                                    className='form-control'
+                                    defaultValue={element.ttl}
+                                    onChange={(e) => {
+                                    this.handleChangeInput(e, i, Labels.ttl);
+                                }}
+                                />
+                            </div>
+
+                            <div className='col-xs-1'>
+                                <button
+                                    className='btn btn-danger'
+                                    onClick={(e) => {
+                                    this.removeRow(e, i);
+                                }}
+                                >
+                                    <i
+                                        className='fa fa-trash-o'
+                                        title='Delete'
+                                    >
+                                    </i>
+                                </button>
+                            </div>
+                        </div>
+                    );
+                });
+
+                if (length > this.DEFAULT_LIMIT) {
+                    fields = fields.slice(this.state.offset, (this.state.page * this.DEFAULT_LIMIT));
+                    const totalPages = Math.ceil(length / this.DEFAULT_LIMIT);
+                    pagination = (
+                        <Pagination
+                            key='panelPaginationDNS'
+                            url={this.props.location.pathname}
+                            currentPage={this.state.page}
+                            totalPages={totalPages}
+                        />
+                    );
+                }
+            }
         }
 
         return (
             <div>
-                <blockquote className='clearfix'>
-                    <p>
+                <div className='row clearfix'>
+                    <div className='col-xs-6'>
+                        {inputSearch}
+                    </div>
+                    <div className='col-xs-6'>
                         <button
                             className='btn btn-info pull-right'
                             onClick={this.addDNSRow}
                         >
                             <i className='fa fa-plus-circle fa-lg'></i> {textButton}
                         </button>
-                    </p>
-                </blockquote>
+                    </div>
+                </div>
 
                 <form>
                     {header}
-                    {fields}
-                    <br/>
+                    {[newFields, fields, pagination]}
                     <br/>
 
                     <div className='col-xs-12 text-right'>
@@ -365,5 +587,6 @@ export default class DNSZoneForm extends React.Component {
 }
 
 DNSZoneForm.propTypes = {
-    domain: React.PropTypes.object
+    domain: React.PropTypes.object,
+    location: React.PropTypes.object
 };
