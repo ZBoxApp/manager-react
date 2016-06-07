@@ -1,5 +1,5 @@
+//import Textarea from 'react-textarea-autosize';
 import React from 'react';
-import Textarea from 'react-textarea-autosize';
 import {browserHistory} from 'react-router';
 
 import MessageBar from '../message_bar.jsx';
@@ -8,6 +8,7 @@ import Panel from '../panel.jsx';
 import CompanyStore from '../../stores/company_store.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
 import UserStore from '../../stores/user_store.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
@@ -23,9 +24,12 @@ export default class EditDomain extends React.Component {
         this.getDomain = this.getDomain.bind(this);
         this.getCompanies = this.getCompanies.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.planSize = this.planSize.bind(this);
         this.isGlobalAdmin = UserStore.isGlobalAdmin();
 
-        this.state = {};
+        this.state = {
+            plans: Utils.getEnabledPlansByCos(ZimbraStore.getAllCos())
+        };
     }
 
     getDomain() {
@@ -90,13 +94,21 @@ export default class EditDomain extends React.Component {
             const businessCategory = this.refs.company.value.trim();
             const description = this.refs.description.value.trim();
             const zimbraNotes = this.refs.notes.value.trim();
+            const plans = this.state.plans;
+            const plansKeys = Object.keys(plans);
+            const zimbraDomainCOSMaxAccounts = [];
+
+            plansKeys.forEach((p) => {
+                zimbraDomainCOSMaxAccounts.push(`${plans[p]}:${this.refs[`plan-${plans[p]}`].value || 0}`);
+            });
 
             const domain = {
                 id,
                 attrs: {
                     businessCategory,
                     description,
-                    zimbraNotes
+                    zimbraNotes,
+                    zimbraDomainCOSMaxAccounts
                 }
             };
 
@@ -124,6 +136,20 @@ export default class EditDomain extends React.Component {
         });
     }
 
+    planSize(e) {
+        e.preventDefault();
+        let total = 0;
+        const objectPlans = this.state.plans;
+        const plans = Object.keys(objectPlans);
+
+        plans.forEach((p) => {
+            const planId = objectPlans[p];
+            total += parseInt(this.refs[`plan-${planId}`].value, 10) || 0;
+        });
+
+        this.refs.mailboxLimit.value = total;
+    }
+
     componentDidMount() {
         if (this.isGlobalAdmin) {
             this.getDomain();
@@ -133,6 +159,7 @@ export default class EditDomain extends React.Component {
     render() {
         const domain = this.state.domain;
         const error = this.state.error;
+        const plans = this.state.plans;
         let form = null;
 
         if (domain || error) {
@@ -186,6 +213,47 @@ export default class EditDomain extends React.Component {
             //     </div>
             // </div>
 
+            let enabledPlans = Object.keys(plans);
+            const maxCosAccounts = Utils.parseMaxCOSAccounts(domain.attrs.zimbraDomainCOSMaxAccounts);
+            let total = 0;
+            const ownPlans = enabledPlans.map((p) => {
+                const planId = maxCosAccounts[plans[p]];
+                total += parseInt(planId, 10) || 0;
+                return (
+                    <div
+                        key={`plan-${p}`}
+                        className='col-md-4 form-group required'
+                    >
+                        <label
+                            htmlFor={`plan-${p}`}
+                            clasName='label-top control-label'
+                        >
+                            <abbr title='Requerido'>{'*'}</abbr><br/>
+                            {Utils.titleCase(p)}
+                        </label>
+
+                        <br/>
+
+                        <div className='row'>
+                            <div className='col-sm-8'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    defaultValue={planId}
+                                    data-required='true'
+                                    data-message={`Debe asignar la cantidad de casillas del tipo ${Utils.titleCase(p)}`}
+                                    data-id={p}
+                                    ref={`plan-${plans[p]}`}
+                                    onKeyUp={(e) => {
+                                        this.planSize(e);
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                );
+            });
+
             if (this.isGlobalAdmin) {
                 form = (
                     <form
@@ -230,6 +298,14 @@ export default class EditDomain extends React.Component {
                             </div>
                         </div>
 
+                        <div className='form-group row'>
+                            <div className='col-md-8 col-md-offset-3'>
+                                <div className='box-content'>
+                                    {ownPlans}
+                                </div>
+                            </div>
+                        </div>
+
                         <div className='form-group string'>
                             <label className='string col-sm-3 control-label'>
                                 {'Descripción'}
@@ -252,7 +328,7 @@ export default class EditDomain extends React.Component {
                             </label>
 
                             <div className='col-sm-8'>
-                            <Textarea
+                            <textarea
                                 className='form-control'
                                 ref='notes'
                                 defaultValue={domain.attrs.zimbraNotes}
@@ -260,6 +336,22 @@ export default class EditDomain extends React.Component {
                                 minRows={3}
                                 maxRows={9}
                             />
+                            </div>
+                        </div>
+
+                        <div className='form-group string'>
+                            <label className='string required col-sm-3 control-label'>
+                                {'Límite de casillas'}
+                            </label>
+
+                            <div className='col-sm-8'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    ref='mailboxLimit'
+                                    value={total}
+                                    disabled='disabled'
+                                />
                             </div>
                         </div>
 
