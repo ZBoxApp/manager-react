@@ -106,6 +106,7 @@ export default {
         'TXT',
         'WKS'
     ],
+    MaxLengthOfPasswd: 9,
     status: {
         active: {
             label: 'Activa',

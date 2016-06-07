@@ -45,7 +45,8 @@ export default class DomainDetails extends React.Component {
     }
 
     getDomain() {
-        const domain = DomainStore.getCurrent();
+        //const domain = DomainStore.getCurrent();
+        const domain = null;
         const states = {};
 
         if (domain && domain.id === this.props.params.id) {

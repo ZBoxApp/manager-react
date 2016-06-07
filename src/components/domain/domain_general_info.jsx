@@ -40,7 +40,7 @@ export default class DomainGeneralInfo extends React.Component {
         domain.checkMxRecord((err, data) => {
             if (err) {
                 return self.setState({
-                    mx: err
+                    mx: err.message || err.extra.reason
                 });
             }
 
@@ -82,11 +82,33 @@ export default class DomainGeneralInfo extends React.Component {
     }
     render() {
         const domain = this.props.domain;
-        let editDomainButton = null;
-        let masterID = null;
+        let editDomainButton;
+        let masterID;
+        let masterDomain;
+        let badgeMaster;
 
-        if (domain.attrs.zimbraDomainAliasTargetId) {
+        if (domain.isAliasDomain && domain.masterDomainName) {
             masterID = domain.attrs.zimbraDomainAliasTargetId;
+            masterDomain = (
+                <li>
+                    <strong>{'Dominio Maestro: '}</strong>
+                    <a
+                        className='account-name'
+                        onClick={(e) => Utils.handleLink(e, `/domains/${masterID}`, this.props.location)}
+                    >
+                        {`${domain.masterDomainName}`}
+                    </a>
+                </li>
+            );
+
+            badgeMaster = (
+                <li>
+                    <StatusLabel
+                        classes='btn btn-md btn-warning'
+                        children='Dominio Alias'
+                    />
+                </li>
+            );
         }
 
         const infoBody = (
@@ -114,31 +136,14 @@ export default class DomainGeneralInfo extends React.Component {
                                 <strong>{'MX Record: '}</strong>
                                 {this.state.mx}
                             </li>
-                            {domain.isAliasDomain && domain.masterDomainName && (
-                                <li>
-                                    <strong>{'Dominio Maestro: '}</strong>
-                                    <a
-                                        className='account-name'
-                                        onClick={(e) => Utils.handleLink(e, `/domains/${masterID}`, this.props.location)}
-                                    >
-                                        {domain.masterDomainName}
-                                    </a>
-                                </li>
-                            )}
+                            {masterDomain}
                             <li>
                                 <strong>{'Próxima renovación: '}</strong>
                                 {this.state.date}
                             </li>
                         </ul>
                         <ul className='list-inline list-unstyled'>
-                            {domain.isAliasDomain && (
-                                <li>
-                                    <StatusLabel
-                                        classes='btn btn-md btn-warning'
-                                        children='Dominio Alias'
-                                    />
-                                </li>
-                            )}
+                            {badgeMaster}
                             <li>
                                 <StatusLabel
                                     classes='btn btn-md btn-info'

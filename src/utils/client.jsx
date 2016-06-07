@@ -202,10 +202,10 @@ export function getCompany(id) {
             },
             dataType: 'json',
             success: function onSuccess(data) {
-                resolve(data);
+                return resolve(data);
             },
             error: function onError(xhr) {
-                reject(xhr.responseJSON);
+                return reject(xhr.responseJSON);
             }
         });
     });

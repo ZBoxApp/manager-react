@@ -67,7 +67,7 @@ export default class CreateMailBox extends React.Component {
                 return false;
             }
 
-            if (passwd.length < 9) {
+            if (passwd.length < Constants.MaxLengthOfPasswd) {
                 GlobalActions.emitMessage({
                     message: 'La contraseña debe ser mayor a 8 caracteres, verifique por favor.',
                     typeError: messageType.ERROR
@@ -86,7 +86,8 @@ export default class CreateMailBox extends React.Component {
                 sn: this.refs.sn.value,
                 description: this.refs.description.value,
                 zimbraCOSId: this.refs.zimbraCOSId.value,
-                zimbraAccountStatus: this.refs.zimbraAccountStatus.value
+                zimbraAccountStatus: this.refs.zimbraAccountStatus.value,
+                zimbraIsDelegatedAdminAccount: this.refs.zimbraIsDelegatedAdminAccount.checked.toString().toUpperCase()
             };
 
             Client.createAccount(
@@ -381,6 +382,28 @@ export default class CreateMailBox extends React.Component {
                             >
                                 {options}
                             </select>
+                        </div>
+                    </div>
+
+                    <div className='form-group string'>
+                        <label className='string col-sm-3 control-label'>
+                            {'Administrador Delegado'}
+                        </label>
+
+                        <div className='col-sm-8'>
+                            <label
+                                className='radio radio-info radio-inline pretty-input'
+                            >
+                                <div className='pretty-checkbox'>
+                                    <input
+                                        type='checkbox'
+                                        className='pretty'
+                                        name='mailbox'
+                                        ref='zimbraIsDelegatedAdminAccount'
+                                    />
+                                    <span></span>
+                                </div>
+                            </label>
                         </div>
                     </div>
 

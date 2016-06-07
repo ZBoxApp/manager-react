@@ -26,7 +26,8 @@ export default class DomainAdminList extends React.Component {
     }
 
     getStateFromStores() {
-        const admins = DomainStore.getAdmins(this.props.domain);
+        //const admins = DomainStore.getAdmins(this.props.domain);
+        const admins = null;
         return {
             admins
         };

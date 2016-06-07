@@ -1,11 +1,12 @@
 //import select2 from 'select2';
+//import ConfirmDeleteModal from './confirm_delete_modal.jsx';
+//import ToggleModalButton from '../toggle_modal_button.jsx';
 import $ from 'jquery';
 import React from 'react';
+import sweetAlert from 'sweetalert';
 import Button from '../button.jsx';
 import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
-import ConfirmDeleteModal from './confirm_delete_modal.jsx';
-import ToggleModalButton from '../toggle_modal_button.jsx';
 import DataList from 'react-datalist';
 import UserStore from '../../stores/user_store.jsx';
 import Promise from 'bluebird';
@@ -43,6 +44,64 @@ export default class EditMailBox extends React.Component {
 
     handleRadioChanged(val) {
         this.refs.zimbraCOSId.value = val;
+    }
+
+    removeAccount() {
+        const account = this.state.data;
+        const response = {
+            title: 'Se ha borrado con éxito',
+            type: 'success'
+        };
+
+        sweetAlert({
+                title: 'Borrar Casilla',
+                text: `¿Esta seguro que dese borrar la casilla ${account.name}?`,
+                type: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Si, deseo borrarlo!',
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true,
+                animation: 'slide-from-top'
+            },
+            (isDeleted) => {
+                if (isDeleted) {
+                    new Promise((resolve, reject) => {
+                        //  start loading
+                        GlobalActions.emitStartLoading();
+
+                        Client.removeAccount(
+                            account.id,
+                            () => {
+                                return resolve(true);
+                            },
+                            (error) => {
+                                return reject(error);
+                            }
+                        );
+                    }).then(() => {
+                        MailboxStore.removeAccount(account);
+                        response.text = 'Será redireccionado a Casillas.';
+                        return sweetAlert(
+                            response,
+                            () => {
+                                Utils.handleLink(event, '/mailboxes/', this.props.location);
+                            }
+                        );
+                    }).catch((error) => {
+                        response.title = 'Ha ocurrido un error.';
+                        response.text = error.message;
+                        response.type = 'error';
+                        response.confirmButtonText = 'Intentar de nuevo';
+                        response.confirmButtonColor = '#DD6B55';
+
+                        return sweetAlert(response);
+                    }).finally(() => {
+                        GlobalActions.emitEndLoading();
+                    });
+                }
+            }
+        );
     }
 
     handleEnabledRename() {
@@ -313,11 +372,6 @@ export default class EditMailBox extends React.Component {
     }
 
     componentDidMount() {
-        /*Client.renameAccount('nuevomodificado@zboxapp.dev', (exito) => {
-            console.log('exito', exito);
-        }, (fallo) => {
-            console.log('fallo', fallo);
-        });*/
         $('#sidebar-mailboxes').addClass('active');
         EventStore.addMessageListener(this.showMessage);
         this.getMailbox(this.props.params.id);
@@ -339,12 +393,12 @@ export default class EditMailBox extends React.Component {
     }
 
     render() {
+        let buttonDelete = null;
         let message;
         let data;
         let actions;
         let form;
         const domains = [];
-        let buttonDelete = null;
         let currentDomain = '';
         const cosElements = [];
         let datalist = (
@@ -371,7 +425,7 @@ export default class EditMailBox extends React.Component {
             const cos = this.state.cos;
             currentDomain = data.name.split('@').pop();
 
-            buttonDelete = (
+            /*buttonDelete = (
                 <ToggleModalButton
                     role='button'
                     className='btn btn-xs btn-danger action-button'
@@ -381,6 +435,20 @@ export default class EditMailBox extends React.Component {
                 >
                     {'Eliminar'}
                 </ToggleModalButton>
+            );*/
+
+            buttonDelete = (
+                <a
+                    className='btn btn-danger btn-xs action-button'
+                    onClick={
+                        () => {
+                            this.removeAccount();
+                        }
+                    }
+                    key='btn-delete-mailbox-key'
+                >
+                    {'Eliminar Casilla'}
+                </a>
             );
 
             const length = doms.length;
