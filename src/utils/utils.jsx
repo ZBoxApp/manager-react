@@ -676,12 +676,14 @@ export function extractLockOuts(object) {
 
 export function parseMaxCOSAccounts(maxCosAccounts) {
     const response = {};
-    const arrCos = maxCosAccounts || false;
+    let arrCos = typeof maxCosAccounts === 'string' && typeof maxCosAccounts !== 'undefined' ? maxCosAccounts.split(false) : maxCosAccounts;
 
     if (arrCos) {
         arrCos.forEach((p) => {
             const splitter = p.split(':');
-            response[splitter.shift()] = splitter[0] || 0;
+            const key = splitter.shift();
+            const value = splitter[0] ? parseInt(splitter[0], 10) : false;
+            response[key] = value || 0;
         });
 
         return response;
