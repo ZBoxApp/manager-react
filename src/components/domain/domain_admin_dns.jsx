@@ -302,7 +302,9 @@ export default class DNSZoneForm extends React.Component {
         let header = null;
         let inputSearch = null;
         let pagination = null;
+        //
         // No show records
+        //
         const inMutableFields = window.manager_config.dns.inmutable;
         const mutableFields = this.state.fields.filter((record) => {
           return !inMutableFields.includes(record.type.toLowerCase());
