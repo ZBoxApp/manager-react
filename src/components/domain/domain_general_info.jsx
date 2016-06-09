@@ -19,6 +19,7 @@ export default class DomainGeneralInfo extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getMXRecord = this.getMXRecord.bind(this);
         this.renovationDate = this.renovationDate.bind(this);
         this.getCompany = this.getCompany.bind(this);
@@ -50,7 +51,7 @@ export default class DomainGeneralInfo extends React.Component {
         });
     }
     getCompany(id) {
-        const company = CompanyStore.getCompanyById(id);
+        const company = this.isStoreEnabled ? CompanyStore.getCompanyById(id) : null;
         if (company) {
             this.setState({
                 company: company.name

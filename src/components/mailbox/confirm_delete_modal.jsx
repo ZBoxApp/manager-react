@@ -15,6 +15,7 @@ export default class ConfirmDeleteModal extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.handleDelete = this.handleDelete.bind(this);
         this.handleKeyUp = this.handleKeyUp.bind(this);
         this.redirect = this.redirect.bind(this);
@@ -47,7 +48,9 @@ export default class ConfirmDeleteModal extends React.Component {
                 }
             );
         }).then(() => {
-            MailboxStore.removeAccount(this.props.data);
+            if (this.isStoreEnabled) {
+                MailboxStore.removeAccount(this.props.data);
+            }
             this.setState(
                 {
                     alert: true,

@@ -57,7 +57,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
         if (this.state.hasDomain) {
             const data = this.props.data;
             const attrs = this.props.data.attrs;
-            const owner = (!attrs.givenName || !attrs.sn) ? null : attrs.givenName + ' ' + attrs.sn;
+            const owner = attrs.displayName ? attrs.displayName : `${attrs.givenName || attrs.cn} ${attrs.sn}`;
             const mail = data.name;
 
             //properties

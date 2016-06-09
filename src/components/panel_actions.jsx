@@ -55,6 +55,10 @@ export default class PanelActions extends React.Component {
     onSearch() {
         const search = this.refs.search.value;
 
+        if (!this.props.data) {
+            return null;
+        }
+
         const arrayFiltered = this.props.data.filter((strArray) => {
             if (strArray.match(search)) {
                 return strArray;
@@ -209,11 +213,10 @@ export default class PanelActions extends React.Component {
     handleChangeLimit() {
         const limit = this.refs.countItems.value;
         this.pagination.setLimit(limit);
-        this.pagination.reset();
 
         const states = {};
 
-        states['items' + this.props.name] = this.pagination.init();
+        states['items' + this.props.name] = this.pagination.reset();
         states['pagination' + this.props.name] = this.pagination.getResults();
 
         this.setState(states);

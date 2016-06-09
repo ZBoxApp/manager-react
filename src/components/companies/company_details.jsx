@@ -28,6 +28,7 @@ export default class CompaniesDetails extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.state = {};
 
         this.getCompany = this.getCompany.bind(this);
@@ -38,7 +39,7 @@ export default class CompaniesDetails extends React.Component {
     getCompany() {
         const self = this;
         const companyId = this.props.params.id;
-        const company = CompaniesStore.getCurrent();
+        const company = this.isStoreEnabled ? CompaniesStore.getCurrent() : null;
         if (company) {
             self.setState({
                 company
@@ -48,7 +49,9 @@ export default class CompaniesDetails extends React.Component {
 
         return Client.getCompany(companyId).then((data) => {
             return self.getDomains(data).then((comp) => {
-                CompaniesStore.setCurrent(comp);
+                if (this.isStoreEnabled) {
+                    CompaniesStore.setCurrent(comp);
+                }
                 self.setState({
                     company: comp
                 });
@@ -75,13 +78,17 @@ export default class CompaniesDetails extends React.Component {
                 },
                 (data) => {
                     const domains = data.domain;
-                    return self.getPlans(domains).
-                    then(() => {
-                        company.domains = domains;
-                        resolve(company);
-                    }).catch((error) => {
-                        reject(error);
-                    });
+                    if (domains) {
+                        return self.getPlans(domains).
+                        then(() => {
+                            company.domains = domains;
+                            resolve(company);
+                        }).catch((error) => {
+                            reject(error);
+                        });
+                    }
+
+                    return resolve(company);
                 },
                 (error) => {
                     reject(error);
@@ -121,6 +128,7 @@ export default class CompaniesDetails extends React.Component {
 
     render() {
         const company = this.state.company;
+
         if (!company) {
             return <div/>;
         }

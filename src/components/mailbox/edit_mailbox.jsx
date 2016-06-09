@@ -31,6 +31,7 @@ export default class EditMailBox extends React.Component {
         this.fillForm = this.fillForm.bind(this);
         this.showMessage = this.showMessage.bind(this);
         this.handleRenameAccount = this.handleRenameAccount.bind(this);
+        this.editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
 
         this.state = {};
     }
@@ -82,10 +83,11 @@ export default class EditMailBox extends React.Component {
                     }).then(() => {
                         MailboxStore.removeAccount(account);
                         response.text = 'Será redireccionado a Casillas.';
+                        this.editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
                         return sweetAlert(
                             response,
                             () => {
-                                Utils.handleLink(event, '/mailboxes/', this.props.location);
+                                Utils.handleLink(event, `${this.editUrlFromParams}`, this.props.location);
                             }
                         );
                     }).catch((error) => {
@@ -223,7 +225,8 @@ export default class EditMailBox extends React.Component {
                 sn: this.refs.sn.value,
                 description: this.refs.description.value,
                 zimbraCOSId: this.refs.zimbraCOSId.value,
-                zimbraAccountStatus: this.refs.zimbraAccountStatus.value
+                zimbraAccountStatus: this.refs.zimbraAccountStatus.value,
+                displayName: `${this.refs.givenName.value} ${this.refs.sn.value}`
             };
 
             GlobalActions.emitStartLoading();
@@ -643,7 +646,7 @@ export default class EditMailBox extends React.Component {
                                 {
                                     className: 'btn btn-default action-button',
                                     onClick: (e) => {
-                                        Utils.handleLink(e, '/mailboxes', this.props.location);
+                                        Utils.handleLink(e, `${this.editUrlFromParams}${this.props.params.id}`, this.props.location);
                                     }
                                 }
                             }
@@ -661,7 +664,7 @@ export default class EditMailBox extends React.Component {
                 props: {
                     className: 'btn btn-default btn-xs action-button',
                     onClick: (e) => {
-                        Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
+                        Utils.handleLink(e, `${this.editUrlFromParams}${this.props.params.id}`, this.props.location);
                     }
                 }
             },

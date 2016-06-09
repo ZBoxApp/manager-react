@@ -15,6 +15,7 @@ export default class AddDistributionListModal extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.handleAddList = this.handleAddList.bind(this);
         this.state = {};
     }
@@ -31,7 +32,11 @@ export default class AddDistributionListModal extends React.Component {
                     email,
                     {displayName},
                     (data) => {
-                        DomainStore.addDistributionList(data);
+                        if (this.isStoreEnabled) {
+                            DomainStore.addDistributionList(data);
+                        } else {
+                            DomainStore.emitDistributionListsChange();
+                        }
                         GlobalActions.emitEndLoading();
                         this.props.onHide();
                     },

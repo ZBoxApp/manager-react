@@ -84,6 +84,7 @@ export default class CreateMailBox extends React.Component {
             const attrs = {
                 givenName: this.refs.givenName.value,
                 sn: this.refs.sn.value,
+                displayName: `${this.refs.givenName.value} ${this.refs.sn.value}`,
                 description: this.refs.description.value,
                 zimbraCOSId: this.refs.zimbraCOSId.value,
                 zimbraAccountStatus: this.refs.zimbraAccountStatus.value,

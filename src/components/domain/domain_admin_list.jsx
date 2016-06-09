@@ -5,6 +5,7 @@ import React from 'react';
 import sweetAlert from 'sweetalert';
 
 import DomainStore from '../../stores/domain_store.jsx';
+import UserStore from '../../stores/user_store.jsx';
 
 import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
@@ -19,15 +20,16 @@ export default class DomainAdminList extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.getAdmins = this.getAdmins.bind(this);
         this.handleRemoveAdmin = this.handleRemoveAdmin.bind(this);
         this.onAdminsChange = this.onAdminsChange.bind(this);
+        this.isGlobalAdmin = UserStore.isGlobalAdmin();
         this.state = this.getStateFromStores();
     }
 
     getStateFromStores() {
-        //const admins = DomainStore.getAdmins(this.props.domain);
-        const admins = null;
+        const admins = this.isStoreEnabled ? DomainStore.getAdmins(this.props.domain) : null;
         return {
             admins
         };
@@ -37,7 +39,9 @@ export default class DomainAdminList extends React.Component {
         const domain = this.props.domain;
         domain.getAdmins((err, data) => {
             const admins = data.account || [];
-            DomainStore.setAdmins(domain, admins);
+            if (this.isStoreEnabled) {
+                DomainStore.setAdmins(domain, admins);
+            }
             this.setState({admins});
         });
     }
@@ -78,7 +82,9 @@ export default class DomainAdminList extends React.Component {
                                 return sweetAlert(response);
                             }
 
-                            DomainStore.removeAdmin(admin.id);
+                            if (this.isStoreEnabled) {
+                                DomainStore.removeAdmin(admin.id);
+                            }
                             return sweetAlert(response);
                         }
                     );
@@ -88,7 +94,7 @@ export default class DomainAdminList extends React.Component {
     }
 
     onAdminsChange() {
-        const admins = DomainStore.getAdmins(this.props.domain);
+        const admins = this.isStoreEnabled ? DomainStore.getAdmins(this.props.domain) : null;
         if (!admins) {
             return this.getAdmins();
         }
@@ -107,6 +113,7 @@ export default class DomainAdminList extends React.Component {
         DomainStore.removeAdminsChangeListener(this.onAdminsChange);
     }
     render() {
+        let btnAddNewAdmin = null;
         if (!this.state.admins) {
             return <div/>;
         }
@@ -127,6 +134,7 @@ export default class DomainAdminList extends React.Component {
 
         const domain = this.props.domain;
         const adminRows = this.state.admins.map((a) => {
+            const name = a.attrs.displayName || `${a.attrs.givenName || a.attrs.cn} ${a.attrs.sn}`;
             return (
                 <tr
                     key={`admin-${a.id}`}
@@ -136,35 +144,50 @@ export default class DomainAdminList extends React.Component {
                         {a.name}
                     </td>
                     <td className='user-name text-center'>
-                        {a.attrs.displayName}
+                        {name}
                     </td>
                     <td className='user-type text-center'>
                     </td>
-                    <td className='user-actions text-center'>
-                        <ul className='list-inline list-unstyled'>
-                            <li>
-                                <a
-                                    className='btn btn-default btn-xs'
-                                    onClick={(e) => Utils.handleLink(e, `/mailboxes/${a.id}/edit`, this.props.location)}
-                                >
-                                    {'Editar'}
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    className='btn btn-danger btn-xs'
-                                    onClick={(e) => this.handleRemoveAdmin(e, a)}
-                                >
-                                    {'Eliminar'}
-                                </a>
-                            </li>
-                        </ul>
-                    </td>
+                    {this.isGlobalAdmin && (
+                        <td className='user-actions text-center'>
+                            <ul className='list-inline list-unstyled'>
+                                <li>
+                                    <a
+                                        className='btn btn-default btn-xs'
+                                        onClick={(e) => Utils.handleLink(e, `/mailboxes/${a.id}/edit`, this.props.location)}
+                                    >
+                                        {'Editar'}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        className='btn btn-danger btn-xs'
+                                        onClick={(e) => this.handleRemoveAdmin(e, a)}
+                                    >
+                                        {'Eliminar'}
+                                    </a>
+                                </li>
+                            </ul>
+                        </td>
+                    )}
                 </tr>
             );
         });
 
+        if (this.isGlobalAdmin) {
+            btnAddNewAdmin = (
+                <ToggleModalButton
+                    role='button'
+                    className='btn btn-default'
+                    dialogType={AddAdminModal}
+                    dialogProps={{domain}}
+                >
+                    {'Agregar administrador'}
+                </ToggleModalButton>
+            );
+        }
         let adminContent;
+
         if (adminRows.length > 0) {
             adminContent = (
                 <div className='table-responsive'>
@@ -179,21 +202,16 @@ export default class DomainAdminList extends React.Component {
                             <th>{'email'}</th>
                             <th className='text-center'>{'Nombre'}</th>
                             <th></th>
-                            <th className='text-center'>{'Acciones'}</th>
+                            {this.isGlobalAdmin && (
+                                <th className='text-center'>{'Acciones'}</th>
+                            )}
                         </tr>
                         </thead>
                         <tbody>
                         {adminRows}
                         </tbody>
                     </table>
-                    <ToggleModalButton
-                        role='button'
-                        className='btn btn-default'
-                        dialogType={AddAdminModal}
-                        dialogProps={{domain}}
-                    >
-                        {'Agregar administrador'}
-                    </ToggleModalButton>
+                    {btnAddNewAdmin}
                 </div>
             );
         } else {
