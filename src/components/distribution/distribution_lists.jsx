@@ -101,7 +101,7 @@ export default class DistributionLists extends React.Component {
                 reject(error);
             });
         }).then((data) => {
-            DomainStore.setOwners(Utils.getOwners(data.owners));
+            DomainStore.setOwners(data.owners);
             DomainStore.setMembers(data.distributionsList.members);
 
             this.setState({
@@ -128,7 +128,7 @@ export default class DistributionLists extends React.Component {
         }
 
         this.multipleActionsOwners(response, this.state.distributionsList).then((res) => {
-            const newOwners = DomainStore.getOwners();
+            //const newOwners = DomainStore.getOwners();
             const errors = [];
             const limit = res.length;
 
@@ -150,12 +150,24 @@ export default class DistributionLists extends React.Component {
                 });
             }
 
-            this.setState({
-                owners: newOwners,
-                error: errors
-            });
+            if (this.state.domain) {
+                const id = this.props.params.id;
+                Client.getDistributionList(id, (success) => {
+                    success.getOwners((error, owners) => {
+                        if (owners) {
+                            DomainStore.setOwners(owners);
+                            this.setState({
+                                owners,
+                                error: errors
+                            });
 
-            response.reset();
+                            response.reset();
+                        }
+                    });
+                }, (err) => {
+                    return err;
+                });
+            }
         });
     }
 
@@ -266,18 +278,18 @@ export default class DistributionLists extends React.Component {
 
                 for (let index = 0; index < limit; index++) {
                     const res = {};
+                    const newPermitido = array[index];
                     const promesa = new Promise((resolve) => {
-                        account.addOwner(array[index], (error) => {
+                        account.addOwner(newPermitido, (error) => {
                             if (error) {
                                 res.isCompleted = false;
-                                res.item = response[key][index];
+                                res.item = newPermitido;
                                 res.action = key;
                                 res.error = error;
                             } else {
                                 res.isCompleted = true;
-                                res.item = response[key][index];
+                                res.item = newPermitido;
                                 res.action = key;
-                                DomainStore.addOwners(response[key][index]);
                             }
 
                             return resolve(res);
@@ -294,8 +306,9 @@ export default class DistributionLists extends React.Component {
 
                 for (let index = 0; index < limit; index++) {
                     const res = {};
+                    const permitido = array[index].name || array[index].id;
                     const promesa = new Promise((resolve) => {
-                        account.removeOwner(array[index], (error) => {
+                        account.removeOwner(permitido, (error) => {
                             if (error) {
                                 res.isCompleted = false;
                                 res.item = response[key][index];

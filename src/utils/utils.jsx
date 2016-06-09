@@ -558,7 +558,8 @@ export function getOwners(owners) {
         const limit = owners.length;
         const ownersArray = [];
         for (let i = 0; i < limit; i++) {
-            ownersArray.push(owners[i].name);
+            const name = owners[i].name || { id: owners[i].id};
+            ownersArray.push(name);
         }
 
         return ownersArray;
