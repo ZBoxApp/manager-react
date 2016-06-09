@@ -354,19 +354,19 @@ export default class DNSZoneForm extends React.Component {
                         <strong>Nombre</strong>
                     </div>
 
-                    <div className='col-xs-1'>
+                    <div className='col-xs-2'>
                         <strong>Tipo</strong>
                     </div>
 
-                    <div className='col-xs-3'>
+                    <div className='col-xs-4'>
                         <strong>Contenido</strong>
                     </div>
 
-                    <div className='col-xs-2'>
+                    <div className='col-xs-1'>
                         <strong>Prioridad</strong>
                     </div>
 
-                    <div className='col-xs-2'>
+                    <div className='col-xs-1'>
                         <strong>TTL</strong>
                     </div>
 
@@ -396,7 +396,7 @@ export default class DNSZoneForm extends React.Component {
                             />
                         </div>
 
-                        <div className='col-xs-1'>
+                        <div className='col-xs-2'>
                             <select
                                 className='form-control'
                                 defaultValue={newElement.type}
@@ -409,7 +409,7 @@ export default class DNSZoneForm extends React.Component {
                             </select>
                         </div>
 
-                        <div className='col-xs-3'>
+                        <div className='col-xs-4'>
                             <input
                                 type='text'
                                 className='form-control'
@@ -420,7 +420,7 @@ export default class DNSZoneForm extends React.Component {
                             />
                         </div>
 
-                        <div className='col-xs-2'>
+                        <div className='col-xs-1'>
                             <input
                                 type='number'
                                 className='form-control'
@@ -431,7 +431,7 @@ export default class DNSZoneForm extends React.Component {
                             />
                         </div>
 
-                        <div className='col-xs-2'>
+                        <div className='col-xs-1'>
                             <input
                                 type='number'
                                 className='form-control'
@@ -482,7 +482,7 @@ export default class DNSZoneForm extends React.Component {
                                 />
                             </div>
 
-                            <div className='col-xs-1'>
+                            <div className='col-xs-2'>
                                 <select
                                     className='form-control'
                                     defaultValue={element.type}
@@ -495,7 +495,7 @@ export default class DNSZoneForm extends React.Component {
                                 </select>
                             </div>
 
-                            <div className='col-xs-3'>
+                            <div className='col-xs-4'>
                                 <input
                                     type='text'
                                     className='form-control'
@@ -506,7 +506,7 @@ export default class DNSZoneForm extends React.Component {
                                 />
                             </div>
 
-                            <div className='col-xs-2'>
+                            <div className='col-xs-1'>
                                 <input
                                     type='number'
                                     className='form-control'
@@ -517,7 +517,7 @@ export default class DNSZoneForm extends React.Component {
                                 />
                             </div>
 
-                            <div className='col-xs-2'>
+                            <div className='col-xs-1'>
                                 <input
                                     type='number'
                                     className='form-control'
