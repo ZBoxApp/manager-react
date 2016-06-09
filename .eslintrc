@@ -131,7 +131,7 @@
     "jsx-quotes": [2, "prefer-single"],
     "key-spacing": [2, {"beforeColon": false, "afterColon": true}],
     "linebreak-style": 2,
-    "lines-around-comment": [2, { "beforeBlockComment": true, "beforeLineComment": true, "allowBlockStart": true, "allowBlockEnd": true }],
+    # "lines-around-comment": [2, { "beforeBlockComment": true, "beforeLineComment": true, "allowBlockStart": true, "allowBlockEnd": true }],
     "new-cap": 2,
     "new-parens": 2,
     "no-lonely-if": 2,
