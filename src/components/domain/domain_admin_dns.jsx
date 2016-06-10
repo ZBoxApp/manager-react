@@ -322,6 +322,13 @@ export default class DNSZoneForm extends React.Component {
         let header = null;
         let inputSearch = null;
         let pagination = null;
+        //
+        // No show records
+        //
+        const inMutableFields = window.manager_config.dns.inmutable;
+        const mutableFields = this.state.fields.filter((record) => {
+            return !inMutableFields.includes(record.type.toLowerCase());
+        });
         const types = this.types.map((item) => {
             return (
                 <option
@@ -374,19 +381,19 @@ export default class DNSZoneForm extends React.Component {
                         <strong>Nombre</strong>
                     </div>
 
-                    <div className='col-xs-1'>
+                    <div className='col-xs-2'>
                         <strong>Tipo</strong>
                     </div>
 
-                    <div className='col-xs-3'>
+                    <div className='col-xs-4'>
                         <strong>Contenido</strong>
                     </div>
 
-                    <div className='col-xs-2'>
+                    <div className='col-xs-1'>
                         <strong>Prioridad</strong>
                     </div>
 
-                    <div className='col-xs-2'>
+                    <div className='col-xs-1'>
                         <strong>TTL</strong>
                     </div>
 
@@ -416,7 +423,7 @@ export default class DNSZoneForm extends React.Component {
                             />
                         </div>
 
-                        <div className='col-xs-1'>
+                        <div className='col-xs-2'>
                             <select
                                 className='form-control'
                                 defaultValue={newElement.type}
@@ -429,7 +436,7 @@ export default class DNSZoneForm extends React.Component {
                             </select>
                         </div>
 
-                        <div className='col-xs-3'>
+                        <div className='col-xs-4'>
                             <input
                                 type='text'
                                 className='form-control'
@@ -440,7 +447,7 @@ export default class DNSZoneForm extends React.Component {
                             />
                         </div>
 
-                        <div className='col-xs-2'>
+                        <div className='col-xs-1'>
                             <input
                                 type='number'
                                 className='form-control'
@@ -451,7 +458,7 @@ export default class DNSZoneForm extends React.Component {
                             />
                         </div>
 
-                        <div className='col-xs-2'>
+                        <div className='col-xs-1'>
                             <input
                                 type='number'
                                 className='form-control'
@@ -480,9 +487,9 @@ export default class DNSZoneForm extends React.Component {
                 );
             });
 
-            if (this.state.fields.length > 0) {
-                const length = this.state.fields.length;
-                fields = this.state.fields.map((element, i) => {
+            if (mutableFields.length > 0) {
+                const length = mutableFields.length;
+                fields = mutableFields.map((element, i) => {
                     const isDisabled = element.enabled ? null : true;
                     return (
                         <div
@@ -499,7 +506,7 @@ export default class DNSZoneForm extends React.Component {
                                 />
                             </div>
 
-                            <div className='col-xs-1'>
+                            <div className='col-xs-2'>
                                 <input
                                     className='form-control'
                                     type='text'
@@ -508,7 +515,7 @@ export default class DNSZoneForm extends React.Component {
                                 />
                             </div>
 
-                            <div className='col-xs-3'>
+                            <div className='col-xs-4'>
                                 <input
                                     type='text'
                                     className='form-control'
@@ -519,7 +526,7 @@ export default class DNSZoneForm extends React.Component {
                                 />
                             </div>
 
-                            <div className='col-xs-2'>
+                            <div className='col-xs-1'>
                                 <input
                                     type='number'
                                     className='form-control'
@@ -530,7 +537,7 @@ export default class DNSZoneForm extends React.Component {
                                 />
                             </div>
 
-                            <div className='col-xs-2'>
+                            <div className='col-xs-1'>
                                 <input
                                     type='number'
                                     className='form-control'

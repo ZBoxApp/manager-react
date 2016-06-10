@@ -28,8 +28,10 @@ export default class CreateMailBox extends React.Component {
         this.handleRadioChanged = this.handleRadioChanged.bind(this);
         this.controllerDataList = this.controllerDataList.bind(this);
         this.handlePasswd = this.handlePasswd.bind(this);
+        this.getEnableAccountsFromDomain = this.getEnableAccountsFromDomain.bind(this);
 
         this.reset = null;
+        this.cacheDomain = null;
 
         this.state = {};
     }
@@ -45,6 +47,122 @@ export default class CreateMailBox extends React.Component {
             error: attrs.message,
             typeError: attrs.typeError
         });
+    }
+
+    addBlurListeneronInput() {
+        const parent = document.getElementById('add-mailbox');
+
+        if (parent) {
+            this.addEventListenerFixed(parent, 'blur', this.getEnableAccountsFromDomain);
+        }
+    }
+
+    addEventListenerFixed(element, type, callback) {
+        const fixEvents = {
+            blur: 'focusout'
+        };
+
+        element.addEventListener(type, callback, typeof (fixEvents[type]) !== 'undefined');
+    }
+
+    getEnableAccountsFromDomain(e, currentDomain) {
+        const target = 'react-datalist-input';
+        const hasEvent = e;
+        let rightInput = null;
+        let value = currentDomain || null;
+        if (hasEvent) {
+            rightInput = e.target;
+            value = rightInput.value.trim();
+        }
+        const classesList = [];
+        if (value.length > 0) {
+            if (hasEvent) {
+                Array.prototype.push.apply(classesList, rightInput.classList);
+            }
+            if (classesList.includes(target) || currentDomain) {
+                const domains = this.state.domains.domain;
+                const thatDomainExists = domains.find((domain) => {
+                    const domainName = domain.name;
+                    return domainName.includes(value) && domainName.length === value.length;
+                });
+
+                if (thatDomainExists.name === this.cacheDomain) {
+                    return null;
+                }
+
+                if (thatDomainExists) {
+                    this.cacheDomain = thatDomainExists.name;
+                    const maxCosAccounts = Utils.parseMaxCOSAccounts(thatDomainExists.attrs.zimbraDomainCOSMaxAccounts);
+                    this.setState({
+                        loadingEnableAccounts: true,
+                        error: false
+                    });
+                    return Client.batchCountAccount([thatDomainExists.name],
+                        (s) => {
+                            const usedAccounts = s.pop();
+                            const plansName = Object.keys(usedAccounts);
+                            const response = [];
+                            const plans = window.manager_config.plans;
+                            if (!maxCosAccounts) {
+                                this.setState({
+                                    loadingEnableAccounts: false,
+                                    enabledAccounts: false
+                                });
+
+                                return GlobalActions.emitMessage({
+                                    message: `El dominio: ${value}, no tiene plan, afíliese a un plan por favor.`,
+                                    typeError: messageType.ERROR
+                                });
+                            }
+                            plansName.forEach((plan) => {
+                                const item = usedAccounts[plan];
+                                if (maxCosAccounts[item.id]) {
+                                    const used = parseInt(item.used, 10);
+                                    const total = parseInt(maxCosAccounts[item.id], 10);
+                                    const enabled = (total - used);
+                                    const error = enabled < 0 ? `${enabled}` : null;
+                                    const classCss = plans[plan].statusCos;
+
+                                    response.push(
+                                        {
+                                            plan,
+                                            enabled,
+                                            error,
+                                            total,
+                                            used,
+                                            classCss,
+                                            cosId: item.id
+                                        }
+                                    );
+                                }
+
+                                 return false;
+                            });
+
+                            return this.setState({
+                                loadingEnableAccounts: false,
+                                enabledAccounts: response
+                            });
+                        },
+                        (err) => {
+                            this.setState({
+                                loadingEnableAccounts: false,
+                                enabledAccounts: false
+                            });
+
+                            return GlobalActions.emitMessage({
+                                message: err.message,
+                                typeError: messageType.ERROR
+                            });
+                        });
+                }
+
+                return GlobalActions.emitMessage({
+                    message: `El dominio: ${value}, no existe, por favor verifíque.`,
+                    typeError: messageType.ERROR
+                });
+            }
+        }
     }
 
     handleSubmit(e) {
@@ -142,6 +260,10 @@ export default class CreateMailBox extends React.Component {
                     limit: max
                 },
                 (data) => {
+                    const rightsDomains = data.domain.filter((domain) => {
+                        return !domain.isAliasDomain && !domain.name.match('archive');
+                    });
+                    data.domain = rightsDomains;
                     resolve(data);
                 },
                 (error) => {
@@ -194,6 +316,10 @@ export default class CreateMailBox extends React.Component {
 
             this.setState(response);
 
+            if (response.currentDomain) {
+                this.getEnableAccountsFromDomain(null, response.currentDomain);
+            }
+
             GlobalActions.emitEndLoading();
 
             Utils.toggleStatusButtons('.action-save', false);
@@ -213,11 +339,15 @@ export default class CreateMailBox extends React.Component {
         $('#sidebar-mailboxes').addClass('active');
         this.getAllDomains();
         GlobalActions.emitEndLoading();
+        this.addBlurListeneronInput();
     }
 
     componentWillUnmount() {
         EventStore.removeMessageListener(this.showMessage);
         $('#sidebar-mailboxes').removeClass('active');
+        this.cacheDomain = null;
+        const parent = document.getElementById('add-mailbox');
+        parent.removeEventListener('focusout', null);
     }
 
     controllerDataList(controller) {
@@ -238,6 +368,46 @@ export default class CreateMailBox extends React.Component {
                     autoclose={true}
                 />
             );
+        }
+
+        let enableAccounts;
+        if (this.state.loadingEnableAccounts) {
+            enableAccounts = (
+                <div className='text-center'>
+                    <i className='fa fa-refresh fa-spin fa-2x'></i>
+                    <p>Cargando casillas disponibles</p>
+                </div>
+            );
+        }
+
+        if (this.state.enabledAccounts) {
+            const accounts = this.state.enabledAccounts;
+            if (accounts.length > 0) {
+                const response = accounts.map((account) => {
+                    return (
+                        <li
+                            key={`${account.plan}-status`}
+                        >
+                            <span className={`${account.classCss} tag-status`}>
+                                {Utils.titleCase(account.plan)}
+                                <span>
+                                    {`Usadas: ${account.used} | Disponibles: ${account.enabled}`}
+                                </span>
+                            </span>
+                        </li>
+                    );
+                });
+
+                enableAccounts = (
+                    <div className='row'>
+                        <div className='col-xs-12 text-center'>
+                            <ul className='list-inline'>
+                                {response}
+                            </ul>
+                        </div>
+                    </div>
+                );
+            }
         }
 
         if (this.state.domains) {
@@ -265,9 +435,19 @@ export default class CreateMailBox extends React.Component {
 
             for (let plan in plans) {
                 if (plans.hasOwnProperty(plan)) {
+                    let isDisabled = null;
+                    if (this.state.enabledAccounts) {
+                        this.state.enabledAccounts.forEach((p) => {
+                            if (plans[plan] === p.cosId) {
+                                isDisabled = p.enabled < 1 ? true : null;
+                            }
+                        });
+                    }
+                    const disabledCss = isDisabled ? 'disabled' : '';
+
                     const item = (
                         <label
-                            className='radio radio-info radio-inline pretty-input'
+                            className={`radio radio-info radio-inline pretty-input ${disabledCss}`}
                             key={plan}
                         >
                             <div className='pretty-radio'>
@@ -278,6 +458,7 @@ export default class CreateMailBox extends React.Component {
                                     onChange={() => {
                                         this.handleRadioChanged(plans[plan]);
                                     }}
+                                    disabled={isDisabled}
                                 />
                                 <span></span>
                             </div>
@@ -503,13 +684,16 @@ export default class CreateMailBox extends React.Component {
                 <div className='content animate-panel'>
                     {message}
                     <div className='row'>
-                        <div className='col-md-12 central-content'>
+                        <div
+                            className='col-md-12 central-content'
+                            id='add-mailbox'
+                        >
                             <Panel
                                 title={'Agregar Casilla'}
                                 btnsHeader={actions}
                                 classHeader={'forum-box'}
                             >
-                                {form}
+                                {[enableAccounts, form]}
                             </Panel>
                         </div>
                     </div>
