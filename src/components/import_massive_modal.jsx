@@ -144,8 +144,9 @@ export default class ImportMassiveModal extends React.Component {
     }
 
     extractCols(data, flagDefault) {
+        let splitConditio = /\r\n|\r|\n/g;
         let hasError = false;
-        const dataArray = data.split('\r\n');
+        const dataArray = data.split(splitConditio);
 
         const isEmpty = dataArray.some((pos) => {
             if (pos === '') {
