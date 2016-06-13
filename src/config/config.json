@@ -1,5 +1,6 @@
 {
     "debug": true,
+    "DEV": true,
     "enableStores" : false,
     "zimbraUrl": "http://zimbra.zboxapp.dev:9081/zimbra_proxy/service/admin/soap",
     "zimbraProxy": "https://192.168.1.8:7071",

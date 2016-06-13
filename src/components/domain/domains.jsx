@@ -68,7 +68,11 @@ export default class Domains extends React.Component {
                 });
                 data.total = data.domain.length;
                 domains = data.domain;
-                DomainStore.setDomains(data);
+
+                if (this.isStoreEnabled) {
+                    DomainStore.setDomains(data);
+                }
+
                 this.getPlans(domains).
                 then(() => {
                     self.setState({
@@ -256,7 +260,9 @@ export default class Domains extends React.Component {
                                 <a
                                     href='#'
                                     onClick={(e) => {
-                                        DomainStore.setCurrent(d);
+                                        if (this.isStoreEnabled) {
+                                            DomainStore.setCurrent(d);
+                                        }
                                         Utils.handleLink(e, `/domains/${d.id}`);
                                     }}
                                 >
