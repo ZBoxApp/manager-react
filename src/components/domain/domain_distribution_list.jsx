@@ -39,19 +39,45 @@ export default class DomainDistributionList extends React.Component {
 
         return lists;
     }
-    getLists() {
+    getLists(label) {
+        const tag = label || null;
         const domain = this.props.domain;
+        let condition;
         setTimeout(() => {
             domain.getAllDistributionLists(
                 (err, lists) => {
                     if (this.isStoreEnabled) {
                         DomainStore.setDistibutionLists(domain, lists);
                     }
+
+                    if (tag === 'add') {
+                        condition = this.state.length + 1;
+                    }
+                    if (tag === 'remove') {
+                        condition = this.state.length - 1;
+                    }
+
                     this.listscache = lists;
-                    this.setState({lists});
+                    const length = lists.length;
+
+                    if (!tag) {
+                        return this.setState({
+                            lists,
+                            length
+                        });
+                    }
+
+                    if (condition === lists.length) {
+                        return this.setState({
+                            lists,
+                            length
+                        });
+                    } else {
+                        this.getLists(tag);
+                    }
                 }
             );
-        }, 1000);
+        }, 100);
     }
     componentWillReceiveProps(nextProps) {
         const page = parseInt(nextProps.location.query.page, 10) || 1;
@@ -60,10 +86,10 @@ export default class DomainDistributionList extends React.Component {
             offset: ((page - 1) * defaultLimit)
         });
     }
-    onListsChange() {
+    onListsChange(label) {
         const lists = this.isStoreEnabled ? DomainStore.getDistributionLists(this.props.domain) : null;
         if (!lists) {
-            return this.getLists();
+            return this.getLists(label);
         }
 
         return this.setState({lists});
@@ -93,7 +119,7 @@ export default class DomainDistributionList extends React.Component {
                             if (this.isStoreEnabled) {
                                 DomainStore.removeDistributionList(list.id);
                             } else {
-                                DomainStore.emitDistributionListsChange();
+                                DomainStore.emitDistributionListsChange('remove');
                             }
 
                             return sweetAlert(response);

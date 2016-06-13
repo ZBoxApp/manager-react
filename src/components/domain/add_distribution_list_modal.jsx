@@ -35,7 +35,7 @@ export default class AddDistributionListModal extends React.Component {
                         if (this.isStoreEnabled) {
                             DomainStore.addDistributionList(data);
                         } else {
-                            DomainStore.emitDistributionListsChange();
+                            DomainStore.emitDistributionListsChange('add');
                         }
                         GlobalActions.emitEndLoading();
                         this.props.onHide();
