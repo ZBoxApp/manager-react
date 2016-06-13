@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import DomainStore from '../../stores/domain_store.jsx';
+import EventStore from '../../stores/event_store.jsx';
 
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Client from '../../utils/client.jsx';
@@ -89,10 +90,10 @@ export default class AddAdminModal extends React.Component {
 
                 if (this.props.show) {
                     this.props.onHide();
-                    GlobalActions.emitToast({
+                    EventStore.emitToast({
                         type: 'success',
                         title: 'Dominio',
-                        body: `Se ha agrega el administrador: ${user}, éxitosamente.`,
+                        body: `Se ha agrega el administrador: ${user.name}, éxitosamente.`,
                         options: {
                             timeOut: 4000,
                             extendedTimeOut: 2000,

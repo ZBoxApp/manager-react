@@ -13,6 +13,7 @@ import ToggleModalButton from '../toggle_modal_button.jsx';
 import AddAdminModal from './add_admin_modal.jsx';
 
 import * as Utils from '../../utils/utils.jsx';
+import * as Client from '../../utils/client.jsx';
 
 //import Constants from '../../utils/constants.jsx';
 
@@ -35,14 +36,31 @@ export default class DomainAdminList extends React.Component {
         };
     }
 
-    getAdmins() {
+    getAdmins(getAllFromAPI) {
         const domain = this.props.domain;
-        domain.getAdmins((err, data) => {
-            const admins = data.account || [];
-            if (this.isStoreEnabled) {
-                DomainStore.setAdmins(domain, admins);
-            }
-            this.setState({admins});
+        const getStuffFromAPI = getAllFromAPI || false;
+        if (!getStuffFromAPI) {
+            return domain.getAdmins((err, data) => {
+                const admins = data.account || [];
+                if (this.isStoreEnabled) {
+                    DomainStore.setAdmins(domain, admins);
+                }
+                this.setState({admins});
+            });
+        }
+
+        return Client.getDomain(domain.name, (data) => {
+            this.props.domain = data;
+
+            return data.getAdmins((err, res) => {
+                const admins = res.account || [];
+                if (this.isStoreEnabled) {
+                    DomainStore.setAdmins(domain, admins);
+                }
+                return this.setState({admins});
+            });
+        }, (err) => {
+            return err;
         });
     }
 
@@ -84,7 +102,10 @@ export default class DomainAdminList extends React.Component {
 
                             if (this.isStoreEnabled) {
                                 DomainStore.removeAdmin(admin.id);
+                            } else {
+                                DomainStore.emitAdminsChange();
                             }
+
                             return sweetAlert(response);
                         }
                     );
@@ -96,7 +117,7 @@ export default class DomainAdminList extends React.Component {
     onAdminsChange() {
         const admins = this.isStoreEnabled ? DomainStore.getAdmins(this.props.domain) : null;
         if (!admins) {
-            return this.getAdmins();
+            return this.getAdmins(true);
         }
 
         return this.setState({admins});

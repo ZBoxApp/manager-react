@@ -18,6 +18,7 @@ import MultipleTaskModal from './multiple_task_modal.jsx';
 import AntiSpamComponent from './antispam.jsx';
 import ZonaDNS from './domain_admin_dns.jsx';
 import EventStore from '../../stores/event_store.jsx';
+import UserStore from '../../stores/user_store.jsx';
 
 import DomainStore from '../../stores/domain_store.jsx';
 
@@ -35,6 +36,7 @@ export default class DomainDetails extends React.Component {
         this.getDomain = this.getDomain.bind(this);
         this.showMessage = this.showMessage.bind(this);
         this.handleClickOnTab = this.handleClickOnTab.bind(this);
+        this.isGlobalAdmin = UserStore.isGlobalAdmin();
 
         this.state = {};
     }
@@ -224,6 +226,16 @@ export default class DomainDetails extends React.Component {
                 tareas_masivas: tabTareasMasivas,
                 zona_dns: zonaDNS
             };
+
+            if (!this.isGlobalAdmin) {
+                tabNames = ['Administradores', 'Listas De Distribución', 'Tareas Masivas', 'Zona DNS'];
+                tabs = {
+                    administradores: tabAdmin,
+                    listas_de_distribución: tabDistribution,
+                    tareas_masivas: tabTareasMasivas,
+                    zona_dns: zonaDNS
+                };
+            }
 
             if (domain.isAliasDomain) {
                 tabNames = ['Zona DNS'];
