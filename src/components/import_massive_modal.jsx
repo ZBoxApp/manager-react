@@ -15,6 +15,7 @@ export default class ImportMassiveModal extends React.Component {
         super(props);
 
         this.isDEV = window.manager_config.DEV;
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.createMassiveAccounts = this.createMassiveAccounts.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.buildCols = this.buildCols.bind(this);
@@ -38,7 +39,7 @@ export default class ImportMassiveModal extends React.Component {
 
         this.plans = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
 
-        this.limit = 200;
+        this.limit = 50;
 
         this.state = {
             options: this.options
@@ -288,6 +289,11 @@ export default class ImportMassiveModal extends React.Component {
         let runAgain = false;
         let loop = 0;
 
+        //Aqui va error batchrequest
+        if (this.props.show) {
+            this.props.onHide();
+        }
+
         for (const account in accounts) {
             if (accounts.hasOwnProperty(account)) {
                 const zimbraCOS = this.isDEV ? accounts[account].zimbraCOSId.trim().toLowerCase() : Utils.titleCase(accounts[account].zimbraCOSId.trim());
@@ -337,7 +343,9 @@ export default class ImportMassiveModal extends React.Component {
                     for (let i = 0; i < length; i++) {
                         const account = response.CreateAccountResponse[i].account[0];
                         const accountFormatted = Client.buildAccountByObject(account);
-                        MailboxStore.setMailbox(accountFormatted);
+                        if (this.isStoreEnabled) {
+                            MailboxStore.setMailbox(accountFormatted);
+                        }
                     }
 
                     MailboxStore.emitAddMassive();

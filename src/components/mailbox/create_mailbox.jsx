@@ -34,6 +34,7 @@ export default class CreateMailBox extends React.Component {
         this.cacheDomain = null;
 
         this.state = {};
+        this.s = true;
     }
 
     handlePasswd(e) {
@@ -341,6 +342,17 @@ export default class CreateMailBox extends React.Component {
         this.getAllDomains();
         GlobalActions.emitEndLoading();
         this.addBlurListeneronInput();
+        /*console.log(this.s);
+
+        setTimeout(() => {
+            console.log('setTimeout', this.s);
+            if (this.s) {
+                console.log('set state');
+                this.setState({
+                    flag: true
+                })
+            }
+        }, 10000);*/
     }
 
     componentWillUnmount() {
@@ -349,6 +361,11 @@ export default class CreateMailBox extends React.Component {
         this.cacheDomain = null;
         const parent = document.getElementById('add-mailbox');
         parent.removeEventListener('focusout', null);
+        this.s = false;
+    }
+
+    shouldComponentUpdate() {
+        return true;
     }
 
     controllerDataList(controller) {

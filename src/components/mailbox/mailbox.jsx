@@ -202,8 +202,7 @@ export default class Mailboxes extends React.Component {
         };
 
         this.setState({
-            loading: true,
-            data: null
+            loading: true
         });
 
         const attrneeded = Utils.getAttrsBySectionFromConfig('mailboxes');
@@ -245,7 +244,6 @@ export default class Mailboxes extends React.Component {
             if (hasMailboxes) {
                 return resolve(MailboxStore.getMailboxes());
             }
-
             return Client.getAllAccounts(attrs, (success) => {
                 const data = Utils.extractLockOuts(success);
                 if (this.isStoreEnabled) {
@@ -276,7 +274,8 @@ export default class Mailboxes extends React.Component {
 
                 return this.setState({
                     data: tables,
-                    loading: false
+                    loading: false,
+                    ac: data.account
                 });
             }
 
@@ -331,8 +330,9 @@ export default class Mailboxes extends React.Component {
                 data: tables
             });
         }
-
-        return this.getAllMailboxes();
+        const domainId = this.props.params.domain_id;
+        this.domainId = domainId;
+        return this.getAllMailboxes(domainId);
     }
 
     componentDidMount() {
@@ -365,7 +365,7 @@ export default class Mailboxes extends React.Component {
         }
 
         if (!tipo) {
-            tipo = 'Desconocido';
+            tipo = row.archiveEnabled ? 'Archiving' : 'Desconocido';
         }
 
         displayName = attrs.displayName || `${attrs.givenName || attrs.cn} ${attrs.sn}`;
