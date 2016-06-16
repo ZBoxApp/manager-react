@@ -782,14 +782,6 @@ export default class CreateMailBox extends React.Component {
 
                     <div className='form-group'>
                         <div className='col-sm-8 col-sm-offset-3'>
-                            /*{counterPlans > 0 && (
-                                <input
-                                    type='submit'
-                                    name='commit'
-                                    value='Guardar'
-                                    className='btn btn-primary action-save'
-                                />
-                            )}*/
                             <input
                                 type='submit'
                                 name='commit'
