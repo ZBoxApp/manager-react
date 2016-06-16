@@ -36,6 +36,8 @@ export default class Mailboxes extends React.Component {
         super(props);
 
         this.isStoreEnabled = window.manager_config.enableStores;
+        this.archivingConfig = window.manager_config.plans.archiving;
+        this.regexp = new RegExp(this.archivingConfig.regexp, 'gi');
         this.showMessage = this.showMessage.bind(this);
         this.refreshAllAccounts = this.refreshAllAccounts.bind(this);
         this.handleChangeFilter = this.handleChangeFilter.bind(this);
@@ -365,7 +367,7 @@ export default class Mailboxes extends React.Component {
         }
 
         if (!tipo) {
-            tipo = row.archiveEnabled ? 'Archiving' : 'Desconocido';
+            tipo = row.name.match(this.regexp) ? 'Archiving' : 'Desconocido';
         }
 
         displayName = attrs.displayName || `${attrs.givenName || attrs.cn} ${attrs.sn}`;

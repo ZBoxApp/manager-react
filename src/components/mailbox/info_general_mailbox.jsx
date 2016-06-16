@@ -64,7 +64,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
             let AdminStatus = null;
             const description = attrs.description;
             const mailhost = attrs.zimbraMailHost;
-            const archive = attrs.zimbraArchiveAccount;
+            const archive = data.archiveEnabled ? attrs.zimbraArchiveAccount : data.archiveEnabled;
             const isAdminDelegated = attrs.zimbraIsDelegatedAdminAccount === 'TRUE';
             if (isAdminDelegated) {
                 statusCos += ' margin-left';

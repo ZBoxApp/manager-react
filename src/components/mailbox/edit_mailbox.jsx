@@ -8,14 +8,16 @@ import Button from '../button.jsx';
 import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
 import DataList from 'react-datalist';
-import UserStore from '../../stores/user_store.jsx';
 import Promise from 'bluebird';
-import MailboxStore from '../../stores/mailbox_store.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Utils from '../../utils/utils.jsx';
+
+import UserStore from '../../stores/user_store.jsx';
 import EventStore from '../../stores/event_store.jsx';
+import MailboxStore from '../../stores/mailbox_store.jsx';
+import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 import Constants from '../../utils/constants.jsx';
 
@@ -25,6 +27,7 @@ export default class EditMailBox extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isStoreEnabled = window.manager_config.enableStores;
         this.handleEdit = this.handleEdit.bind(this);
         this.handleRadioChanged = this.handleRadioChanged.bind(this);
         this.getMailbox = this.getMailbox.bind(this);
@@ -33,7 +36,9 @@ export default class EditMailBox extends React.Component {
         this.handleRenameAccount = this.handleRenameAccount.bind(this);
         this.editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
 
-        this.state = {};
+        this.state = {
+            zimbraCOSId: ''
+        };
     }
 
     showMessage(attrs) {
@@ -44,7 +49,9 @@ export default class EditMailBox extends React.Component {
     }
 
     handleRadioChanged(val) {
-        this.refs.zimbraCOSId.value = val;
+        this.setState({
+            zimbraCOSId: val
+        });
     }
 
     removeAccount() {
@@ -81,7 +88,9 @@ export default class EditMailBox extends React.Component {
                             }
                         );
                     }).then(() => {
-                        MailboxStore.removeAccount(account);
+                        if (this.isStoreEnabled) {
+                            MailboxStore.removeAccount(account);
+                        }
                         response.text = 'Será redireccionado a Casillas.';
                         this.editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
                         return sweetAlert(
@@ -157,7 +166,7 @@ export default class EditMailBox extends React.Component {
     }
 
     handleRenameAccount(email) {
-        const account = MailboxStore.getCurrent();
+        const account = this.isStoreEnabled ? MailboxStore.getCurrent() : null;
 
         if (account) {
             const oldName = this.refs.rename.innerHTML;
@@ -179,14 +188,14 @@ export default class EditMailBox extends React.Component {
                     });
                 }
 
-                let newAccount = MailboxStore.changeAccount(success);
+                let newAccount = this.isStoreEnabled ? MailboxStore.changeAccount(success) : null;
 
                 if (!newAccount) {
                     newAccount = success;
                 }
 
                 this.setState({
-                    data: newAccount
+                    data: newAccount || success
                 });
 
                 this.refs.rename.innerHTML = 'Renombrar';
@@ -216,7 +225,12 @@ export default class EditMailBox extends React.Component {
 
     handleEdit(e) {
         e.preventDefault();
-        Utils.toggleStatusButtons('.action-button', true);
+        let shouldEnableArchiving = false;
+        let shouldDisabledArchiving = false;
+        const plans = this.state.cos;
+        const mailbox = this.state.data.attrs;
+        let p;
+        //Utils.toggleStatusButtons('.action-button', true);
 
         Utils.validateInputRequired(this.refs).then(() => {
             // fill new attrs
@@ -228,6 +242,19 @@ export default class EditMailBox extends React.Component {
                 zimbraAccountStatus: this.refs.zimbraAccountStatus.value,
                 displayName: `${this.refs.givenName.value} ${this.refs.sn.value}`
             };
+
+            const keysPlans = Object.keys(this.state.cos);
+            const plansConfig = window.manager_config.plans;
+            keysPlans.forEach((plan) => {
+                if (plans[plan] === attrs.zimbraCOSId && plansConfig[plan].archiving) {
+                    shouldEnableArchiving = !shouldEnableArchiving;
+                    p = plan;
+                }
+            });
+
+            if (mailbox.zimbraCOSId !== attrs.zimbraCOSId && mailbox.zimbraArchiveEnabled === 'TRUE') {
+                shouldDisabledArchiving = !shouldDisabledArchiving;
+            }
 
             GlobalActions.emitStartLoading();
 
@@ -243,9 +270,31 @@ export default class EditMailBox extends React.Component {
                     }
                 );
             }).then((account) => {
-                MailboxStore.changeAccount(account);
+                if (this.isStoreEnabled) {
+                    MailboxStore.changeAccount(account);
+                }
 
-                Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
+                if (shouldDisabledArchiving && !shouldEnableArchiving) {
+                    account.disableArchiving((err) => {
+                        if (err) {
+                            return err;
+                        }
+
+                        return Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
+                    });
+                }
+
+                if (shouldEnableArchiving && !shouldDisabledArchiving && mailbox.zimbraArchiveEnabled === 'FALSE') {
+                    account.enableArchiving(p, (err) => {
+                        if (err) {
+                            return err;
+                        }
+
+                        return Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
+                    });
+                }
+
+                return Utils.handleLink(e, `/mailboxes/${this.props.params.id}`, this.props.location);
             }).catch((error) => {
                 GlobalActions.emitMessage({
                     message: error.message,
@@ -271,8 +320,10 @@ export default class EditMailBox extends React.Component {
         let data = null;
         const max = 200;
         Utils.toggleStatusButtons('.action-save', true);
+        const cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
+        const hasMailboxes = this.isStoreEnabled ? MailboxStore.hasMailboxes() : null;
 
-        if (MailboxStore.hasMailboxes()) {
+        if (hasMailboxes) {
             data = MailboxStore.getMailboxById(id);
 
             const domains = new Promise((resolve, reject) => {
@@ -289,22 +340,17 @@ export default class EditMailBox extends React.Component {
                 );
             });
 
-            const cos = new Promise((resolve, reject) => {
-                Client.getAllCos((success) => {
-                    resolve(success);
-                }, (error) => {
-                    reject(error);
-                });
-            });
-
-            promises.push(domains, cos);
+            promises.push(domains);
 
             Promise.all(promises).then((result) => {
-                MailboxStore.setCurrent(data);
+                if (this.isStoreEnabled) {
+                    MailboxStore.setCurrent(data);
+                }
                 this.setState({
                     data,
+                    zimbraCOSId: data.attrs.zimbraCOSId,
                     domains: result.shift().domain,
-                    cos: Utils.getEnabledPlansByCos(result.shift())
+                    cos
                 });
                 Utils.toggleStatusButtons('.action-save', false);
             }).catch((error) => {
@@ -342,27 +388,22 @@ export default class EditMailBox extends React.Component {
                 );
             });
 
-            const cos = new Promise((resolve, reject) => {
-                Client.getAllCos((success) => {
-                    resolve(success);
-                }, (error) => {
-                    reject(error);
-                });
-            });
-
-            promises.push(mailbox, doms, cos);
+            promises.push(mailbox, doms);
 
             Promise.all(promises).then((result) => {
                 const account = result.shift();
 
                 this.setState({
                     data: account,
+                    zimbraCOSId: account.attrs.zimbraCOSId,
                     domains: result.shift().domain,
-                    cos: Utils.getEnabledPlansByCos(result.shift())
+                    cos
                 });
 
                 Utils.toggleStatusButtons('.action-save', false);
-                MailboxStore.setCurrent(account);
+                if (this.isStoreEnabled) {
+                    MailboxStore.setCurrent(account);
+                }
             }).catch((error) => {
                 GlobalActions.emitMessage({
                     message: error.message,
@@ -391,7 +432,6 @@ export default class EditMailBox extends React.Component {
         this.refs.givenName.value = attrs.givenName || '';
         this.refs.sn.value = attrs.sn;
         this.refs.description.value = attrs.description || '';
-        this.refs.zimbraCOSId.value = attrs.zimbraCOSId || '';
         this.refs.zimbraAccountStatus.value = attrs.zimbraAccountStatus;
     }
 
@@ -404,6 +444,7 @@ export default class EditMailBox extends React.Component {
         const domains = [];
         let currentDomain = '';
         const cosElements = [];
+        const {zimbraCOSId} = this.state;
         let datalist = (
             <input
                 type='text'
@@ -487,7 +528,7 @@ export default class EditMailBox extends React.Component {
                                 />
                                 <span></span>
                             </div>
-                            {cosName}
+                            {Utils.titleCase(cosName)}
                         </label>
                     );
                     cosElements.push(checkbox);
@@ -626,6 +667,7 @@ export default class EditMailBox extends React.Component {
                         <input
                             type='hidden'
                             ref='zimbraCOSId'
+                            value={zimbraCOSId}
                             data-required='true'
                             data-message='El plan de su cuenta es requerido, por favor verificar.'
                         />
