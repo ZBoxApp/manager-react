@@ -274,6 +274,8 @@ export default class EditMailBox extends React.Component {
                     MailboxStore.changeAccount(account);
                 }
 
+                console.log('disable', shouldDisabledArchiving, 'enable', shouldEnableArchiving); //eslint-disable-line no-console
+
                 if (shouldDisabledArchiving && !shouldEnableArchiving) {
                     account.disableArchiving((err) => {
                         if (err) {
