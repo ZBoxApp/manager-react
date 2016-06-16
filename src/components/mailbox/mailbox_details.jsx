@@ -38,6 +38,12 @@ export default class MailboxDetails extends React.Component {
         this.onRemoveAlias = this.onRemoveAlias.bind(this);
         this.onCancelAlias = this.onCancelAlias.bind(this);
 
+        this.domain_id = this.props.params.domain_id || null;
+        this.mailboxId = this.props.params.id || null;
+
+        this.editUrlFromParams = this.domain_id ? `/domains/${this.domain_id}/mailboxes/${this.mailboxId}` : `/mailboxes/${this.mailboxId}`;
+        this.editUrlFromParams += '/edit';
+
         this.state = {};
     }
 
@@ -85,11 +91,24 @@ export default class MailboxDetails extends React.Component {
     }
 
     getMailbox(id) {
-        const hasMailboxes = this.isStoreEnabled ? MailboxStore.hasMailboxes() : null;
-        if (hasMailboxes) {
-            const account = MailboxStore.getMailboxById(id);
-            MailboxStore.setCurrent(account);
-            let items = account.attrs.zimbraMailAlias;
+        return new Promise((resolve, reject) => {
+            // get mailbox from store if it exists
+            const hasMailboxes = this.isStoreEnabled ? MailboxStore.hasMailboxes() : null;
+
+            if (hasMailboxes) {
+                const account = MailboxStore.getMailboxById(id) || MailboxStore.getMailboxByIdInDomain(id, this.domain_id);
+                return resolve(account);
+            }
+
+            //if is not into store just search it.
+            return Client.getAccount(id, (data) => {
+                return resolve(data);
+            }, (error) => {
+                return reject(error);
+            });
+        }).then((mailbox) => {
+            MailboxStore.setCurrent(mailbox);
+            let items = mailbox.attrs.zimbraMailAlias || null;
 
             if (items) {
                 if (!Array.isArray(items)) {
@@ -97,75 +116,36 @@ export default class MailboxDetails extends React.Component {
                 }
             }
 
-            account.viewMailPath(global.window.manager_config.webmailLifetime, (error, res) => {
+            mailbox.viewMailPath(global.window.manager_config.webmailLifetime, (error, res) => {
                 if (res) {
                     return this.setState({
-                        data: account,
+                        data: mailbox,
                         alias: items,
                         webmail: `${global.window.manager_config.webMailUrl}${res}`
                     });
                 }
 
                 return this.setState({
-                    data: account,
+                    data: mailbox,
                     alias: items,
                     webmail: false
                 });
             });
-
+        }).catch((error) => {
+            GlobalActions.emitMessage({
+                error: error.message,
+                type: error.typeError
+            });
+        }).finally(() => {
             GlobalActions.emitEndLoading();
             Utils.toggleStatusButtons('.action-info-btns', false);
-        } else {
-            return new Promise((resolve, reject) => {
-                Client.getAccount(id, (data) => {
-                    return resolve(data);
-                }, (error) => {
-                    return reject(error);
-                });
-            }).then((result) => {
-                MailboxStore.setCurrent(result);
-
-                let items = result.attrs.zimbraMailAlias;
-
-                if (items) {
-                    if (!Array.isArray(items)) {
-                        items = [items];
-                    }
-                }
-
-                result.viewMailPath(global.window.manager_config.webmailLifetime, (error, res) => {
-                    if (res) {
-                        return this.setState({
-                            data: result,
-                            alias: items,
-                            webmail: `${global.window.manager_config.webMailUrl}${res}`
-                        });
-                    }
-
-                    return this.setState({
-                        data: result,
-                        alias: items,
-                        webmail: false
-                    });
-                });
-            }).catch((error) => {
-                GlobalActions.emitMessage({
-                    error: error.message,
-                    type: error.typeError
-                });
-            }).finally(() => {
-                GlobalActions.emitEndLoading();
-                Utils.toggleStatusButtons('.action-info-btns', false);
-            });
-        }
-
-        return true;
+        });
     }
 
     componentDidMount() {
         EventStore.addMessageListener(this.showMessage);
         $('#sidebar-mailboxes').addClass('active');
-        this.getMailbox(this.props.params.id);
+        this.getMailbox(this.mailboxId);
     }
 
     componentWillUnmount() {
@@ -306,7 +286,7 @@ export default class MailboxDetails extends React.Component {
         }
 
         if (this.state.data) {
-            const webmail = this.state.webmail ? this.state.webmail : null;
+            const webmail = this.state.webmail || null;
             generalData = (
                 <BlockGeneralInfoMailbox
                     data={this.state.data}
@@ -321,14 +301,12 @@ export default class MailboxDetails extends React.Component {
                 />
             );
 
-            const editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
-
             btnsGeneralInfo = [
                 {
                     props: {
                         className: 'btn btn-xs btn-default action-info-btns',
                         onClick: (e) => {
-                            this.handleEdit(e, `${editUrlFromParams}${this.state.data.id}/edit`, this.props.location);
+                            this.handleEdit(e, this.editUrlFromParams, this.props.location);
                         }
                     },
                     label: 'Editar'
@@ -375,7 +353,10 @@ export default class MailboxDetails extends React.Component {
             }
 
             const formAutoResp = (
-                <FormVacacionesMailbox data={this.state.data}/>
+                <FormVacacionesMailbox
+                    data={this.state.data}
+                    domainId={this.domain_id}
+                />
             );
 
             const formAlias = (

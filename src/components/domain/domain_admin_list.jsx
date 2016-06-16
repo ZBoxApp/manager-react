@@ -193,7 +193,9 @@ export default class DomainAdminList extends React.Component {
             );
         });
 
-        if (this.isGlobalAdmin) {
+        //if (this.isGlobalAdmin) {
+        const go = true;
+        if (go) {
             btnAddNewAdmin = (
                 <ToggleModalButton
                     role='button'

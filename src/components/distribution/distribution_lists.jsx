@@ -581,7 +581,9 @@ export default class DistributionLists extends React.Component {
             permitidos: allows
         };
 
-        if (!this.isGlobalAdmin) {
+        const not = false;
+        //if (!this.isGlobalAdmin) {
+        if (not) {
             tabNamesArray = ['Miembros'];
             tabs = {
                 miembros: members
