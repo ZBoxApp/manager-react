@@ -25,7 +25,8 @@
             "label": "Premium",
             "isEnabledToEdit": true,
             "forRights": true,
-            "archiving": true
+            "archiving": true,
+            "refer": "archiving"
         },
         "professional": {
             "statusCos": "btn-primary",

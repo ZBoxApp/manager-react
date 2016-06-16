@@ -228,9 +228,9 @@ export default class EditMailBox extends React.Component {
         let shouldEnableArchiving = false;
         let shouldDisabledArchiving = false;
         const plans = this.state.cos;
-        const mailbox = this.state.data.attrs;
+        const mailbox = this.state.data;
         let p;
-        //Utils.toggleStatusButtons('.action-button', true);
+        Utils.toggleStatusButtons('.action-button', true);
 
         Utils.validateInputRequired(this.refs).then(() => {
             // fill new attrs
@@ -248,11 +248,11 @@ export default class EditMailBox extends React.Component {
             keysPlans.forEach((plan) => {
                 if (plans[plan] === attrs.zimbraCOSId && plansConfig[plan].archiving) {
                     shouldEnableArchiving = !shouldEnableArchiving;
-                    p = plan;
+                    p = plansConfig[plan].refer || plan;
                 }
             });
 
-            if (mailbox.zimbraCOSId !== attrs.zimbraCOSId && mailbox.zimbraArchiveEnabled === 'TRUE') {
+            if (mailbox.attrs.zimbraCOSId !== attrs.zimbraCOSId && mailbox.archiveEnabled) {
                 shouldDisabledArchiving = !shouldDisabledArchiving;
             }
 
@@ -286,7 +286,7 @@ export default class EditMailBox extends React.Component {
                     });
                 }
 
-                if (shouldEnableArchiving && !shouldDisabledArchiving && mailbox.zimbraArchiveEnabled === 'FALSE') {
+                if (shouldEnableArchiving && !shouldDisabledArchiving && !mailbox.archiveEnabled) {
                     account.enableArchiving(p, (err) => {
                         if (err) {
                             return err;
