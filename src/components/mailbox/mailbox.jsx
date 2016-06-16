@@ -36,7 +36,7 @@ export default class Mailboxes extends React.Component {
     constructor(props) {
         super(props);
 
-        this.isMounted = true;
+        //this.isMounted = null;
         this.isStoreEnabled = window.manager_config.enableStores;
         this.archivingConfig = window.manager_config.plans.archiving;
         this.domainId = this.props.params.domain_id || null;
@@ -350,7 +350,7 @@ export default class Mailboxes extends React.Component {
         MailboxStore.removeListenerAddMassive(this.showMessage);
         $('#sidebar-mailboxes').removeClass('active');
         this.domainName = null;
-        this.isMounted = false;
+        //this.isMounted = false;
         this.domainId = null;
     }
 
