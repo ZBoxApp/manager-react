@@ -267,20 +267,17 @@ export default class PanelActions extends React.Component {
     onSubmit() {
         const response = {};
         response.reset = this.reset;
+        response.target = this.props.nameFunc;
 
-        this.refs.savebutton.setAttribute('disabled', 'disabled');
-        this.refs.savebutton.innerHTML = 'Aplicando Cambios...';
+        //this.refs.savebutton.setAttribute('disabled', 'disabled');
+        //this.refs.savebutton.innerHTML = 'Aplicando Cambios...';
 
         if (this.forAdd.length > 0) {
-            response.add = this.forAdd;
+            response['add' + Utils.titleCase(this.props.nameFunc)] = this.forAdd;
         }
 
         if (this.forRemove.length > 0) {
-            response.remove = this.forRemove;
-        }
-
-        if (this.refresh.length > 0) {
-            response.refresh = this.refresh;
+            response['remove' + Utils.titleCase(this.props.nameFunc)] = this.forRemove;
         }
 
         if (this.props.onApplyChanges) {
@@ -656,7 +653,8 @@ PanelActions.propTypes = {
     hasExport: React.PropTypes.bool,
     showNameOnButton: React.PropTypes.bool,
     onExport: React.PropTypes.func,
-    isEmail: React.PropTypes.bool
+    isEmail: React.PropTypes.bool,
+    nameFunc: React.PropTypes.string.isRequired
 };
 
 PanelActions.defaultProps = {

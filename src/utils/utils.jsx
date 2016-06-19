@@ -375,7 +375,7 @@ export function exportAsCSV(data, target, title, hasLabel) {
         for (var j = 0; j < keys.length; j++) {
             let col = null;
 
-            if (typeof item === 'object') {
+            if (typeof item === 'object' && item.attrs) {
                 col = status[item.attrs[keys[j]]] || item.attrs[keys[j]];
             }
 
