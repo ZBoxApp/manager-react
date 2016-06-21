@@ -11,6 +11,11 @@
         "token": "otto",
         "inmutable": ["mx", "soa", "ns", "spf"]
     },
+    "maxAttachmentLimit": {
+        "max": 52428800,
+        "min": 1048576,
+        "step": 1048576
+    },
     "maxResultOnRequestZimbra": 3000,
     "autoincrementOnFailRequestZimbra": 500,
     "plans": {
@@ -82,7 +87,8 @@
                 "businessCategory": true,
                 "zimbraCreateTimestamp": true,
                 "zimbraDomainType": true,
-                "zimbraMailCatchAllForwardingAddress": true
+                "zimbraMailCatchAllForwardingAddress": true,
+                "amavisMessageSizeLimit": true
             }
         },
         "search": {

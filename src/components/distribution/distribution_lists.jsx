@@ -37,7 +37,6 @@ export default class DistributionLists extends React.Component {
         this.onCancelOwner = this.onCancelOwner.bind(this);
         this.onExportMembers = this.onExportMembers.bind(this);
         this.onExportAllowers = this.onExportAllowers.bind(this);
-        this.makeRequest = this.makeRequest.bind(this);
         this.domain = null;
         this.isGlobalAdmin = UserStore.isGlobalAdmin();
 
@@ -61,54 +60,6 @@ export default class DistributionLists extends React.Component {
     onExportAllowers(data) {
         const title = `Permitidos de la lista de distribución '${this.state.distributionsList.name}' de ${this.state.domain.name}`;
         Utils.exportAsCSV(data, 'allowers', title, true);
-    }
-
-    makeRequest(response, dl, resolve, store) {
-        const keys = Object.keys(response).sort();
-        const item = keys[0];
-        const res = store || {};
-        const action = item.match(/(remove|add)/gi);
-        if (action) {
-            var element = response[item];
-            if (element && element.length) {
-                const pop = element.pop();
-                const target = typeof pop === 'object' ? pop.name || pop.id : pop;
-                const label = action[0] === 'remove' ? 'eliminar' : 'agregar';
-                return dl[item](target, (er, success) => {
-                    if (success) {
-                        if (res.completed) {
-                            res.completed.push({
-                                action: label,
-                                target
-                            });
-                        } else {
-                            res.completed = [{
-                                action: label,
-                                target
-                            }];
-                        }
-                        const api = success.api ? success : dl;
-                        return this.makeRequest(response, api, resolve, res);
-                    }
-
-                    er.action = label;
-                    er.target = target;
-                    if (res.error) {
-                        res.error.push(er);
-                    } else {
-                        res.error = [er];
-                    }
-
-                    return this.makeRequest(response, dl, resolve, res);
-                });
-            } else {
-                Reflect.deleteProperty(response, item);
-                return this.makeRequest(response, dl, resolve, res);
-            }
-        }
-
-        res.data = dl;
-        return resolve(res);
     }
 
     getDistributionLists() {
@@ -175,7 +126,7 @@ export default class DistributionLists extends React.Component {
 
     onSubmitActions(response) {
         return new Promise((resolve) => {
-            return this.makeRequest(response, this.state.distributionsList, resolve);
+            return Utils.makeRequest(response, this.state.distributionsList, resolve);
         }).then((data) => {
             const errors = [];
             if (data.error) {
