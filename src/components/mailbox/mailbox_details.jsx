@@ -37,6 +37,7 @@ export default class MailboxDetails extends React.Component {
         this.showMessage = this.showMessage.bind(this);
         this.onRemoveAlias = this.onRemoveAlias.bind(this);
         this.onCancelAlias = this.onCancelAlias.bind(this);
+        this.setDomainId = this.setDomainId.bind(this);
 
         this.domain_id = this.props.params.domain_id || null;
         this.mailboxId = this.props.params.id || null;
@@ -45,6 +46,12 @@ export default class MailboxDetails extends React.Component {
         this.editUrlFromParams += '/edit';
 
         this.state = {};
+    }
+
+    setDomainId(domainId) {
+        if (!this.domain_id) {
+            this.domain_id = domainId;
+        }
     }
 
     handleEdit(e, path, location) {
@@ -117,9 +124,9 @@ export default class MailboxDetails extends React.Component {
                 if (!Array.isArray(items)) {
                     items = [items];
                 }
-            }
 
-            items.sort(Utils.sortByNames);
+                items.sort(Utils.sortByNames);
+            }
 
             mailbox.viewMailPath(global.window.manager_config.webmailLifetime, (error, res) => {
                 if (res) {
@@ -149,12 +156,14 @@ export default class MailboxDetails extends React.Component {
 
     componentDidMount() {
         EventStore.addMessageListener(this.showMessage);
+        MailboxStore.addListenerSendDomainId(this.setDomainId);
         $('#sidebar-mailboxes').addClass('active');
         this.getMailbox(this.mailboxId);
     }
 
     componentWillUnmount() {
         EventStore.removeMessageListener(this.showMessage);
+        MailboxStore.removeListenerSendDomainId(this.setDomainId);
         $('#sidebar-mailboxes').removeClass('active');
     }
 
@@ -164,6 +173,7 @@ export default class MailboxDetails extends React.Component {
         }).then((data) => {
             const errors = [];
             const {alias} = this.state;
+            const mailbox = this.state.data;
 
             if (data.error) {
                 data.error.forEach((err) => {
@@ -181,9 +191,17 @@ export default class MailboxDetails extends React.Component {
                 });
 
                 data.completed.forEach((obj) => {
-                    alias.push(obj.target);
+                    if (obj.isNew) {
+                        alias.push(obj.target);
+                    }
                 });
+
                 alias.sort(Utils.sortByNames);
+            }
+
+            if (this.isStoreEnabled) {
+                mailbox.attrs.zimbraMailAlias = alias;
+                MailboxStore.updateMailbox(this.mailboxId, mailbox, this.domain_id);
             }
 
             return this.setState({

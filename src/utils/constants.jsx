@@ -33,7 +33,8 @@ export default {
         NEW_TOAST_EVENT: null,
         MAILBOX_ADD_MASSIVE_EVENT: null,
         NEXT_STEP_EVENT: null,
-        ZONE_DNS_CHANGE_EVENT: null
+        ZONE_DNS_CHANGE_EVENT: null,
+        SEND_DOMAINID_EVENT: null
     }),
 
     MessageType: keyMirror({

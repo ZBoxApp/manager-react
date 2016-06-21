@@ -256,6 +256,20 @@ class MailboxStoreClass extends EventEmitter {
         this.removeListener(eventTypes.MAILBOX_ADD_MASSIVE_EVENT, callback);
     }
 
+    // emit domainId to the parent component
+
+    emitDomainId(params) {
+        this.emit(eventTypes.SEND_DOMAINID_EVENT, params);
+    }
+
+    addListenerSendDomainId(params) {
+        this.on(eventTypes.SEND_DOMAINID_EVENT, params);
+    }
+
+    removeListenerSendDomainId(params) {
+        this.removeListener(eventTypes.SEND_DOMAINID_EVENT, params);
+    }
+
 }
 
 const MailboxStore = new MailboxStoreClass();
