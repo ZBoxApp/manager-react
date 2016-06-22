@@ -57,6 +57,7 @@ function initZimbra() {
                 zimbra = new ZimbraAdminApi({
                     url: config.zimbraUrl
                 });
+                zimbra.client.options.timeout = config.timeoutRequest;
                 zimbra.client.token = token;
                 zimbra.client.session = { id: sessionId };
                 ZimbraStore.setCurrent(zimbra);

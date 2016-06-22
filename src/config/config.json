@@ -1,11 +1,12 @@
 {
     "debug": true,
     "DEV": true,
-    "enableStores" : true,
+    "enableStores" : false,
     "zimbraUrl": "http://zimbra.zboxapp.dev:9081/zimbra_proxy/service/admin/soap",
     "zimbraProxy": "https://192.168.1.8:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
     "webMailUrl": "https://192.168.1.8:8443",
+    "timeoutRequest": 60000,
     "dns": {
         "url": "http://zimbra.zboxapp.dev:9081/powerdns_proxy",
         "token": "otto",

@@ -17,26 +17,50 @@ export default class MultipleTaskModal extends React.Component {
         this.onSubmit = this.onSubmit.bind(this);
         this.getOwnAccounts = this.getOwnAccounts.bind(this);
         this.handleChangeDate = this.handleChangeDate.bind(this);
+        this.handleBlurTextAreaMessage = this.handleBlurTextAreaMessage.bind(this);
+        this.handleEnabledReplay = this.handleEnabledReplay.bind(this);
+
         this.allAccounts = [];
         this.loop = 0;
         this.range = 200;
         this.initialDate = Utils.setInitialDate();
 
-        this.dateStart = this.initialDate.formatted;
-        this.dateEnd = this.initialDate.formatted;
-        this.timestampStart = this.initialDate.timestamp;
-        this.timestampEnd = this.initialDate.timestamp;
-
         this.state = {
-            loaded: false
+            loaded: false,
+            zimbraPrefOutOfOfficeFromDate: this.initialDate.timestamp,
+            zimbraPrefOutOfOfficeUntilDate: this.initialDate.timestamp,
+            zimbraPrefOutOfOfficeReplyEnabled: false,
+            zimbraPrefOutOfOfficeReply: '',
+            zimbraPrefOutOfOfficeFromDateInput: this.initialDate.formatted,
+            zimbraPrefOutOfOfficeUntilDateInput: this.initialDate.formatted
         };
     }
 
     handleChangeDate(x, from) {
-        const ref = this.refs[from];
         const timestamp = Utils.getInitialDateFromTimestamp(x);
+        const date = Utils.timestampToDate(timestamp);
+        const states = {};
 
-        ref.value = timestamp;
+        states[from] = timestamp;
+        states[`${from}Input`] = date;
+
+        this.setState(states);
+    }
+
+    handleBlurTextAreaMessage(e) {
+        const zimbraPrefOutOfOfficeReply = e.target.value.trim();
+
+        if (zimbraPrefOutOfOfficeReply.length > 0) {
+            this.setState({
+                zimbraPrefOutOfOfficeReply
+            });
+        }
+    }
+
+    handleEnabledReplay(e) {
+        this.setState({
+            zimbraPrefOutOfOfficeReplyEnabled: e.target.checked
+        });
     }
 
     onSubmit() {
@@ -44,13 +68,17 @@ export default class MultipleTaskModal extends React.Component {
         const domain = this.props.data;
         const total = accounts.length;
         const collection = [];
-        const refs = this.refs;
         let message = null;
         let err = false;
-        const isEnabled = refs.zimbraPrefOutOfOfficeReplyEnabled.checked;
+        const isEnabled = this.state.zimbraPrefOutOfOfficeReplyEnabled;
+        const responseText = this.state.zimbraPrefOutOfOfficeReply;
 
-        const start = refs.zimbraPrefOutOfOfficeFromDate.value;
-        const end = refs.zimbraPrefOutOfOfficeUntilDate.value;
+        const start = this.state.zimbraPrefOutOfOfficeFromDate;
+        const end = this.state.zimbraPrefOutOfOfficeUntilDate;
+
+        if (this.props.show) {
+            this.props.onHide();
+        }
 
         if ((start > end) && isEnabled) {
             message = 'La fecha en la que termina su respuesta automática, debe ser mayor que en la que comienza.';
@@ -83,11 +111,11 @@ export default class MultipleTaskModal extends React.Component {
         const attrs = {};
 
         if (isEnabled) {
-            const formatedStart = document.getElementById('zimbraPrefOutOfOfficeFromDate').value.split('/').reverse().join('') + '000000Z';
-            const formatedEnd = document.getElementById('zimbraPrefOutOfOfficeUntilDate').value.split('/').reverse().join('') + '000000Z';
+            const formatedStart = this.state.zimbraPrefOutOfOfficeFromDateInput.split('/').reverse().join('') + '000000Z';
+            const formatedEnd = this.state.zimbraPrefOutOfOfficeUntilDateInput.split('/').reverse().join('') + '000000Z';
 
             attrs.zimbraPrefOutOfOfficeReplyEnabled = isEnabled.toString().toUpperCase();
-            attrs.zimbraPrefOutOfOfficeReply = refs.zimbraPrefOutOfOfficeReply.value;
+            attrs.zimbraPrefOutOfOfficeReply = responseText;
             attrs.zimbraPrefOutOfOfficeFromDate = formatedStart;
             attrs.zimbraPrefOutOfOfficeUntilDate = formatedEnd;
         } else {
@@ -122,6 +150,7 @@ export default class MultipleTaskModal extends React.Component {
                 return true;
             }
 
+            this.loop++;
             setTimeout(() => {
                 this.onSubmit();
             }, 200);
@@ -203,6 +232,7 @@ export default class MultipleTaskModal extends React.Component {
         let content = null;
         let messageLoading = 'Cargando...';
         let labelError = null;
+        const {zimbraPrefOutOfOfficeFromDate, zimbraPrefOutOfOfficeUntilDate, zimbraPrefOutOfOfficeReplyEnabled, zimbraPrefOutOfOfficeFromDateInput, zimbraPrefOutOfOfficeUntilDateInput} = this.state;
 
         if (this.state.loading) {
             const message = this.state.messageLoading;
@@ -232,7 +262,8 @@ export default class MultipleTaskModal extends React.Component {
                                     <input
                                         type='checkbox'
                                         className='pretty'
-                                        ref='zimbraPrefOutOfOfficeReplyEnabled'
+                                        defultChecked={zimbraPrefOutOfOfficeReplyEnabled}
+                                        onChange={this.handleEnabledReplay}
                                     />
                                     <span></span>
                                 </div>
@@ -257,13 +288,12 @@ export default class MultipleTaskModal extends React.Component {
                                 onChange={(x) => {
                                     this.handleChangeDate(x, 'zimbraPrefOutOfOfficeFromDate');
                                 }}
-                                defaultText={this.dateStart}
+                                defaultText={zimbraPrefOutOfOfficeFromDateInput}
                                 mode={'date'}
                             />
                             <input
                                 type='hidden'
-                                ref='zimbraPrefOutOfOfficeFromDate'
-                                value={this.timestampStart}
+                                value={zimbraPrefOutOfOfficeFromDate}
                             />
                         </div>
                     </div>
@@ -282,7 +312,7 @@ export default class MultipleTaskModal extends React.Component {
                                         readOnly: 'readOnly'
                                     }
                                 }
-                                defaultText={this.dateEnd}
+                                defaultText={zimbraPrefOutOfOfficeUntilDateInput}
                                 onChange={(x) => {
                                     this.handleChangeDate(x, 'zimbraPrefOutOfOfficeUntilDate');
                                 }}
@@ -290,8 +320,7 @@ export default class MultipleTaskModal extends React.Component {
                             />
                             <input
                                 type='hidden'
-                                ref='zimbraPrefOutOfOfficeUntilDate'
-                                value={this.timestampEnd}
+                                value={zimbraPrefOutOfOfficeUntilDate}
                             />
                         </div>
                     </div>
@@ -302,14 +331,14 @@ export default class MultipleTaskModal extends React.Component {
                         </label>
 
                         <div className='col-sm-8'>
-                                    <textarea
-                                        name='response'
-                                        id='responseBox'
-                                        className='form-control'
-                                        rows='4'
-                                        ref='zimbraPrefOutOfOfficeReply'
-                                    >
-                                    </textarea>
+                            <textarea
+                                name='response'
+                                id='responseBox'
+                                className='form-control'
+                                rows='4'
+                                onBlur={this.handleBlurTextAreaMessage}
+                            >
+                            </textarea>
                         </div>
                     </div>
                 </form>

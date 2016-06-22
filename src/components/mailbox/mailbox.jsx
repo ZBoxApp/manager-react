@@ -348,7 +348,7 @@ export default class Mailboxes extends React.Component {
 
     componentWillUnmount() {
         EventStore.removeMessageListener(this.showMessage);
-        MailboxStore.removeListenerAddMassive(this.showMessage);
+        MailboxStore.removeListenerAddMassive(this.refreshAllAccounts);
         $('#sidebar-mailboxes').removeClass('active');
         this.domainName = null;
         //this.isMounted = false;
