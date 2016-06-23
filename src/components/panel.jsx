@@ -25,8 +25,8 @@ export default class Panel extends React.Component {
         if (this.props.hasHeader && (this.props.btnsHeader || this.props.title || this.props.filter)) {
             panelHeader = (
                 <div className='panel-heading hbuilt clearfix'>
-                    <div className='pull-right'>{btns}</div>
-                    <div className='heading-buttons pull-left'>
+                    <div className='pull-right text-right'>{btns}</div>
+                    <div className='heading-buttons pull-left text-left'>
                         {this.props.title || this.props.filter}
                     </div>
                 </div>

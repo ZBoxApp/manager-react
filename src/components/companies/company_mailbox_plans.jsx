@@ -17,11 +17,10 @@ export default class CompanyMailboxPlans extends React.Component {
     }
     handleBuy(e) {
         e.preventDefault();
-        alert('llevar al usuario a la página que permita comprar más casillas'); //eslint-disable-line no-alert
     }
     render() {
         const company = this.props.company;
-        const headerButtons = [
+        /*const headerButtons = [
             {
                 label: 'Comprar',
                 props: {
@@ -29,7 +28,8 @@ export default class CompanyMailboxPlans extends React.Component {
                     onClick: this.handleBuy
                 }
             }
-        ];
+        ];*/
+        const headerButtons = [];
 
         const mailboxPlans = [];
         const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
@@ -75,9 +75,11 @@ export default class CompanyMailboxPlans extends React.Component {
                 }
 
                 Object.keys(domainPlans).forEach((id) => {
-                    used = domainPlans[id].used;
-                    plans[id].noLimit = true;
-                    plans[id].used += used;
+                    if (plans[id]) {
+                        used = domainPlans[id].used;
+                        plans[id].noLimit = true;
+                        plans[id].used += used;
+                    }
                 });
             }
         });

@@ -47,7 +47,10 @@ export default class Header extends React.Component {
                         alt='ZBox Manager'
                     />
                 </div>
-                <nav role='navigation'>
+                <nav
+                    role='navigation'
+                    className='overflow'
+                >
                     <div
                         className='header-link hide-menu'
                         onClick={() => this.toggleSidebar()}
@@ -60,38 +63,40 @@ export default class Header extends React.Component {
                         </span>
                     </div>
 
-                    <form
-                        className='navbar-form-custom'
-                        acceptCharset='UTF-8'
-                        onSubmit={(e) => this.handleSearch(e)}
-                    >
-                        <input
-                            ref='utf8'
-                            name='utf8'
-                            type='hidden'
-                            value='✓'
-                        />
-                        <input
-                            ref='query'
-                            type='text'
-                            name='query'
-                            id='query'
-                            placeholder='Buscar'
-                            autoComplete='off'
-                            className='form-control'
-                        />
-                    </form>
+                    <div className='overflow'>
+                        <form
+                            className='navbar-form-custom'
+                            acceptCharset='UTF-8'
+                            onSubmit={(e) => this.handleSearch(e)}
+                        >
+                            <input
+                                ref='utf8'
+                                name='utf8'
+                                type='hidden'
+                                value='✓'
+                            />
+                            <input
+                                ref='query'
+                                type='text'
+                                name='query'
+                                id='query'
+                                placeholder='Buscar'
+                                autoComplete='off'
+                                className='form-control'
+                            />
+                        </form>
 
-                    <div className='navbar-right'>
-                        <ul className='nav navbar-nav no-borders'>
-                            <li className='dropdown'>
-                                <Link
-                                    to='/logout'
-                                >
-                                    <i className='fa fa-sign-out'></i>
-                                </Link>
-                            </li>
-                        </ul>
+                        <div className='navbar-right'>
+                            <ul className='nav navbar-nav no-borders'>
+                                <li className='dropdown'>
+                                    <Link
+                                        to='/logout'
+                                    >
+                                        <i className='fa fa-sign-out'></i>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </nav>
             </div>

@@ -64,10 +64,9 @@ export default class Domains extends React.Component {
             attrs,
             (data) => {
                 if (data.domain) {
-                    data.domain = data.domain.filter((dom) => {
-                        return !dom.isAliasDomain;
-                    });
-                    data.total = data.domain.length;
+                    const domainCleaned = Utils.getDomainsCleaned(data.domain);
+                    data.domain = domainCleaned;
+                    data.total = domainCleaned.length;
                 }
                 domains = data.domain;
 

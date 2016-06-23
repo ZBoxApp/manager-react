@@ -13,7 +13,7 @@ import * as Utils from '../../utils/utils.jsx';
 
 export default class CompanyDomains extends React.Component {
     render() {
-        const domains = this.props.company.domains || [];
+        const domains = this.props.company.domains ? Utils.getDomainsCleaned(this.props.company.domains) : [];
         const isAdmin = UserStore.isGlobalAdmin();
 
         let buttons;
