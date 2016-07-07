@@ -6,6 +6,16 @@
     "zimbraProxy": "https://192.168.1.8:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
     "webMailUrl": "https://192.168.1.8:8443",
+    "salesAPI": {
+        "base": "http://localhost:8080/parse",
+        "getPrices": "/functions/getPrices",
+        "makeSale": "/functions/makeSale",
+        "appId": "salesZboxManagerApp"
+    },
+    "invoiceAPI": {
+        "currency": "CLP",
+        "requireTax": true
+    },
     "timeoutRequest": 60000,
     "dns": {
         "url": "http://zimbra.zboxapp.dev:9081/powerdns_proxy",
@@ -24,7 +34,22 @@
             "statusCos": "btn-success",
             "label": "Básica",
             "isEnabledToEdit": true,
-            "forRights": true
+            "forRights": true,
+            "sales": [
+                {
+                    "disabled": false
+                },
+                {
+                    "disabled": true,
+                    "label": "Precio",
+                    "hasPrice": true
+                },
+                {
+                    "disabled": true,
+                    "label": "$",
+                    "ref": "total"
+                }
+            ]
         },
         "premium": {
             "statusCos": "btn-primary2",
@@ -32,13 +57,43 @@
             "isEnabledToEdit": true,
             "forRights": true,
             "archiving": true,
-            "refer": "archiving"
+            "refer": "archiving",
+            "sales": [
+                {
+                    "disabled": false
+                },
+                {
+                    "disabled": true,
+                    "label": "Precio",
+                    "hasPrice": true
+                },
+                {
+                    "disabled": true,
+                    "label": "$",
+                    "ref": "total"
+                }
+            ]
         },
         "professional": {
             "statusCos": "btn-primary",
             "label": "Profesional",
             "isEnabledToEdit": true,
-            "forRights": true
+            "forRights": true,
+            "sales": [
+                {
+                    "disabled": false
+                },
+                {
+                    "disabled": true,
+                    "label": "Precio",
+                    "hasPrice": true
+                },
+                {
+                    "disabled": true,
+                    "label": "$",
+                    "ref": "total"
+                }
+            ]
         },
         "default": false,
         "archiving": {

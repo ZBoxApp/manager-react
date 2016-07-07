@@ -7,6 +7,7 @@ import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
 
 import ZimbraStore from '../../stores/zimbra_store.jsx';
+import UserStore from '../../stores/user_store.jsx';
 
 import * as Utils from '../../utils/utils.jsx';
 
@@ -47,6 +48,7 @@ export default class DomainMailboxPlans extends React.Component {
         }
 
         const headerButtons = [
+
             {
                 label: 'Ver casillas',
                 props: {
@@ -62,6 +64,18 @@ export default class DomainMailboxPlans extends React.Component {
                 }
             }
         ];
+
+        if (UserStore.isGlobalAdmin()) {
+            headerButtons.unshift(
+                {
+                    label: 'Comprar Casillas',
+                    props: {
+                        className: 'btn btn-info btn-xs',
+                        onClick: (e) => Utils.handleLink(e, `/sales/${this.props.params.id}/mailboxes`, this.props.location)
+                    }
+                }
+            );
+        }
 
         const mailboxPlans = [];
         let panelBody = null;

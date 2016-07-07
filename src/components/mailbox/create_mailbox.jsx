@@ -14,6 +14,7 @@ import EventStore from '../../stores/event_store.jsx';
 import MailboxStore from '../../stores/mailbox_store.jsx';
 import DomainStore from '../../stores/domain_store.jsx';
 import ZimbraStore from '../../stores/zimbra_store.jsx';
+import UserStore from '../../stores/user_store.jsx';
 
 import Constants from '../../utils/constants.jsx';
 
@@ -267,10 +268,53 @@ export default class CreateMailBox extends React.Component {
         });
     }
 
-    handleRadioChanged(val) {
-        this.setState({
-            zimbraCOSId: val
-        });
+    handleRadioChanged(e, val) {
+        const {enabledAccounts} = this.state;
+        let needToBuy = false;
+        let data = {};
+
+        if (enabledAccounts) {
+            const keys = Object.keys(enabledAccounts);
+            keys.forEach((pos) => {
+                if (enabledAccounts[pos].cosId === val && enabledAccounts[pos].enabled < 1) {
+                    needToBuy = true;
+                    data = enabledAccounts[pos];
+                }
+            });
+        }
+
+        if (!needToBuy) {
+            return this.setState({
+                zimbraCOSId: val
+            });
+        }
+
+        e.target.checked = false;
+        const {zimbraCOSId} = this.state;
+
+        if (zimbraCOSId.length > 0) {
+            this.setState({
+                zimbraCOSId: ''
+            });
+        }
+
+        if (UserStore.isGlobalAdmin()) {
+            const options = {
+                title: 'Comprar Casilla',
+                text: `Por ahora no tienes más cupo para crear una casilla tipo <strong>${Utils.titleCase(data.plan)}</strong>, ¿Deseas comprar más?`,
+                html: true,
+                confirmButtonText: 'Si, compraré'
+            };
+
+            return Utils.alertToBuy((isConfirmed) => {
+                if (isConfirmed) {
+                    const {id} = this.cacheDomain;
+                    if (id) {
+                        return Utils.handleLink(null, `/sales/${id}/mailboxes`);
+                    }
+                }
+            }, options);
+        }
     }
 
     getAllDomains() {
@@ -422,7 +466,7 @@ export default class CreateMailBox extends React.Component {
 
             keyPlans.forEach((plan) => {
                 if (plans[plan]) {
-                    let isDisabled = null;
+                    //let isDisabled = null;
                     let classCss = null;
                     let info = null;
                     let hasPlan = false;
@@ -430,7 +474,7 @@ export default class CreateMailBox extends React.Component {
                         this.state.enabledAccounts.forEach((p) => {
                             if (plans[plan] === p.cosId) {
                                 hasPlan = true;
-                                isDisabled = p.enabled < 1 ? true : null;
+                                //isDisabled = p.enabled < 1 ? true : null;
                                 classCss = p.classCss;
                                 info = (
                                     <div>
@@ -448,7 +492,7 @@ export default class CreateMailBox extends React.Component {
                     }
 
                     if (this.state.enabledAccounts && !hasPlan && null) {
-                        isDisabled = true;
+                        //isDisabled = true;
                         info = (
                             <div>
                                 <span className='text-danger'>
@@ -458,11 +502,11 @@ export default class CreateMailBox extends React.Component {
                         );
                     }
 
-                    const disabledCss = isDisabled ? 'disabled' : '';
+                    //const disabledCss = isDisabled ? 'disabled' : '';
 
                     const item = (
                         <label
-                            className={`radio radio-info radio-inline pretty-input ${disabledCss}`}
+                            className={'radio radio-info radio-inline pretty-input'}
                             key={plan}
                         >
                             <div className='pretty-radio'>
@@ -470,10 +514,9 @@ export default class CreateMailBox extends React.Component {
                                     type='radio'
                                     className='pretty'
                                     name='mailbox'
-                                    onChange={() => {
-                                        this.handleRadioChanged(plans[plan]);
+                                    onChange={(e) => {
+                                        this.handleRadioChanged(e, plans[plan]);
                                     }}
-                                    disabled={isDisabled}
                                 />
                                 <span></span>
                             </div>
