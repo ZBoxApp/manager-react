@@ -210,6 +210,7 @@ export default class DomainMailboxPlans extends React.Component {
                 btnsHeader={headerButtons}
                 error={noLimitError}
                 children={panelBody}
+                classCss={['flex']}
             />
         );
     }

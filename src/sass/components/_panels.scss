@@ -22,12 +22,21 @@
     padding: 10px 4px;
     transition: all .3s;
 
-    > div {
+    &:not(.flex) > div {
       max-width: 50%;
       width: 100%;
     }
 
-    .heading-buttons {
+    &.flex {
+      display: flex;
+
+      > div:first-child {
+        flex-grow: 1;
+        order: 1;
+      }
+    }
+
+    &:not(.flex) .heading-buttons {
       max-width: 50%;
     }
   }
