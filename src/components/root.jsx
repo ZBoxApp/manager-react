@@ -29,9 +29,11 @@ export default class Root extends React.Component {
     componentWillReceiveProps(newProps) {
         this.redirectIfNecessary(newProps);
     }
+
     componentWillMount() {
         this.redirectIfNecessary(this.props);
     }
+
     render() {
         if (this.props.children == null) {
             return <div/>;

@@ -5,12 +5,13 @@ import * as GlobalActions from '../action_creators/global_actions.jsx';
 import UserStore from '../stores/user_store.jsx';
 
 import React from 'react';
-import {browserHistory} from 'react-router';
+import {browserHistory, Link} from 'react-router';
 
 export default class SidebarMenu extends React.Component {
     constructor(props) {
         super(props);
         this.handleLink = this.handleLink.bind(this);
+        this.openSupportModal = this.openSupportModal.bind(this);
     }
     handleLink(e, path) {
         e.preventDefault();
@@ -18,6 +19,19 @@ export default class SidebarMenu extends React.Component {
             GlobalActions.emitStartLoading();
             browserHistory.push(path);
         }
+    }
+
+    openSupportModal(e) {
+        e.preventDefault();
+        const user = UserStore.getCurrentUser();
+
+        const name = user.attrs._attrs.displayName ? user.attrs._attrs.displayName : `${user.attrs._attrs.givenName || user.attrs._attrs.cn} ${user.attrs._attrs.sn}`;
+
+        window.HS.beacon.identify({
+            name,
+            email: user.name
+        });
+        window.HS.beacon.open();
     }
 
     makeCompanyLink() {
@@ -69,6 +83,23 @@ export default class SidebarMenu extends React.Component {
                     >
                         {'Documentación'}
                     </a>
+                </li>
+                <li>
+                    <a
+                        className='nav-label'
+                        href='#'
+                        onClick={this.openSupportModal}
+                    >
+                        {'Soporte'}
+                    </a>
+                </li>
+                <li>
+                    <Link
+                        to='/logout'
+                        title='Cerrar Sesión'
+                    >
+                        Cerrar Sesión
+                    </Link>
                 </li>
             </ul>
         );

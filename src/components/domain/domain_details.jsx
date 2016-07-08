@@ -43,7 +43,7 @@ export default class DomainDetails extends React.Component {
 
         this.isGlobalAdmin = UserStore.isGlobalAdmin();
         this.DomainAttachmentLimit = window.manager_config.maxAttachmentLimit;
-        this.sizeOfAttatch = this.DomainAttachmentLimit.min;
+        this.sizeOfAttatch = this.DomainAttachmentLimit.max;
         this.state = {};
     }
 
@@ -116,7 +116,7 @@ export default class DomainDetails extends React.Component {
         if (domain && domain.id === this.props.params.id) {
             states.domain = domain;
 
-            this.sizeOfAttatch = domain.attrs.amavisMessageSizeLimit || this.DomainAttachmentLimit.min;
+            this.sizeOfAttatch = domain.attrs.amavisMessageSizeLimit || this.DomainAttachmentLimit.max;
 
             GlobalActions.emitEndLoading();
 
@@ -146,7 +146,7 @@ export default class DomainDetails extends React.Component {
                     }
                     states.domain = data;
 
-                    this.sizeOfAttatch = data.attrs.amavisMessageSizeLimit || this.DomainAttachmentLimit.min;
+                    this.sizeOfAttatch = data.attrs.amavisMessageSizeLimit || this.DomainAttachmentLimit.max;
 
                     Client.getZone(data.name, (zone) => {
                         states.zone = this.isStoreEnabled ? DomainStore.setZoneDNS(zone) : zone;
@@ -283,6 +283,8 @@ export default class DomainDetails extends React.Component {
                             placeholder='Amount'
                             max={this.DomainAttachmentLimit.max}
                             min={this.DomainAttachmentLimit.min}
+                            data-max={bytesConvertor(this.DomainAttachmentLimit.max)}
+                            data-min={bytesConvertor(this.DomainAttachmentLimit.min)}
                             onChange={this.slideLimitDomainAttach}
                             step={this.DomainAttachmentLimit.step}
                             defaultValue={this.sizeOfAttatch}
