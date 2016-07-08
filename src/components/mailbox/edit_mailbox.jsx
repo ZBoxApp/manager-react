@@ -581,7 +581,7 @@ export default class EditMailBox extends React.Component {
     getMailbox(id) {
         const promises = [];
         let data = null;
-        const max = 200;
+        const max = 1000;
         Utils.toggleStatusButtons('.action-save', true);
         const hasMailboxes = this.isStoreEnabled ? MailboxStore.hasMailboxes() : null;
 
