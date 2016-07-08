@@ -336,6 +336,7 @@ export default class CreateMailBox extends React.Component {
             const rightsDomains = Utils.getDomainsCleaned(domains.domain);
             domains.domain = rightsDomains;
             domains.total = rightsDomains.length;
+            console.log(domains);
 
             const response = {
                 plans: this.cos,
