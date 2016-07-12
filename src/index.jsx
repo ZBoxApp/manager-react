@@ -24,6 +24,9 @@ import DistributionLists from './components/distribution/distribution_lists.jsx'
 import EditDistributionList from './components/distribution/edit_distribution_lists.jsx';
 import SearchView from './components/search/search.jsx';
 import SalesForm from './components/sales/sales.jsx';
+import deleteMassive from './components/massive/masive_delete.jsx';
+import ErrorsFromActions from './components/errors_from_action.jsx';
+import Template404 from './components/404/404.jsx';
 
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
@@ -46,13 +49,15 @@ const notFoundParams = {
 function preRenderSetup(callwhendone) {
     const d1 = Client.getClientConfig(
         (data) => {
-            if (!data) {
+            const config = data.result;
+
+            if (!config) {
                 return;
             }
 
-            global.window.manager_config = data;
+            global.window.manager_config = config;
 
-            if (data.debug) {
+            if (config.debug) {
                 global.window.Client = Client;
                 global.window.Utils = Utils;
             }
@@ -119,7 +124,7 @@ function renderRootComponent() {
                 >
                     <Route
                         path='error'
-                        component={ErrorPage}
+                        component={ErrorPage || Template404}
                     />
                     <Route
                         component={LoggedIn}
@@ -212,6 +217,16 @@ function renderRootComponent() {
                         <Route
                             path='sales/:domainId/mailboxes'
                             component={SalesForm}
+                        />
+
+                        <Route
+                            path='massive'
+                            component={deleteMassive}
+                        />
+
+                        <Route
+                            path='errorsFromAction'
+                            component={ErrorsFromActions}
                         />
                     </Route>
                     <Route component={NotLoggedIn}>
