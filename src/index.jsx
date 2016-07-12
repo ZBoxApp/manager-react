@@ -49,7 +49,7 @@ const notFoundParams = {
 function preRenderSetup(callwhendone) {
     const d1 = Client.getClientConfig(
         (data) => {
-            const config = data.result;
+            const config = data.result || data;
 
             if (!config) {
                 return;

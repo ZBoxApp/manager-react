@@ -103,7 +103,7 @@ export default class DomainMailboxPlans extends React.Component {
         }
 
         for (const key in plans) {
-            if (plans.hasOwnProperty(key) && plans[key].used !== 0 && plans[key].limit !== 0) {
+            if (plans.hasOwnProperty(key) && plans[key].limit !== 0) {
                 const plan = plans[key];
                 totalUsed += (parseInt(plan.used, 10)) ? parseInt(plan.used, 10) : 0;
                 if (plan.limit === 0) {
