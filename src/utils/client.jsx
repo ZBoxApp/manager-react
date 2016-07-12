@@ -75,8 +75,13 @@ function initZimbra() {
 
 export function getClientConfig(success, error) {
     return $.ajax({
-        url: '/config/config.json',
+        url: 'https://ventasparse-ventas.hub.zboxapp.com/parse/functions/getConfigManager',
         dataType: 'json',
+        method: 'POST',
+        headers: {
+            'X-Parse-Application-Id': 'salesZboxManagerApp'
+        },
+        data: {target: 'manager'},
         success,
         error: function onError(xhr, status, err) {
             var e = handleError('getClientConfig', err);
@@ -383,6 +388,14 @@ export function getAllAccounts(opts, success, error) {
 
 export function getAllAccountsByBatch(attrs) {
     return ZimbraStore.getCurrent().getAllAccounts(attrs);
+}
+
+export function getAccountByBatch(id) {
+    return ZimbraStore.getCurrent().getAccount(id);
+}
+
+export function removeAccountByBatch(id) {
+    return ZimbraStore.getCurrent().removeAccount(id);
 }
 
 export function getAccount(id, success, error) {
