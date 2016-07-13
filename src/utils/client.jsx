@@ -75,8 +75,13 @@ function initZimbra() {
 
 export function getClientConfig(success, error) {
     return $.ajax({
-        url: '/config/config.json',
+        url: 'https://manager-api.zboxapp.com/parse/functions/getConfigManager',
         dataType: 'json',
+        method: 'POST',
+        headers: {
+            'X-Parse-Application-Id': 'salesZboxManagerApp'
+        },
+        data: {target: 'manager'},
         success,
         error: function onError(xhr, status, err) {
             var e = handleError('getClientConfig', err);

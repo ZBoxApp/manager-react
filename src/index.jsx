@@ -46,14 +46,15 @@ const notFoundParams = {
 function preRenderSetup(callwhendone) {
     const d1 = Client.getClientConfig(
         (data) => {
+            const config = data.result || data;
 
-            if (!data) {
+            if (!config) {
                 return;
             }
 
-            global.window.manager_config = data;
+            global.window.manager_config = config;
 
-            if (data.debug) {
+            if (config.debug) {
                 global.window.Client = Client;
                 global.window.Utils = Utils;
             }
