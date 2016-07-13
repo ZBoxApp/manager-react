@@ -75,7 +75,7 @@ function initZimbra() {
 
 export function getClientConfig(success, error) {
     return $.ajax({
-        url: 'https://ventasparse-ventas.hub.zboxapp.com/parse/functions/getConfigManager',
+        url: 'https://manager-api.zboxapp.com/parse/functions/getConfigManager',
         dataType: 'json',
         method: 'POST',
         headers: {
