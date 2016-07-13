@@ -24,7 +24,6 @@ import DistributionLists from './components/distribution/distribution_lists.jsx'
 import EditDistributionList from './components/distribution/edit_distribution_lists.jsx';
 import SearchView from './components/search/search.jsx';
 import SalesForm from './components/sales/sales.jsx';
-
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
 import Constants from './utils/constants.jsx';
@@ -46,14 +45,15 @@ const notFoundParams = {
 function preRenderSetup(callwhendone) {
     const d1 = Client.getClientConfig(
         (data) => {
+            const config = data.result || data;
 
-            if (!data) {
+            if (!config) {
                 return;
             }
 
-            global.window.manager_config = data;
+            global.window.manager_config = config;
 
-            if (data.debug) {
+            if (config.debug) {
                 global.window.Client = Client;
                 global.window.Utils = Utils;
             }
