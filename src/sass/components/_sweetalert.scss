@@ -1,4 +1,4 @@
-// eslint-disable
+// scss-lint:disable all
 
 body {
   &.stop-scrolling {
@@ -698,3 +698,5 @@ body {
 }
 
 @import 'loader_animation';
+
+// scss-lint:enable all
