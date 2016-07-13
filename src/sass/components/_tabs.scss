@@ -57,7 +57,7 @@
 
   > li {
     > a {
-      border-radius: 4px 0 0 4px;
+      border-top-left-radius: 4px;
       margin-right: -1px;
     }
   }
@@ -70,7 +70,7 @@
 
   > li {
     > a {
-      border-radius: 0 4px 4px 0;
+      border-bottom-right-radius: 4px;
       margin-left: -1px;
     }
   }
@@ -94,7 +94,7 @@
     margin-top: -1px;
 
     > a {
-      border-radius: 0 0 4px 4px;
+      border-bottom-left-radius: 4px;
     }
   }
 }
@@ -120,7 +120,8 @@
 .tabs-left > .nav-tabs .active > a,
 .tabs-left > .nav-tabs .active > a:hover,
 .tabs-left > .nav-tabs .active > a:focus {
-  border-color: $border-color transparent $border-color $border-color;
+  border-color: $border-color;
+  border-right-color: transparent;
 }
 
 .tabs-right > .nav-tabs > li > a:hover,
