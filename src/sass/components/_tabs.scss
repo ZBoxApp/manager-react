@@ -126,13 +126,15 @@
 
 .tabs-right > .nav-tabs > li > a:hover,
 .tabs-right > .nav-tabs > li > a:focus {
-  border-color: $border-color-tabs-state $border-color-tabs-state $border-color-tabs-state $table-children-border-bottom-color;
+  border-color: $border-color-tabs-state;
+  border-left-color: $table-children-border-bottom-color;
 }
 
 .tabs-right > .nav-tabs .active > a,
 .tabs-right > .nav-tabs .active > a:hover,
 .tabs-right > .nav-tabs .active > a:focus {
-  border-color: $border-color $border-color $border-color transparent;
+  border-color: $border-color;
+  border-left-color: transparent;
   z-index: 1;
 }
 

@@ -55,10 +55,11 @@ export default class DNSZoneForm extends React.Component {
     }
 
     addDNSRequest() {
+        const domain = this.props.state.domain;
+        const template = window.manager_config.dns.template;
         const request = {
-            name: this.props.state.domain.name,
-            kind: 'Master',
-            nameservers: []
+            name: domain.name,
+            template
         };
 
         const records = this.defaultRows;

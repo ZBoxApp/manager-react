@@ -103,6 +103,9 @@ var config = {
             'node_modules',
             path.resolve(__dirname)
         ]
+    },
+    node: {
+        fs: 'empty'
     }
 };
 
