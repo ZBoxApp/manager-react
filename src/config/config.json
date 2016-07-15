@@ -20,7 +20,37 @@
     "dns": {
         "url": "http://zimbra.zboxapp.dev:9081/powerdns_proxy",
         "token": "otto",
-        "inmutable": ["mx", "soa", "ns", "spf"]
+        "inmutable": ["mx", "soa", "ns", "spf"],
+        "template": {
+            "zone_data": {
+                "kind": "Master",
+                "nameservers": ["ns.zboxapp.com", "ns2.zboxapp.com"],
+                "soa_edit": "DEFAULT",
+                "soa_edit_api": "DEFAULT",
+                "masters": []
+            },
+            "zone_records":
+            [
+                {
+                    "name": "{{=zone.name}}", "type": "SOA", "content": "ns.zboxapp.com. dns.zboxapp.com. 0 10800 3600 604800 3600", "disabled": false, "ttl": 900, "priority": 0
+                },
+                {
+                    "name": "{{=zone.name}}", "type": "NS", "content": "ns.zboxapp.com.", "disabled": false, "ttl": 900, "priority": 0
+                },
+                {
+                    "name": "{{=zone.name}}", "type": "NS", "content": "ns2.zboxapp.com.", "disabled": false, "ttl": 900, "priority": 0
+                },
+                {
+                    "name": "{{=zone.name}}", "type": "MX", "content": "5 mailcleaner.zboxapp.com.", "disabled": false, "ttl": 900, "priority": 5
+                },
+                {
+                    "name": "{{=zone.name}}", "type": "TXT", "content": "\"v=spf1 include:_spf.zboxapp.com -all\"", "disabled": false, "ttl": 900, "priority": 0
+                },
+                {
+                    "name": "mail.{{=zone.name}}", "type": "CNAME", "content": "mail.zboxapp.com.", "disabled": false, "ttl": 900, "priority": 0
+                }
+            ]
+        }
     },
     "maxAttachmentLimit": {
         "max": 52428800,

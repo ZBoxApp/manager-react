@@ -42,6 +42,7 @@ export default class DomainMailboxPlans extends React.Component {
         );
     }
     render() {
+        const countAccounts = this.state.plans;
         if (!this.state.plans) {
             return <div/>;
         }
@@ -72,127 +73,142 @@ export default class DomainMailboxPlans extends React.Component {
 
         const mailboxPlans = [];
         let panelBody = null;
-        const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
-        const planKeys = Object.keys(cos).map((c) => {
-            return cos[c];
-        });
-
-        const domain = this.props.domain;
-        const domainCos = domain.maxAccountsByCos();
-        const domainPlans = Utils.getPlansFromDomain(domain);
-        const plans = {};
         let noLimitError;
-        let totalUsed = 0;
-        let totalLimit = 0;
+        const isNotMigrating = !countAccounts.migracion;
 
-        planKeys.forEach((key) => {
-            plans[key] = {
-                limit: 0,
-                used: 0
-            };
-        });
-
-        let used = 0;
-        if (domainCos) {
-            Object.keys(domainCos).forEach((id) => {
-                const limit = domainCos[id];
-                used = domainPlans[cos[id]].used;
-                plans[cos[id]].limit += limit;
-                plans[cos[id]].used += used;
+        if (isNotMigrating) {
+            const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
+            const planKeys = Object.keys(cos).map((c) => {
+                return cos[c];
             });
-        }
 
-        for (const key in plans) {
-            if (plans.hasOwnProperty(key) && plans[key].limit !== 0) {
-                const plan = plans[key];
-                totalUsed += (parseInt(plan.used, 10)) ? parseInt(plan.used, 10) : 0;
-                if (plan.limit === 0) {
-                    //totalLimit = '\u221e';
+            const domain = this.props.domain;
+            const domainCos = domain.maxAccountsByCos();
+            const domainPlans = Utils.getPlansFromDomain(domain);
+            const plans = {};
+            let totalUsed = 0;
+            let totalLimit = 0;
 
-                    if (!noLimitError) {
-                        noLimitError = (
-                            <MessageBar
-                                message='Existen dominios sin límites asignados'
-                                type='WARNING'
-                                autoclose={true}
-                            />
-                        );
+            planKeys.forEach((key) => {
+                plans[key] = {
+                    limit: 0,
+                    used: 0
+                };
+            });
+
+            let used = 0;
+            if (domainCos) {
+                Object.keys(domainCos).forEach((id) => {
+                    const limit = domainCos[id];
+                    used = domainPlans[cos[id]].used;
+                    plans[cos[id]].limit += limit;
+                    plans[cos[id]].used += used;
+                });
+            }
+
+            for (const key in plans) {
+                if (plans.hasOwnProperty(key) && plans[key].limit !== 0) {
+                    const plan = plans[key];
+                    totalUsed += (parseInt(plan.used, 10)) ? parseInt(plan.used, 10) : 0;
+                    if (plan.limit === 0) {
+                        //totalLimit = '\u221e';
+
+                        if (!noLimitError) {
+                            noLimitError = (
+                                <MessageBar
+                                    message='Existen dominios sin límites asignados'
+                                    type='WARNING'
+                                    autoclose={true}
+                                />
+                            );
+                        }
+                    } else {
+                        totalLimit += plan.limit;
                     }
-                } else {
-                    totalLimit += plan.limit;
-                }
 
+                    mailboxPlans.push(
+                        <tr key={`plan-${key}`}>
+                            <td className='mbx-plan'
+                                style={{borderTop: 0}}
+                            >
+                                {key}
+                            </td>
+                            <td
+                                className='text-center'
+                                style={{borderTop: 0}}
+                            >
+                                {plan.limit || '\u221e'}
+                            </td>
+                            <td
+                                className='text-center'
+                                style={{borderTop: 0}}
+                            >
+                                {plan.used}
+                            </td>
+                        </tr>
+                    );
+                }
+            }
+
+            if (mailboxPlans.length > 0) {
                 mailboxPlans.push(
-                    <tr key={`plan-${key}`}>
+                    <tr key='totalizacion-planes'>
                         <td className='mbx-plan'
                             style={{borderTop: 0}}
                         >
-                            {key}
+                            <strong>{'Total'}</strong>
                         </td>
                         <td
                             className='text-center'
                             style={{borderTop: 0}}
                         >
-                            {plan.limit || '\u221e'}
+                            <strong>{totalLimit}</strong>
                         </td>
                         <td
                             className='text-center'
                             style={{borderTop: 0}}
                         >
-                            {plan.used}
+                            <strong>{totalUsed}</strong>
                         </td>
                     </tr>
                 );
+
+                panelBody = (
+                    <table
+                        id='domain-mbxs'
+                        cellPadding='1'
+                        cellSpacing='1'
+                        className='table'
+                        style={{marginBottom: '0px'}}
+                    >
+                        <thead>
+                        <tr>
+                            <th style={{width: '50%'}}></th>
+                            <th className='text-center'>{'Límite'}</th>
+                            <th className='text-center'>{'Usadas'}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {mailboxPlans}
+                        </tbody>
+                    </table>
+                );
+            } else {
+                panelBody = (
+                    <div className='text-center'>
+                        <h4 className='text-danger'>{'No se han asignado límites de casillas.'}</h4>
+                    </div>
+                );
             }
-        }
-
-        if (mailboxPlans.length > 0) {
-            mailboxPlans.push(
-                <tr key='totalizacion-planes'>
-                    <td className='mbx-plan'
-                        style={{borderTop: 0}}
-                    >
-                        <strong>{'Total'}</strong>
-                    </td>
-                    <td
-                        className='text-center'
-                        style={{borderTop: 0}}
-                    >
-                        <strong>{totalLimit}</strong>
-                    </td>
-                    <td
-                        className='text-center'
-                        style={{borderTop: 0}}
-                    >
-                        <strong>{totalUsed}</strong>
-                    </td>
-                </tr>
-            );
-
-            panelBody = (
-                <table
-                    id='domain-mbxs'
-                    cellPadding='1'
-                    cellSpacing='1'
-                    className='table'
-                    style={{marginBottom: '0px'}}
-                >
-                    <thead>
-                    <tr>
-                        <th style={{width: '50%'}}></th>
-                        <th className='text-center'>{'Límite'}</th>
-                        <th className='text-center'>{'Usadas'}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {mailboxPlans}
-                    </tbody>
-                </table>
-            );
         } else {
             panelBody = (
                 <div className='text-center'>
-                    <h4 className='text-danger'>{'No se han asignado límites de casillas.'}</h4>
+                    <h4 className='text-danger'>{'Se esta realizando una migracion.'}</h4>
+                    <blockquote>
+                        {`Limite : ${countAccounts.migracion.limit || 'No definido'}`}
+                        <br/>
+                        {`Usadas : ${countAccounts.migracion.used || 'No definido'}`}
+                    </blockquote>
                 </div>
             );
         }
