@@ -90,6 +90,25 @@ export function getClientConfig(success, error) {
     });
 }
 
+export function clearCacheZimbra(flushData, success, error) {
+    // flushData parameter example would be like this {type: 'domain', allServers: 1, entry: 'zboxapp.dev'}
+    initZimbra().then(
+        (zimbra) => {
+            zimbra.flushCache(flushData, (err, cleared) => {
+                if (err) {
+                    return error(err);
+                }
+
+                return success(cleared);
+            });
+        },
+        (err) => {
+            const e = handleError('clearCacheZimbra', err);
+            return error(e);
+        }
+    );
+}
+
 export function getMe(success, error) {
     initZimbra().then(
         (zimbra) => {
