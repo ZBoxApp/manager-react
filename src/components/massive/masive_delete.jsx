@@ -5,6 +5,7 @@ import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Utils from '../../utils/utils.jsx';
 
 import ErrorStore from '../../stores/error_store.jsx';
+import UserStore from '../../stores/user_store.jsx';
 
 import PageInfo from '../page_info.jsx';
 import Panel from '../panel.jsx';
@@ -39,8 +40,13 @@ export default class MassiveDelete extends React.Component {
         }
     }
 
+    componentWillReceiveProps() {
+        GlobalActions.emitEndLoading();
+    }
+
     componentDidMount() {
         this.handleCommands();
+        GlobalActions.emitEndLoading();
     }
 
     handleDelete(e) {
@@ -55,13 +61,13 @@ export default class MassiveDelete extends React.Component {
         }
 
         const preMailboxes = consoleText.split(/\r?\n/gi);
+        const pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         const getAccountByBatch = [];
         const deleteAccountByBatch = [];
         const wrongEmails = [];
         const emailsNotFound = [];
 
         preMailboxes.forEach((email) => {
-            const pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             const cleanEmail = email.trim();
             const condition = pattern.test(cleanEmail) && cleanEmail !== '';
 
@@ -246,21 +252,38 @@ export default class MassiveDelete extends React.Component {
     }
 
     render() {
-        const consoleText = (
-            <div
-                className='row'
-                key='deleteConsole'
-            >
-                <div className='col-xs-12'>
-                    <blockquote className='custom-blockquote'>
-                        <p>
-                            <i>
-                                {'Escribir el nombre de las casillas a la cual se quiere eliminar, cada casilla debe ser separada por un salto de linea (Tecla Enter).'}
-                            </i>
-                        </p>
-                    </blockquote>
+        let buttons = null;
+        let consoleText = null;
+
+        if (!UserStore.isGlobalAdmin()) {
+            consoleText = (
+                <div
+                    className='text-center'
+                    key='notAllowed'
+                >
+                    <h3 className='page-header'>
+                        {'Usted no tiene permisos para ingresar a esta area'}
+                    </h3>
                 </div>
-                <div className='col-xs-12 wrapper-console'>
+            );
+        }
+
+        if (UserStore.isGlobalAdmin()) {
+            consoleText = (
+                <div
+                    className='row'
+                    key='deleteConsole'
+                >
+                    <div className='col-xs-12'>
+                        <blockquote className='custom-blockquote'>
+                            <p>
+                                <i>
+                                    {'Escribir el nombre de las casillas a la cual se quiere eliminar, cada casilla debe ser separada por un salto de linea (Tecla Enter).'}
+                                </i>
+                            </p>
+                        </blockquote>
+                    </div>
+                    <div className='col-xs-12 wrapper-console'>
                     <textarea
                         className='form-control consoleText'
                         ref='console'
@@ -274,25 +297,26 @@ export default class MassiveDelete extends React.Component {
                         </code>
                         {'PARA EJECUTAR'}
                     </span>
+                    </div>
                 </div>
-            </div>
-        );
+            );
 
-        const buttons = (
-            <div
-                key={'btn-actions'}
-                className='row'
-            >
-                <div className='col-xs-12 text-right'>
-                    <button
-                        className='btn btn-danger'
-                        onClick={this.handleDelete}
-                    >
-                        {'Borrar Casillas'}
-                    </button>
+            buttons = (
+                <div
+                    key={'btn-actions'}
+                    className='row'
+                >
+                    <div className='col-xs-12 text-right'>
+                        <button
+                            className='btn btn-danger'
+                            onClick={this.handleDelete}
+                        >
+                            {'Borrar Casillas'}
+                        </button>
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        }
 
         return (
             <div>

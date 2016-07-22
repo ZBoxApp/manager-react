@@ -1855,6 +1855,14 @@ label {
   }
 }
 
+.noresize {
+  resize: none;
+}
+
+.margin-bottom {
+  margin-bottom: 20px;
+}
+
 // Error Page
 
 // scss-lint:enable all

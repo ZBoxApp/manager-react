@@ -19,6 +19,7 @@ import ToggleModalButton from '../toggle_modal_button.jsx';
 import MessageBar from '../message_bar.jsx';
 import Promise from 'bluebird';
 import MailboxStore from '../../stores/mailbox_store.jsx';
+import ResendForm from './reenvios_form.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
@@ -343,7 +344,7 @@ export default class MailboxDetails extends React.Component {
                 />
             );
 
-            const tab2 = (
+            const tabAlias = (
                 <Panel
                     title='Casillas'
                     hasHeader={false}
@@ -352,12 +353,17 @@ export default class MailboxDetails extends React.Component {
                 />
             );
 
+            const reenvios = (
+                <ResendForm mailbox={this.state.data}/>
+            );
+
             panelTabs = (
                 <PanelTab
-                    tabNames={['Resp Vacaciones', 'Alias']}
+                    tabNames={['Resp Vacaciones', 'Alias', 'Reenvios']}
                     tabs={{
                         resp_vacaciones: tabAdmin,
-                        alias: tab2
+                        alias: tabAlias,
+                        reenvios
                     }}
                     location={this.props.location}
                 />

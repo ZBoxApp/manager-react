@@ -25,6 +25,7 @@ import EditDistributionList from './components/distribution/edit_distribution_li
 import SearchView from './components/search/search.jsx';
 import SalesForm from './components/sales/sales.jsx';
 import TemplateError from './components/404/404.jsx';
+import DeleteMassive from './components/massive/masive_delete.jsx';
 
 import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
@@ -215,6 +216,11 @@ function renderRootComponent() {
                         <Route
                             path='sales/:domainId/mailboxes'
                             component={SalesForm}
+                        />
+
+                        <Route
+                            path='/deleteMassive'
+                            component={DeleteMassive}
                         />
                     </Route>
                     <Route component={NotLoggedIn}>

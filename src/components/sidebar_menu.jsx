@@ -13,6 +13,7 @@ export default class SidebarMenu extends React.Component {
         this.handleLink = this.handleLink.bind(this);
         this.openSupportModal = this.openSupportModal.bind(this);
     }
+
     handleLink(e, path) {
         e.preventDefault();
         if (`/${this.props.location.pathname}` !== path) {
@@ -93,6 +94,17 @@ export default class SidebarMenu extends React.Component {
                         {'Soporte'}
                     </a>
                 </li>
+                {UserStore.isGlobalAdmin() && (
+                    <li>
+                        <a
+                            className='nav-label'
+                            href='#'
+                            onClick={(e) => this.handleLink(e, '/deleteMassive')}
+                        >
+                            {'Borrado Masivo'}
+                        </a>
+                    </li>
+                )}
                 <li>
                     <Link
                         to='/logout'
