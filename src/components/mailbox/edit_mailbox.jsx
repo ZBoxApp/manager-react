@@ -29,6 +29,7 @@ export default class EditMailBox extends React.Component {
         super(props);
 
         this.isStoreEnabled = window.manager_config.enableStores;
+        this.changeStatus = this.changeStatus.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
         this.handleRadioChanged = this.handleRadioChanged.bind(this);
         this.getMailbox = this.getMailbox.bind(this);
@@ -47,7 +48,8 @@ export default class EditMailBox extends React.Component {
         this.currentPlan = '';
 
         this.state = {
-            zimbraCOSId: ''
+            zimbraCOSId: '',
+            zimbraAccountStatus: ''
         };
     }
 
@@ -55,6 +57,15 @@ export default class EditMailBox extends React.Component {
         this.setState({
             error: attrs.message,
             typeError: attrs.typeError
+        });
+    }
+
+    changeStatus(e) {
+        const select = e.target;
+        const zimbraAccountStatus = select.value;
+
+        this.setState({
+            zimbraAccountStatus
         });
     }
 
@@ -610,6 +621,7 @@ export default class EditMailBox extends React.Component {
                 this.setState({
                     data,
                     zimbraCOSId: data.attrs.zimbraCOSId,
+                    zimbraAccountStatus: data.attrs.zimbraAccountStatus,
                     domains,
                     cos: this.cos
                 });
@@ -665,6 +677,7 @@ export default class EditMailBox extends React.Component {
                 this.setState({
                     data: account,
                     zimbraCOSId: account.attrs.zimbraCOSId,
+                    zimbraAccountStatus: account.attrs.zimbraAccountStatus,
                     domains,
                     cos: this.cos
                 });
@@ -717,7 +730,7 @@ export default class EditMailBox extends React.Component {
         let currentDomain = '';
         const cosElements = [];
         const {cos} = this.state;
-        const {zimbraCOSId} = this.state;
+        const {zimbraCOSId, zimbraAccountStatus} = this.state;
         let enableAccounts;
         let counterPlans = 9999;
 
@@ -999,6 +1012,8 @@ export default class EditMailBox extends React.Component {
                         <select
                             className='form-control'
                             ref='zimbraAccountStatus'
+                            value={zimbraAccountStatus}
+                            onChange={this.changeStatus}
                         >
                             {options}
                         </select>
