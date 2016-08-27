@@ -23,6 +23,7 @@ export default class AntiSpam extends React.Component {
         this.domain = this.isStoreEnabled ? DomainStore.getCurrent() : this.props.data;
         this.blackList = [];
         this.whiteList = [];
+        this.limit = 10;
 
         if (this.domain.attrs.amavisBlacklistSender) {
             this.blackList = Array.isArray(this.domain.attrs.amavisBlacklistSender) ? this.domain.attrs.amavisBlacklistSender : this.domain.attrs.amavisBlacklistSender.trim().split(' ');
@@ -31,6 +32,42 @@ export default class AntiSpam extends React.Component {
         if (this.domain.attrs.amavisWhitelistSender) {
             this.whiteList = Array.isArray(this.domain.attrs.amavisWhitelistSender) ? this.domain.attrs.amavisWhitelistSender : this.domain.attrs.amavisWhitelistSender.trim().split(' ');
         }
+
+        this.state = {
+            whiteListPaginate: {
+                page: 1,
+                total: this.whiteList.length,
+                offset: 0
+            },
+            blackListPaginate: {
+                page: 1,
+                total: this.blackList.length,
+                offset: 0
+            }
+        };
+    }
+
+    onChangePage(target, value) {
+        const paginator = this.state[`${target}ListPaginate`];
+        let {page} = paginator;
+        page += value;
+
+        if (page < 1) {
+            page = 1;
+        }
+
+        if (page > Math.ceil(paginator.total / this.limit)) {
+            page = paginator.page;
+        }
+
+        let newState = {...this.state[`${target}ListPaginate`],
+            page,
+            offset: ((page - 1) * this.limit)
+        };
+
+        newState = {...this.state, [`${target}ListPaginate`]: {...newState}};
+
+        this.setState(newState);
     }
 
     handleDelete(e, item, action) {
@@ -64,7 +101,7 @@ export default class AntiSpam extends React.Component {
 
     handleSave(e, action) {
         const attrs = {};
-        const isEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const isEmail = /^(([^<>()\[\]\\.,;:\s@']+(\.[^<>()\[\]\\.,;:\s@']+)*)|('.+'))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         const isDomain = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
         const invalidInput = /ñ/gi;
         const target = action === 'black' ? 'lista negra' : 'lista blanca';
@@ -154,8 +191,26 @@ export default class AntiSpam extends React.Component {
                 this.whiteList = returns;
             }
 
+            const paginator = this.state[`${action}ListPaginate`];
+            const total = this[`${action}List`].length;
+
+            let page = Math.ceil(total / this.limit);
+            let offset = paginator.offset;
+
+            if (page > paginator.page) {
+                page--;
+            }
+
+            offset = ((page - 1) * this.limit);
+
+            const newState = {...this.state[`${action}ListPaginate`],
+                total: this[`${action}List`].length || 0,
+                page,
+                offset
+            };
+
             this.setState({
-                update: true
+                [action + 'ListPaginate']: newState
             });
         }).catch((err) => {
             EventStore.emitMessage({
@@ -177,9 +232,15 @@ export default class AntiSpam extends React.Component {
     render() {
         let whiteList = null;
         let blackList = null;
+        let sliceList = null;
+        let whiteListControls = null;
+        let blackListControls = null;
+        const {whiteListPaginate, blackListPaginate} = this.state;
 
         if (this.blackList && this.blackList.length > 0) {
-            blackList = this.blackList.map((black, i) => {
+            sliceList = this.blackList.slice(blackListPaginate.offset, blackListPaginate.page * this.limit);
+
+            blackList = sliceList.map((black, i) => {
                 return (
                     <tr
                         key={`black-${i}`}
@@ -203,6 +264,41 @@ export default class AntiSpam extends React.Component {
                     </tr>
                 );
             });
+
+            if (blackListPaginate.total > this.limit) {
+                const until = (blackListPaginate.page * this.limit) < blackListPaginate.total ? blackListPaginate.page * this.limit : blackListPaginate.total;
+                blackListControls = (
+                    <td>
+                        <div className='row'>
+                            <div className='col-xs-6'>
+                                <span>{`${blackListPaginate.offset + 1} - ${until} de ${blackListPaginate.total}`}</span>
+                            </div>
+                            <div className='col-xs-6'>
+                                <div className='text-right'>
+                                    <button
+                                        className={'btn btn-info btn-sm'}
+                                        onClick={() => {
+                                                this.onChangePage('black', -1);
+                                            }
+                                        }
+                                    >
+                                        Anterior
+                                    </button>
+                                    <button
+                                        className={'btn btn-info btn-sm'}
+                                        onClick={() => {
+                                                this.onChangePage('black', 1);
+                                            }
+                                        }
+                                    >
+                                        Siguiente
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                );
+            }
         } else {
             blackList = (
                 <tr>
@@ -214,7 +310,9 @@ export default class AntiSpam extends React.Component {
         }
 
         if (this.whiteList && this.whiteList.length > 0) {
-            whiteList = this.whiteList.map((white, i) => {
+            sliceList = this.whiteList.slice(whiteListPaginate.offset, whiteListPaginate.page * this.limit);
+
+            whiteList = sliceList.map((white, i) => {
                 return (
                     <tr
                         key={`white-${i}`}
@@ -238,6 +336,43 @@ export default class AntiSpam extends React.Component {
                     </tr>
                 );
             });
+
+            if (whiteListPaginate.total > this.limit) {
+                const until = (whiteListPaginate.page * this.limit) < whiteListPaginate.total ? whiteListPaginate.page * this.limit : whiteListPaginate.total;
+
+                whiteListControls = (
+                    <td>
+                        <div className='row'>
+                            <div className='col-xs-6'>
+                                <span>{`${whiteListPaginate.offset + 1} - ${until} de ${whiteListPaginate.total}`}</span>
+                            </div>
+
+                            <div className='col-xs-6'>
+                                <div className='text-right'>
+                                    <button
+                                        className={'btn btn-info btn-sm'}
+                                        onClick={() => {
+                                                this.onChangePage('white', -1);
+                                            }
+                                        }
+                                    >
+                                        Anterior
+                                    </button>
+                                    <button
+                                        className={'btn btn-info btn-sm'}
+                                        onClick={() => {
+                                                this.onChangePage('white', 1);
+                                            }
+                                        }
+                                    >
+                                        Siguiente
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                );
+            }
         } else {
             whiteList = (
                 <tr>
@@ -297,7 +432,13 @@ export default class AntiSpam extends React.Component {
                                     </thead>
 
                                     <tbody>
-                                        {whiteList}
+                                    {whiteList}
+
+                                    {whiteListControls && (
+                                        <tr>
+                                            {whiteListControls}
+                                        </tr>
+                                    )}
                                     </tbody>
                                 </table>
                             </div>
@@ -350,7 +491,13 @@ export default class AntiSpam extends React.Component {
                                     </thead>
 
                                     <tbody>
-                                        {blackList}
+                                    {blackList}
+
+                                    {blackListControls && (
+                                        <tr>
+                                            {blackListControls}
+                                        </tr>
+                                    )}
                                     </tbody>
                                 </table>
                             </div>
