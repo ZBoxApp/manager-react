@@ -40,7 +40,7 @@ var config = {
         loaders: [
             {
                 test: /\.jsx?$/,
-                loader: 'babel',
+                loader: 'babel-loader',
                 exclude: /(node_modules)/,
                 query: {
                     presets: ['react', 'es2015', 'stage-0'],
@@ -88,12 +88,12 @@ var config = {
         }),
         htmlExtract,
         new webpack.LoaderOptionsPlugin({
-            minimize: !DEV,
+            minimize: true,
             debug: false
         }),
-        new webpack.optimize.UglifyJsPlugin({
+        /*new webpack.optimize.UglifyJsPlugin({
             compress: { warnings: false }
-        })
+        })*/
     ],
     resolve: {
         alias: {
@@ -112,15 +112,15 @@ var config = {
 // Development mode configuration
 if (DEV) {
     if (FULLMAP) {
-        config.devtool = 'source-map';
+        //config.devtool = 'source-map';
     } else {
-        config.devtool = 'eval-cheap-module-source-map';
+        //config.devtool = 'eval-cheap-module-source-map';
     }
 }
 
 // Production mode configuration
 if (!DEV) {
-    config.devtool = 'source-map';
+    //config.devtool = 'source-map';
     config.plugins.push(
         new webpack.optimize.UglifyJsPlugin({
             'screw-ie8': true,

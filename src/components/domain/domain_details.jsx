@@ -345,7 +345,7 @@ export default class DomainDetails extends React.Component {
                 zona_dns: zonaDNS
             };
 
-            if (!this.isGlobalAdmin) {
+            /*if (!this.isGlobalAdmin) {
                 tabNames = ['Administradores', 'Listas De Distribución', 'Preferencias', 'Zona DNS'];
                 tabs = {
                     administradores: tabAdmin,
@@ -353,7 +353,7 @@ export default class DomainDetails extends React.Component {
                     preferencias: tabPreferences,
                     zona_dns: zonaDNS
                 };
-            }
+            }*/
 
             if (domain.isAliasDomain) {
                 tabNames = ['Zona DNS'];
