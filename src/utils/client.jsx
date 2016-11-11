@@ -76,8 +76,10 @@ function initZimbra() {
 export function getClientConfig(success, error) {
     return $.ajax({
         url: 'https://manager-api.zboxapp.com/parse/functions/getConfigManager',
+        //url: './config/config.json',
         dataType: 'json',
         method: 'POST',
+        //method: 'GET',
         headers: {
             'X-Parse-Application-Id': 'salesZboxManagerApp'
         },
@@ -644,7 +646,10 @@ export function getAllCos(success, error) {
       if (UserStore.isGlobalAdmin()) {
         zimbra.getAllCos((err, data) => {
           if (err) {
-            return error(handleError('getAllCos', err));
+              if (error && typeof error === 'function') {
+                  error(handleError('getAllCos', err));
+              }
+              return;
           }
           return success(data);
         });
@@ -657,7 +662,10 @@ export function getAllCos(success, error) {
 
         zimbra.makeBatchRequest(batchRequests, (err, data) => {
           if (err) {
-            return error(handleError('getCos', err));
+              if (error && typeof error === 'function') {
+                  error(handleError('getCos', err));
+              }
+              return;
           }
           const allCos = data.GetCosResponse.map((r) => {
             return r.cos[0];
@@ -667,7 +675,10 @@ export function getAllCos(success, error) {
       }
     },
     (err) => {
-      return error(handleError('getAllCos', err));
+        if (error && typeof error === 'function') {
+            error(handleError('getAllCos', err));
+        }
+        return;
     }
   );
 }
