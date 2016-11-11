@@ -216,13 +216,25 @@ export default class Domains extends React.Component {
                     status = 'Activo';
                     statusClass += 'btn-info';
                     break;
-                case 'inactive':
-                    status = 'Inactivo';
-                    statusClass += 'btn-default';
+                case 'closed':
+                    status = 'Cerrado';
+                    statusClass += 'btn-primary';
+                    break;
+                case 'locked':
+                    status = 'Bloqueado';
+                    statusClass += 'btn-danger';
+                    break;
+                case 'suspended':
+                    status = 'Suspendido';
+                    statusClass += 'btn-primary';
+                    break;
+                case 'maintenance':
+                    status = 'En Mantención';
+                    statusClass += 'btn-warning2';
                     break;
                 default:
-                    status = 'Migrando';
-                    statusClass += 'btn-warning2';
+                    status = 'Desconocido';
+                    statusClass += 'btn-danger';
                     break;
                 }
 
