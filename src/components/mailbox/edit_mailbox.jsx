@@ -38,6 +38,9 @@ export default class EditMailBox extends React.Component {
         this.handleRenameAccount = this.handleRenameAccount.bind(this);
         this.addBlurListeneronInput = this.addBlurListeneronInput.bind(this);
         this.getEnableAccountsFromDomain = this.getEnableAccountsFromDomain.bind(this);
+        this.watcherRemoveAccount = this.watcherRemoveAccount.bind(this);
+
+        this.isRemove = false;
 
         this.cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
         this.editUrlFromParams = this.props.params.domain_id ? `/domains/${this.props.params.domain_id}/mailboxes/` : '/mailboxes/';
@@ -217,6 +220,18 @@ export default class EditMailBox extends React.Component {
         }, options);
     }
 
+    watcherRemoveAccount(id, resolve) {
+        setTimeout(() => {
+            Client.getAccount(id, () => {
+                if (!this.isRemove) {
+                    this.watcherRemoveAccount(id, resolve);
+                }
+            }, () => {
+                return resolve(true);
+            });
+        }, 5000);
+    }
+
     removeAccount() {
         const account = this.state.data;
         const response = {
@@ -240,16 +255,20 @@ export default class EditMailBox extends React.Component {
                     new Promise((resolve, reject) => {
                         //  start loading
                         GlobalActions.emitStartLoading();
+                        this.isRemove = false;
 
                         Client.removeAccount(
                             account.id,
                             () => {
+                                this.isRemove = true;
                                 return resolve(true);
                             },
                             (error) => {
+                                this.isRemove = true;
                                 return reject(error);
                             }
                         );
+                        this.watcherRemoveAccount(account.id, resolve);
                     }).then(() => {
                         if (this.isStoreEnabled) {
                             MailboxStore.removeAccount(account);
