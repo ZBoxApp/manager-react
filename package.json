@@ -15,7 +15,7 @@
     "js-powerdns": "ZBoxApp/js-powerdns",
     "keymirror": "0.1.1",
     "lodash": "^4.11.1",
-    "moment": "^2.13.0",
+    "moment": "^2.13.x",
     "node-sass": "^3.8.0",
     "nprogress": "^0.2.0",
     "object-assign": "4.0.1",
