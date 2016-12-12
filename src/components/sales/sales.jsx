@@ -33,7 +33,8 @@ export default class SalesForm extends React.Component {
 
         this.state = {
             loading: true,
-            errorAjax: false
+            errorAjax: false,
+            disabled: false
         };
     }
 
@@ -126,9 +127,30 @@ export default class SalesForm extends React.Component {
         const {zimbraCreateTimestamp} = attrs;
         const {businessCategory} = attrs;
 
+        const createdDate = moment(zimbraCreateTimestamp, ['YYYYDDMM', 'YYYY-DD-MM', 'DD-MM-YYYY', 'YYYY-MM-DD']);
+
+        if (!createdDate.isValid()) {
+            this.setState({
+                disabled: true,
+                loading: false,
+                errorAjax: true
+            });
+
+            return EventStore.emitToast({
+                type: 'error',
+                title: 'Compras - Precios',
+                body: 'Ha ocurrido un error al obtener su fecha de creación de dominio.',
+                options: {
+                    timeOut: 4000,
+                    extendedTimeOut: 2000,
+                    closeButton: true
+                }
+            });
+        }
+
         const data = {
             domainId,
-            domainCreatedDate: moment(zimbraCreateTimestamp).format('MM/DD/Y'),
+            domainCreatedDate: createdDate.format('MM/DD/Y'),
             anualRenovation: true,
             companyId: businessCategory,
             type: 'standar',
@@ -138,6 +160,7 @@ export default class SalesForm extends React.Component {
         Client.getPrices(data, (success) => {
             this.setState({
                 loading: false,
+                disabled: false,
                 prices: success.result.prices,
                 isAnual: success.result.isAnual,
                 description: success.result.isAnual ? success.result.description : null
@@ -258,7 +281,7 @@ export default class SalesForm extends React.Component {
         let form = null;
         let actions;
         const buttons = [];
-        const {description} = this.state;
+        const {description, disabled} = this.state;
         let descriptionText;
 
         if (description) {
@@ -399,6 +422,7 @@ export default class SalesForm extends React.Component {
                     <div className='col-xs-12 text-right'>
                         <button className='btn btn-default'>Cancelar</button>
                         <button
+                            disabled={disabled}
                             className='btn btn-info'
                             onClick={this.confirmShipping}
                         >Comprar</button>
