@@ -29,7 +29,6 @@ export default class SalesForm extends React.Component {
         this.avoidPlans = ['archiving', 'default'];
         this.plans = window.manager_config.plans;
         this.messageCode = window.manager_config.messageCode;
-
         this.mailboxes = Object.keys(this.plans).filter((plan) => {
             const isValidPlan = !this.avoidPlans.includes(plan);
 
@@ -43,9 +42,12 @@ export default class SalesForm extends React.Component {
         this.state = state;
     }
 
+    componentDidMount() {
+        GlobalActions.emitEndLoading();
+    }
+
     onKeyupInput(event, label) {
         const value = event.target.value;
-
         this.checkAmount(label, value);
     }
 
@@ -130,6 +132,7 @@ export default class SalesForm extends React.Component {
 
                     const {name} = domain;
                     data.domain = name;
+                    data = JSON.stringify(data);
                     Client.requestMailboxes(data, (response) => {
                         const text = this.messageCode[response.messageCode];
                         sweetAlert('Compra éxitosa', text, 'success');
