@@ -75,7 +75,7 @@ function initZimbra() {
 
 export function getClientConfig(success, error) {
     return $.ajax({
-        url: 'https://manager-api.zboxapp.com/parse/functions/getConfigManager',
+        url: 'https://manager.zboxapp.com/ventas_api/parse/functions/getConfigManager',
         //url: './config/config.json',
         dataType: 'json',
         method: 'POST',
@@ -834,6 +834,30 @@ export function getPrices(data, success, error) {
         data: data,
         headers: {
             'X-Parse-Application-Id': appId
+        },
+        dataType: 'json',
+        success: function onSuccess(response) {
+            success(response);
+        },
+        error: function onError(err) {
+            error(err.responseJSON || err);
+        }
+    });
+}
+
+export function requestMailboxes(data, success, error) {
+    const appId = window.manager_config.salesAPI.appId;
+    const endpoints = window.manager_config.salesAPI;
+    const url = endpoints.base + endpoints.requestSale;
+
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: data,
+        contentType: 'application/json',
+        headers: {
+            'X-Parse-Application-Id': appId,
+            'X-Parse-REST-API-Key': 'master'
         },
         dataType: 'json',
         success: function onSuccess(response) {

@@ -1,85 +1,119 @@
 import React from 'react';
 import PageInfo from '../page_info.jsx';
 import Panel from '../panel.jsx';
-import moment from 'moment';
-import currencyFormatter from 'currency-formatter';
-import EventStore from '../../stores/event_store.jsx';
 import UserStore from '../../stores/user_store.jsx';
-import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import * as Client from '../../utils/client.jsx';
-
-import ZimbraStore from '../../stores/zimbra_store.jsx';
+import sweetAlert from 'sweetalert';
 
 export default class SalesForm extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleSetNumbersOfMailboxes = this.handleSetNumbersOfMailboxes.bind(this);
-        this.getPrices = this.getPrices.bind(this);
-        this.onlyNumber = this.onlyNumber.bind(this);
+        this.buildPurchase = this.buildPurchase.bind(this);
         this.confirmShipping = this.confirmShipping.bind(this);
-        this.getDomainInfo = this.getDomainInfo.bind(this);
-        this.tryAgain = this.tryAgain.bind(this);
 
-        this.cos = Utils.getEnabledPlansByCos(ZimbraStore.getAllCos());
-        this.plans = window.manager_config.plans;
-        this.keys = Object.keys(this.cos);
-        this.sales = {};
-        this.isNAN = false;
-        this.currency = window.manager_config.invoiceAPI.currency;
-        const precision = this.currency === 'CLP' ? 0 : 2;
-        this.currencyParams = {code: this.currency, symbol: '', precision};
+        const {name, attrs} = UserStore.getCurrentUser();
+        const {displayName, cn, sn} = attrs._attrs;
 
-        this.state = {
-            loading: true,
-            errorAjax: false,
-            disabled: false
+        const state = {
+            disabled: true,
+            purchase: {},
+            user: {
+                email: name,
+                fullname: this.buildFullName(displayName, cn, sn)
+            },
+            domainId: props.params.domainId
         };
+
+        this.avoidPlans = ['archiving', 'default'];
+        this.plans = window.manager_config.plans;
+        this.messageCode = window.manager_config.messageCode;
+
+        this.mailboxes = Object.keys(this.plans).filter((plan) => {
+            const isValidPlan = !this.avoidPlans.includes(plan);
+
+            if (isValidPlan) {
+                state.purchase[plan] = 0;
+            }
+
+            return isValidPlan;
+        });
+
+        this.state = state;
+    }
+
+    onKeyupInput(event, label) {
+        const value = event.target.value;
+
+        this.checkAmount(label, value);
+    }
+
+    buildFullName(displayName, cn, sn) {
+        const fullname = displayName && displayName.trim() !== '' ? displayName : `${cn} ${sn}`;
+
+        return fullname;
+    }
+
+    checkAmount(label, _value) {
+        const value = _value || 0;
+        const state = this.state;
+        const purchase = state.purchase;
+        const isEnabled = this.mailboxes.some((plan) => {
+            const planAmount = plan === label ? value : purchase[plan];
+            return planAmount > 0;
+        });
+
+        this.setState({
+            disabled: !isEnabled,
+            purchase: {...purchase, [label]: parseInt(value, 10)}
+        });
+    }
+
+    onKeydownInput(event) {
+        const keycode = event.keyCode || event.which;
+        const allows = [8, 9, 37, 39, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105];
+
+        if (allows.includes(keycode)) {
+            return true;
+        }
+
+        event.preventDefault();
+        return null;
+    }
+
+    buildPurchase(purchase) {
+        const plans = this.plans;
+        const content = [];
+        this.mailboxes.reduce((last, current) => {
+            const quantity = purchase[current];
+            if (quantity > 0) {
+                const plan = plans[current];
+                const label = quantity > 1 ? 'casillas' : 'casilla';
+                last.push(`${quantity} ${label} ${plan.label}`);
+            }
+            return last;
+        }, content);
+        return content;
+    }
+
+    transformToHTML(content) {
+        const list = content.join('</strong>, <strong>');
+        return `<p><strong>${list}</strong></p>`;
     }
 
     confirmShipping(e) {
         e.preventDefault();
-        const plans = [];
-        const {domain} = this.state;
-        const domainId = domain.id;
-        const companyId = domain.attrs.businessCategory;
-        const adminEmail = UserStore.getCurrentUser().name;
-        const items = {};
-        const data = {
-            domainId,
-            companyId,
-            adminEmail,
-            upgrade: false,
-            currency: this.currency
+        const {purchase, user, domainId} = this.state;
+        const content = this.transformToHTML(this.buildPurchase(purchase));
+        let data = {
+            purchase,
+            user: user.email,
+            fullname: user.fullname
         };
-
-        this.keys.forEach((plan) => {
-            if (this.sales[plan] && this.sales[plan].quantity && this.sales[plan].quantity > 0) {
-                items[plan] = this.sales[plan];
-                items[plan].type = 'Producto';
-                plans.push(`${Utils.titleCase(plan)} : <strong>${this.sales[plan].quantity}</strong>`);
-            }
-        });
-
-        if (plans.length < 1) {
-            return EventStore.emitToast({
-                type: 'error',
-                title: 'Compra Casillas',
-                body: 'Debe indicar cuantas casillas desea comprar.',
-                options: {
-                    timeOut: 4000,
-                    extendedTimeOut: 2000,
-                    closeButton: true
-                }
-            });
-        }
-
-        const content = plans.join(', ');
-        const total = `${this.refs.total.value} ${this.currency}`;
         const options = {
             title: 'Confirmación',
-            text: `Esta seguro de realizar la compra de ${content} por un total de <strong>${total}</strong>`,
+            text: `Esta seguro de realizar la compra de ${content}`,
             html: true,
             confirmButtonText: 'Si, compraré',
             confirmButtonColor: '#4EA5EC',
@@ -89,347 +123,54 @@ export default class SalesForm extends React.Component {
 
         Utils.alertToBuy((isConfirmed) => {
             if (isConfirmed) {
-                data.items = items;
-                const requestObject = JSON.stringify(data);
-                Client.makeSale(requestObject, () => {
-                    Utils.alertToBuy((isConfirmed) => {
-                        if (isConfirmed) {
-                            Utils.handleLink(null, `/domains/${domainId}/mailboxes/new`);
-                        }
-                    }, {
-                        title: 'Compra de Casillas',
-                        text: 'Su compra se ha realizado con éxito.',
-                        showCancelButton: false,
-                        confirmButtonColor: '#4EA5EC',
-                        confirmButtonText: 'Muy bien',
-                        type: 'success'
-                    });
-                }, (error) => {
-                    Utils.alertToBuy(() => {
-                        return null;
-                    }, {
-                        title: 'Error',
-                        text: error.message || error.error.message || 'Ha ocurrido un error desconocido.',
-                        showCancelButton: false,
-                        confirmButtonColor: '#4EA5EC',
-                        confirmButtonText: 'Entiendo',
-                        type: 'error',
-                        closeOnConfirm: true
+                Client.getDomain(domainId, (domain, err) => {
+                    if (err) {
+                        return sweetAlert('Error', 'El Dominio no existe.', 'error');
+                    }
+
+                    const {name} = domain;
+                    data.domain = name;
+                    Client.requestMailboxes(data, (response) => {
+                        const text = this.messageCode[response.messageCode];
+                        sweetAlert('Compra éxitosa', text, 'success');
+                    }, (error) => {
+                        const text = this.messageCode[error.messageCode];
+                        sweetAlert('Error', text, 'error');
                     });
                 });
             }
         }, options);
     }
 
-    getPrices() {
-        const {domainId} = this.props.params || this.state.domain.name || null;
-        const attrs = this.state.domain.attrs;
-        const {zimbraCreateTimestamp} = attrs;
-        const {businessCategory} = attrs;
-
-        const createdDate = moment(zimbraCreateTimestamp, ['YYYYDDMM', 'YYYY-DD-MM', 'DD-MM-YYYY', 'YYYY-MM-DD']);
-
-        if (!createdDate.isValid()) {
-            this.setState({
-                disabled: true,
-                loading: false,
-                errorAjax: true
-            });
-
-            return EventStore.emitToast({
-                type: 'error',
-                title: 'Compras - Precios',
-                body: 'Ha ocurrido un error al obtener su fecha de creación de dominio.',
-                options: {
-                    timeOut: 4000,
-                    extendedTimeOut: 2000,
-                    closeButton: true
-                }
-            });
-        }
-
-        const data = {
-            domainId,
-            domainCreatedDate: createdDate.format('MM/DD/Y'),
-            anualRenovation: true,
-            companyId: businessCategory,
-            type: 'standar',
-            currency: this.currency
-        };
-
-        Client.getPrices(data, (success) => {
-            this.setState({
-                loading: false,
-                disabled: false,
-                prices: success.result.prices,
-                isAnual: success.result.isAnual,
-                description: success.result.isAnual ? success.result.description : null
-            });
-        }, (error) => {
-            this.setState({
-                errorAjax: true,
-                loading: false
-            });
-
-            return EventStore.emitToast({
-                type: 'error',
-                title: 'Compras - Precios',
-                body: error.message || error.error.message || 'Ha ocurrido un error al intentar obtener los precios, vuelva a intentarlo por favor.',
-                options: {
-                    timeOut: 4000,
-                    extendedTimeOut: 2000,
-                    closeButton: true
-                }
-            });
+    renderInputs() {
+        const {purchase} = this.state;
+        return this.mailboxes.map((input, index) => {
+            const plan = this.plans[input];
+            const value = purchase[input];
+            return (
+                <div
+                    key={`sale-input-${plan.label}-${index}`}
+                    className='col-xs-4'
+                >
+                    <div className='form-group'>
+                        <div className='input-group'>
+                            <div className='input-group-addon'>{`Casilla ${plan.label}`}</div>
+                            <input
+                                type='text'
+                                className='form-control'
+                                defaultValue={value}
+                                onKeyUp={(event) => this.onKeyupInput(event, input)}
+                                onKeyDown={this.onKeydownInput}
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
         });
-    }
-
-    tryAgain(e) {
-        e.preventDefault();
-
-        this.setState({
-            loading: true,
-            errorAjax: false
-        });
-
-        this.getPrices();
-    }
-
-    getDomainInfo() {
-        const {domainId} = this.props.params;
-
-        Client.getDomain(domainId, (res, err) => {
-            if (err) {
-                return Utils.alertToBuy(() => {
-                    return null;
-                }, {
-                    title: 'Error',
-                    text: err.message || err.error.message || 'Ha ocurrido un error desconocido, cuando se recuperaba la información del dominio.',
-                    showCancelButton: false,
-                    confirmButtonColor: '#4EA5EC',
-                    confirmButtonText: 'Entiendo',
-                    type: 'error',
-                    closeOnConfirm: true
-                });
-            }
-
-            this.setState({
-                domain: res
-            });
-
-            return this.getPrices();
-        });
-    }
-
-    componentDidMount() {
-        GlobalActions.emitEndLoading();
-        this.getDomainInfo();
-    }
-
-    handleSetNumbersOfMailboxes(e, id) {
-        if (this.isNAN) {
-            e.preventDefault();
-            return null;
-        }
-
-        const amount = e.target.value.trim();
-        let totalPrice = 0;
-        let description = 'Nuevas Casillas ';
-
-        this.keys.forEach((plan) => {
-            if (this.cos[plan] === id) {
-                const price = this.state.prices[plan];
-                const size = amount.length > 0 ? parseInt(amount, 10) : 0;
-                const total = size ? size * price : size;
-                const totalFormatted = total ? currencyFormatter.format(total, this.currencyParams) : total;
-                this.refs[`${plan}-total`].value = totalFormatted;
-                description += Utils.titleCase(plan);
-
-                this.sales[plan] = {
-                    quantity: size,
-                    description,
-                    price,
-                    id,
-                    total
-                };
-            }
-            if (this.sales[plan] && this.sales[plan].total && this.sales[plan].total > 0) {
-                totalPrice += this.sales[plan].total;
-            }
-        });
-
-        const currentTotal = totalPrice ? currencyFormatter.format(totalPrice, this.currencyParams) : totalPrice;
-        this.refs.total.value = currentTotal;
-    }
-
-    onlyNumber(e) {
-        const key = e.keyCode;
-        const forbidden = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 8, 9, 37, 39];
-        this.isNAN = false;
-
-        if (!(forbidden.indexOf(key) > -1)) {
-            this.isNAN = true;
-            e.preventDefault();
-            return null;
-        }
     }
 
     render() {
-        const plans = this.cos;
-        const configPlans = this.plans;
-        const keysPlans = this.keys;
-        let form = null;
-        let actions;
-        const buttons = [];
-        const {description, disabled} = this.state;
-        let descriptionText;
-
-        if (description) {
-            descriptionText = (
-                <div
-                    key='desc-key'
-                    className='alert alert-info margin-bottom'
-                >
-                    <span
-                        className='glyphicon glyphicon glyphicon-question-sign'
-                        aria-hidden='true'
-                    ></span>
-                    <span className='sr-only'>Info:</span>
-                    {description}
-                </div>
-            );
-        }
-
-        if (this.state.errorAjax) {
-            form = (
-                <div
-                    className='text-center'
-                    key={'errorajax-loading'}
-                >
-                    <i
-                        className='fa fa-refresh fa-4x fa-fw pointer'
-                        onClick={this.tryAgain}
-                    >
-                    </i>
-                    <p>{'Intentarlo de nuevo'}</p>
-                </div>
-            );
-        }
-
-        if (this.state.isAnual) {
-            buttons.push(
-                {
-                    label: 'Anual',
-                    props: {
-                        className: 'btn btn-success btn-xs'
-                    }
-                }
-            );
-        } else {
-            buttons.push(
-                {
-                    label: 'Mensual',
-                    props: {
-                        className: 'btn btn-info btn-xs'
-                    }
-                }
-            );
-        }
-
-        if (this.state.loading) {
-            form = (
-                <div
-                    className='text-center'
-                    key={'prices-loading'}
-                >
-                    <i className='fa fa-spinner fa-spin fa-4x fa-fw'></i>
-                    <p>{'Cargando Precios...'}</p>
-                </div>
-            );
-        }
-
-        if (!this.state.loading && this.state.prices) {
-            const prices = this.state.prices;
-            const rows = keysPlans.map((plan) => {
-                const cosId = plans[plan];
-                const salesArray = configPlans[plan].sales;
-                const fields = salesArray.map((field, index) => {
-                    const label = field.label || `Casillas ${Utils.titleCase(plan)}`;
-                    const price = field.hasPrice ? currencyFormatter.format(prices[plan], this.currencyParams) : '';
-                    const myref = field.ref ? {ref: `${plan}-${field.ref}`} : {};
-                    return (
-                        <div
-                            key={`sale-input-${plan}-${index}`}
-                            className='col-xs-4'
-                        >
-                            <div className='form-group'>
-                                <div className='input-group'>
-                                    <div className='input-group-addon'>{label}</div>
-                                    <input
-                                        type='text'
-                                        className='form-control'
-                                        disabled={field.disabled}
-                                        defaultValue={price}
-                                        {...myref}
-                                        onKeyUp={(e) => {
-                                            this.handleSetNumbersOfMailboxes(e, cosId);
-                                        }}
-                                        onKeyDown={this.onlyNumber}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    );
-                });
-
-                return (
-                    <div
-                        key={`row-fields-${plan}`}
-                        className='row'
-                    >
-                        {fields}
-                    </div>
-                );
-            });
-
-            form = (
-                <form key='form-container'>
-                    {rows}
-                    <div className='row'>
-                        <div className='col-xs-4 pull-right'>
-                            <div className='form-group'>
-                                <div className='input-group'>
-                                    <div className='input-group-addon'>Total</div>
-                                    <input
-                                        type='text'
-                                        disabled={true}
-                                        className='form-control'
-                                        ref='total'
-                                    />
-                                    <div className='input-group-addon'>{this.currency}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            );
-
-            actions = (
-                <div
-                    className='row'
-                    key='actions-container'
-                >
-                    <div className='col-xs-12 text-right'>
-                        <button className='btn btn-default'>Cancelar</button>
-                        <button
-                            disabled={disabled}
-                            className='btn btn-info'
-                            onClick={this.confirmShipping}
-                        >Comprar</button>
-                    </div>
-                </div>
-            );
-        }
+        const {disabled} = this.state;
 
         return (
             <div>
@@ -441,9 +182,26 @@ export default class SalesForm extends React.Component {
                     <div className='row'>
                         <div className='col-md-12 central-content'>
                             <Panel
-                                btnsHeader={buttons}
-                                children={[descriptionText, form, actions]}
-                            />
+                                hasHeader={true}
+                                title={'Selecciona la cantidad de casillas que deseas comprar.'}
+                            >
+                                <form key='form-container'>
+                                    <div className='row'>
+                                        {this.renderInputs()}
+                                    </div>
+                                    <div
+                                        className='row'
+                                    >
+                                        <div className='col-xs-12 text-right'>
+                                            <button
+                                                disabled={disabled}
+                                                className='btn btn-info'
+                                                onClick={this.confirmShipping}
+                                            >Comprar</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </Panel>
                         </div>
                     </div>
                 </div>
