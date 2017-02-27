@@ -14,6 +14,10 @@ export default class SalesForm extends React.Component {
         this.buildPurchase = this.buildPurchase.bind(this);
         this.confirmShipping = this.confirmShipping.bind(this);
         this.resetCounter = this.resetCounter.bind(this);
+        this.onChangeValue = this.onChangeValue.bind(this);
+        this.onKeydownInput = this.onKeydownInput.bind(this);
+
+        this.isOnlyNumber = false;
 
         const {name, attrs} = UserStore.getCurrentUser();
         const {displayName, cn, sn} = attrs._attrs;
@@ -47,23 +51,20 @@ export default class SalesForm extends React.Component {
 
     resetCounter() {
         const purchase = {};
-        const reset = this.mailboxes.forEach((plan) => {
-            purchase[plan] = 0;
+        this.mailboxes.forEach((plan) => {
+            const isValidPlan = !this.avoidPlans.includes(plan);
+            if (isValidPlan) {
+                purchase[plan] = 0;
+            }
         });
 
         this.setState({
-            purchase: reset
+            purchase
         });
     }
 
     componentDidMount() {
         GlobalActions.emitEndLoading();
-    }
-
-    onKeyupInput(event, label) {
-        const value = event.target.value;
-
-        this.checkAmount(label, value);
     }
 
     buildFullName(displayName, cn, sn) {
@@ -92,11 +93,13 @@ export default class SalesForm extends React.Component {
         const allows = [8, 9, 37, 39, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105];
 
         if (allows.includes(keycode)) {
-            return true;
+            this.isOnlyNumber = true;
+            return this.isOnlyNumber;
         }
 
         event.preventDefault();
-        return null;
+        this.isOnlyNumber = false;
+        return this.isOnlyNumber;
     }
 
     buildPurchase(purchase) {
@@ -149,8 +152,8 @@ export default class SalesForm extends React.Component {
                     data.domain = name;
                     data = JSON.stringify(data);
                     Client.requestMailboxes(data, (response) => {
-                        const text = this.messageCode[response.messageCode];
                         this.resetCounter();
+                        const text = this.messageCode[response.messageCode];
                         sweetAlert('Compra éxitosa', text, 'success');
                     }, (error) => {
                         const text = this.messageCode[error.messageCode];
@@ -159,6 +162,14 @@ export default class SalesForm extends React.Component {
                 });
             }
         }, options);
+    }
+
+    onChangeValue(event, input) {
+        const value = event.target.value;
+
+        if (this.isOnlyNumber) {
+            this.checkAmount(input, value);
+        }
     }
 
     renderInputs() {
@@ -177,8 +188,8 @@ export default class SalesForm extends React.Component {
                             <input
                                 type='text'
                                 className='form-control'
-                                defaultValue={value}
-                                onKeyUp={(event) => this.onKeyupInput(event, input)}
+                                value={value}
+                                onChange={(event) => this.onChangeValue(event, input)}
                                 onKeyDown={this.onKeydownInput}
                             />
                         </div>
