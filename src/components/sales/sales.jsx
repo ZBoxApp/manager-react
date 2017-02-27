@@ -153,10 +153,14 @@ export default class SalesForm extends React.Component {
                     data = JSON.stringify(data);
                     Client.requestMailboxes(data, (response) => {
                         this.resetCounter();
-                        const text = this.messageCode[response.messageCode];
+                        const {result} = response;
+                        const {messageCode} = result;
+                        const text = this.messageCode[messageCode];
                         sweetAlert('Compra éxitosa', text, 'success');
-                    }, (error) => {
-                        const text = this.messageCode[error.messageCode];
+                    }, (err) => {
+                        const {error} = err;
+                        const {messageCode} = error;
+                        const text = this.messageCode[messageCode];
                         sweetAlert('Error', text, 'error');
                     });
                 });
