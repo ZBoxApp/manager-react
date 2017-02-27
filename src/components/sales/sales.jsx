@@ -243,24 +243,3 @@ export default class SalesForm extends React.Component {
 SalesForm.propTypes = {
     params: React.PropTypes.object
 };
->
-                                            <button
-                                                disabled={disabled}
-                                                className='btn btn-info'
-                                                onClick={this.confirmShipping}
-                                            >Comprar</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </Panel>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-}
-
-SalesForm.propTypes = {
-    params: React.PropTypes.object
-};
