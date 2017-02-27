@@ -2,6 +2,7 @@ import React from 'react';
 import PageInfo from '../page_info.jsx';
 import Panel from '../panel.jsx';
 import UserStore from '../../stores/user_store.jsx';
+import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import * as Client from '../../utils/client.jsx';
 import sweetAlert from 'sweetalert';
@@ -12,6 +13,7 @@ export default class SalesForm extends React.Component {
 
         this.buildPurchase = this.buildPurchase.bind(this);
         this.confirmShipping = this.confirmShipping.bind(this);
+        this.resetCounter = this.resetCounter.bind(this);
 
         const {name, attrs} = UserStore.getCurrentUser();
         const {displayName, cn, sn} = attrs._attrs;
@@ -29,6 +31,7 @@ export default class SalesForm extends React.Component {
         this.avoidPlans = ['archiving', 'default'];
         this.plans = window.manager_config.plans;
         this.messageCode = window.manager_config.messageCode;
+
         this.mailboxes = Object.keys(this.plans).filter((plan) => {
             const isValidPlan = !this.avoidPlans.includes(plan);
 
@@ -42,12 +45,24 @@ export default class SalesForm extends React.Component {
         this.state = state;
     }
 
+    resetCounter() {
+        const purchase = {};
+        const reset = this.mailboxes.forEach((plan) => {
+            purchase[plan] = 0;
+        });
+
+        this.setState({
+            purchase: reset
+        });
+    }
+
     componentDidMount() {
         GlobalActions.emitEndLoading();
     }
 
     onKeyupInput(event, label) {
         const value = event.target.value;
+
         this.checkAmount(label, value);
     }
 
@@ -135,6 +150,7 @@ export default class SalesForm extends React.Component {
                     data = JSON.stringify(data);
                     Client.requestMailboxes(data, (response) => {
                         const text = this.messageCode[response.messageCode];
+                        this.resetCounter();
                         sweetAlert('Compra éxitosa', text, 'success');
                     }, (error) => {
                         const text = this.messageCode[error.messageCode];
