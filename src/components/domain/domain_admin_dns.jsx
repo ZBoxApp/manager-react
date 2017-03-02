@@ -246,24 +246,11 @@ export default class DNSZoneForm extends React.Component {
         );
     }
 
-    removeRow(e, object) {
+    removeRow(e, object, i) {
         e.preventDefault();
-        let index = null;
 
         if (typeof object === 'object') {
-            const element = this.defaultRows.filter((item, i) => {
-                const isRightName = item.name === object.name;
-                if (isRightName) {
-                    index = i;
-                    return isRightName;
-                }
-                return isRightName;
-            });
-
-            if (element.length > 0) {
-                const item = element.pop();
-                return this.showSweetConfirm(item, index);
-            }
+            return this.showSweetConfirm(object, i);
         }
 
         this.newRows.splice(object, 1);
@@ -326,9 +313,13 @@ export default class DNSZoneForm extends React.Component {
         // No show records
         //
         const inMutableFields = window.manager_config.dns.inmutable;
-        const mutableFields = this.state.fields.filter((record) => {
-            return !inMutableFields.includes(record.type.toLowerCase());
+        const mutableFields = {};
+        this.state.fields.forEach((record, index) => {
+            if (!inMutableFields.includes(record.type.toLowerCase())) {
+                mutableFields[index] = record;
+            }
         });
+        const mutableFieldsLength = Object.keys(mutableFields).length;
         const types = this.types.map((item) => {
             return (
                 <option
@@ -476,6 +467,7 @@ export default class DNSZoneForm extends React.Component {
                                     this.removeRow(e, index);
                                 }}
                             >
+                            {"DELETE"}
                                 <i
                                     className='fa fa-trash-o'
                                     title='Delete'
@@ -487,9 +479,11 @@ export default class DNSZoneForm extends React.Component {
                 );
             });
 
-            if (mutableFields.length > 0) {
-                const length = mutableFields.length;
-                fields = mutableFields.map((element, i) => {
+            if (mutableFieldsLength > 0) {
+                const length = mutableFieldsLength;
+                const mutableFieldsArray = Object.keys(mutableFields);
+                fields = mutableFieldsArray.map((i) => {
+                    const element = mutableFields[i];
                     const isDisabled = element.enabled ? null : true;
                     return (
                         <div
@@ -552,9 +546,10 @@ export default class DNSZoneForm extends React.Component {
                                 <button
                                     className='btn btn-danger'
                                     onClick={(e) => {
-                                    this.removeRow(e, element);
+                                    this.removeRow(e, element, i);
                                 }}
                                 >
+                                {i}
                                     <i
                                         className='fa fa-trash-o'
                                         title='Delete'
