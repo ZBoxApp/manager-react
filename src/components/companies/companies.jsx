@@ -252,7 +252,9 @@ export default class Companies extends React.Component {
 
             const chunk = data.slice(this.state.offset, (this.state.page * Constants.QueryOptions.DEFAULT_LIMIT));
 
-            const rows = chunk.map((c) => {
+            const rows = chunk.filter((record) => {
+                return true;
+            }).map((c) => {
                 const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
                 const plansString = [];
                 const domains = c.domains;

@@ -33,12 +33,17 @@ export default class CompanyMailboxPlans extends React.Component {
         const headerButtons = [];
 
         const mailboxPlans = [];
+        // const cosIdsWithCosNames = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
         const cos = Utils.getEnabledPlansByCosId(ZimbraStore.getAllCos());
+
         const planKeys = Object.keys(cos).map((c) => {
             return cos[c];
-        });
+        }).filter((item) => item !== 'archiving');
 
-        const domains = company.domains || [];
+        let domains = company.domains || [];
+
+        // exclude archiving domains to count correctly the free, limit and used mailboxes from domains
+        domains = domains.filter((domain) => !(/\.(archive)$/.test(domain.name)));
 
         const plans = {};
         let noLimitError;
@@ -55,14 +60,17 @@ export default class CompanyMailboxPlans extends React.Component {
         domains.forEach((d) => {
             const domainCos = d.maxAccountsByCos();
             const domainPlans = Utils.getPlansFromDomain(d);
+
             let used = 0;
             if (domainCos) {
                 Object.keys(domainCos).forEach((id) => {
+                    const cosName = cos[id];
                     const limit = domainCos[id];
-                    used = domainPlans[cos[id]].used;
-                    plans[cos[id]].limit += limit;
-                    plans[cos[id]].used += used;
-                    plans[cos[id]].free += (limit - used);
+                    used = domainPlans[cosName].used;
+
+                    plans[cosName].limit += limit;
+                    plans[cosName].used += used;
+                    plans[cosName].free += (limit - used);
                 });
             } else {
                 if (!noLimitError) {

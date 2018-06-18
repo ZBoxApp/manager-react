@@ -40,6 +40,7 @@ export default class CompaniesDetails extends React.Component {
     getCompany() {
         const self = this;
         const companyId = this.props.params.id;
+
         const company = this.isStoreEnabled ? CompaniesStore.getCurrent() : null;
         if (company) {
             self.setState({
@@ -49,7 +50,7 @@ export default class CompaniesDetails extends React.Component {
         }
 
         return Client.getCompany(companyId).then((data) => {
-            return self.getDomains(data).then((comp) => {
+            return self.getDomains(data.data).then((comp) => {
                 if (this.isStoreEnabled) {
                     CompaniesStore.setCurrent(comp);
                 }
