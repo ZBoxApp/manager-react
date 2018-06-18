@@ -5,6 +5,7 @@ import UserStore from '../stores/user_store.jsx';
 import SidebarMenu from './sidebar_menu.jsx';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {Link} from 'react-router';
 
 export default class Sidebar extends React.Component {
@@ -58,5 +59,5 @@ export default class Sidebar extends React.Component {
 }
 
 Sidebar.propTypes = {
-    location: React.PropTypes.object.isRequired
+    location: PropTypes.object.isRequired
 };

@@ -8,6 +8,7 @@ import ToastAlert from './toast_alert.jsx';
 import ProgressTask from './progress_task.jsx';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class LoggedIn extends React.Component {
     render() {
@@ -26,13 +27,10 @@ export default class LoggedIn extends React.Component {
     }
 }
 
-LoggedIn.defaultProps = {
-};
-
 LoggedIn.propTypes = {
-    children: React.PropTypes.oneOfType([
-        React.PropTypes.arrayOf(React.PropTypes.element),
-        React.PropTypes.element
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.element),
+        PropTypes.element
     ]),
-    location: React.PropTypes.object.isRequired
+    location: PropTypes.object.isRequired
 };

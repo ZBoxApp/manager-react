@@ -4,6 +4,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Panel from '../panel.jsx';
 
@@ -35,5 +36,5 @@ export default class CompanyInfo extends React.Component {
 }
 
 CompanyInfo.propTypes = {
-    company: React.PropTypes.object.isRequired
+    company: PropTypes.object.isRequired
 };

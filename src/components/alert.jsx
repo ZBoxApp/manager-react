@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class Alert extends React.Component {
     constructor() {
@@ -49,10 +50,10 @@ export default class Alert extends React.Component {
 }
 
 Alert.propTypes = {
-    className: React.PropTypes.string,
-    iconClass: React.PropTypes.string,
-    withClose: React.PropTypes.bool,
-    children: React.PropTypes.any
+    className: PropTypes.string,
+    iconClass: PropTypes.string,
+    withClose: PropTypes.bool,
+    children: PropTypes.any
 };
 
 Alert.defaultProps = {

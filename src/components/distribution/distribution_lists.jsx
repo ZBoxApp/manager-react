@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import EventStore from '../../stores/event_store.jsx';
 
@@ -509,6 +510,6 @@ export default class DistributionLists extends React.Component {
 }
 
 DistributionLists.propTypes = {
-    location: React.PropTypes.object,
-    params: React.PropTypes.object
+    location: PropTypes.object,
+    params: PropTypes.object
 };

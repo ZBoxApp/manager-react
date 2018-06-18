@@ -1,6 +1,7 @@
 // Copyright (c) 2016 ZBox, Spa. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React from 'react';
+import PropTypes from 'prop-types';
 import EventStore from '../stores/event_store.jsx';
 
 export default class ProgressTask extends React.Component {
@@ -128,12 +129,9 @@ export default class ProgressTask extends React.Component {
     }
 }
 
-ProgressTask.defaultProps = {
-};
-
 ProgressTask.propTypes = {
-    children: React.PropTypes.oneOfType([
-        React.PropTypes.arrayOf(React.PropTypes.element),
-        React.PropTypes.element
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.element),
+        PropTypes.element
     ])
 };

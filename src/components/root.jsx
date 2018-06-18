@@ -4,6 +4,7 @@
 import * as Client from '../utils/client.jsx';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {browserHistory} from 'react-router';
 
@@ -42,9 +43,7 @@ export default class Root extends React.Component {
         return this.props.children;
     }
 }
-Root.defaultProps = {
-};
 
 Root.propTypes = {
-    children: React.PropTypes.object
+    children: PropTypes.object
 };

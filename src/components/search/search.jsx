@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import PageInfo from '../page_info.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import * as Client from '../../utils/client.jsx';
@@ -247,5 +248,5 @@ export default class SearchView extends React.Component {
 }
 
 SearchView.propTypes = {
-    params: React.PropTypes.object
+    params: PropTypes.object
 };

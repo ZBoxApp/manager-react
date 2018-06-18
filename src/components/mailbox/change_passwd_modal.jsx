@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {Modal} from 'react-bootstrap';
 import UserStore from '../../stores/user_store.jsx';
 import PasswordStrengthMeter from 'react-password-strength-meter';
@@ -169,8 +170,8 @@ export default class ConfirmDeleteModal extends React.Component {
 }
 
 ConfirmDeleteModal.propTypes = {
-    show: React.PropTypes.bool.isRequired,
-    onHide: React.PropTypes.func.isRequired,
-    data: React.PropTypes.object,
-    location: React.PropTypes.object
+    show: PropTypes.bool.isRequired,
+    onHide: PropTypes.func.isRequired,
+    data: PropTypes.object,
+    location: PropTypes.object
 };

@@ -5,6 +5,7 @@ import * as GlobalActions from '../action_creators/global_actions.jsx';
 import UserStore from '../stores/user_store.jsx';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {browserHistory, Link} from 'react-router';
 
 export default class SidebarMenu extends React.Component {
@@ -119,5 +120,5 @@ export default class SidebarMenu extends React.Component {
 }
 
 SidebarMenu.propTypes = {
-    location: React.PropTypes.object.isRequired
+    location: PropTypes.object.isRequired
 };

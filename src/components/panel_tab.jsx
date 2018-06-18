@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import * as Utils from '../utils/utils.jsx';
 
 export default class Panel extends React.Component {
@@ -75,8 +76,8 @@ export default class Panel extends React.Component {
 }
 
 Panel.propTypes = {
-    tabNames: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    tabs: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired,
-    onClick: React.PropTypes.func
+    tabNames: PropTypes.arrayOf(PropTypes.string).isRequired,
+    tabs: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+    onClick: PropTypes.func
 };

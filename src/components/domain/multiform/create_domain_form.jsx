@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {browserHistory} from 'react-router';
 
 import CompanyStore from '../../../stores/company_store.jsx';
@@ -342,6 +343,6 @@ export default class CreateDomainForm extends React.Component {
 }
 
 CreateDomainForm.propTypes = {
-    params: React.PropTypes.object.isRequired,
-    state: React.PropTypes.object
+    params: PropTypes.object.isRequired,
+    state: PropTypes.object
 };

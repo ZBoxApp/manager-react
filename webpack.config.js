@@ -111,10 +111,18 @@ var config = {
 
 // Development mode configuration
 if (DEV) {
+    config.plugins.push(
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify('development')
+            }
+        })
+    );
+
     if (FULLMAP) {
-        //config.devtool = 'source-map';
+        config.devtool = 'source-map';
     } else {
-        //config.devtool = 'eval-cheap-module-source-map';
+        config.devtool = 'eval-cheap-module-source-map';
     }
 }
 
@@ -125,7 +133,8 @@ if (!DEV) {
         new webpack.optimize.UglifyJsPlugin({
             'screw-ie8': true,
             mangle: {
-                toplevel: false
+                toplevel: false,
+                keep_fnames: true
             },
             compress: {
                 warnings: false

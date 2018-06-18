@@ -23,7 +23,13 @@ build: | install test
 
 	@npm run build
 
-run: | install start-server
+# comment out to avoid install every restart server
+# run: | install start-server
+# 	@echo Running ZBox Manager Webapp for development
+
+# 	@npm run run &
+
+run: | start-server
 	@echo Running ZBox Manager Webapp for development
 
 	@npm run run &

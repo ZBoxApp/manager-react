@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import {browserHistory} from 'react-router';
 import Promise from 'bluebird';
 
@@ -422,6 +423,6 @@ export default class DomainDetails extends React.Component {
 }
 
 DomainDetails.propTypes = {
-    location: React.PropTypes.object.isRequired,
-    params: React.PropTypes.object.isRequired
+    location: PropTypes.object.isRequired,
+    params: PropTypes.object.isRequired
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import PageInfo from '../page_info.jsx';
 import Panel from '../panel.jsx';
 import UserStore from '../../stores/user_store.jsx';
@@ -245,5 +246,5 @@ export default class SalesForm extends React.Component {
 }
 
 SalesForm.propTypes = {
-    params: React.PropTypes.object
+    params: PropTypes.object
 };

@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import Promise from 'bluebird';
 
 import MessageBar from '../message_bar.jsx';
@@ -364,5 +365,5 @@ export default class Domains extends React.Component {
 }
 
 Domains.propTypes = {
-    location: React.PropTypes.object.isRequired
+    location: PropTypes.object.isRequired
 };

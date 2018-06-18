@@ -1,5 +1,6 @@
 //import * as Utils from '../../utils/utils.jsx';
 import React from 'react';
+import PropTypes from 'prop-types';
 import Panel from '../panel.jsx';
 import CreateDomainForm from './multiform/create_domain_form.jsx';
 import MailCleanerForm from './multiform/mailcleaner_form.jsx';
@@ -174,6 +175,6 @@ export default class CreateDomain extends React.Component {
 }
 
 CreateDomain.propTypes = {
-    params: React.PropTypes.object.isRequired
+    params: PropTypes.object.isRequired
 };
 

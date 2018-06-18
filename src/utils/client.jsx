@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import Promise from 'bluebird';
+import axios from 'axios';
 
 import ZimbraAdminApi from 'zimbra-admin-api-js';
 import Powerdns from 'js-powerdns';
@@ -24,8 +25,6 @@ function handleError(methodName, err) {
         });
         return err;
     }
-
-    console.error(methodName, err); //eslint-disable-line no-console
 
     const error = {
         type: Constants.MessageType.ERROR
@@ -73,23 +72,30 @@ function initZimbra() {
         });
 }
 
-export function getClientConfig(success, error) {
-    return $.ajax({
-        url: 'https://manager.zboxapp.com/ventas_api/parse/functions/getConfigManager',
-        //url: './config/config.json',
-        dataType: 'json',
-        method: 'POST',
-        //method: 'GET',
+export function getClientConfig() {
+    const method = Utils.isDevMode() ? 'GET' : 'POST';
+    const url = Utils.getConfigName();
+    return axios({
+        url,
+        method,
         headers: {
             'X-Parse-Application-Id': 'salesZboxManagerApp'
-        },
-        data: {target: 'manager'},
-        success,
-        error: function onError(xhr, status, err) {
-            var e = handleError('getClientConfig', err);
-            error(e);
         }
     });
+    // return $.ajax({
+    //     url,
+    //     dataType: 'json',
+    //     method,
+    //     headers: {
+    //         'X-Parse-Application-Id': 'salesZboxManagerApp'
+    //     },
+    //     //data: {target: 'manager'},
+    //     success,
+    //     error: function onError(xhr, status, err) {
+    //         var e = handleError('getClientConfig', err);
+    //         error(e);
+    //     }
+    // });
 }
 
 export function clearCacheZimbra(flushData, success, error) {
@@ -222,37 +228,45 @@ export function getAllCompanies() {
 export function getCompany(id) {
     const url = global.window.manager_config.companiesEndPoints.detail.replace('{id}', id);
 
-    return new Promise((resolve, reject) => {
-        return $.ajax({
-            url,
-            beforeSend: function setApiToken(xhrObj) {
-                xhrObj.setRequestHeader('x-api-key', window.manager_config.user_token);
-            },
-            dataType: 'json',
-            success: function onSuccess(data) {
-                return resolve(data);
-            },
-            error: function onError(xhr) {
-                return reject(xhr.responseJSON);
-            }
-        });
-    });
-}
-
-export function getInvoices(id, success, error) {
-    const url = global.window.manager_config.companiesEndPoints.invoices.replace('{id}', id);
-
-    return $.ajax({
-        url,
-        beforeSend: function setApiToken(xhrObj) {
-            xhrObj.setRequestHeader('x-api-key', window.manager_config.user_token);
-        },
-        dataType: 'json',
-        success,
-        error: function onError(xhr, status, err) {
-            error(err);
+    return axios.get(url, {
+        headers: {
+            'x-api-key': window.manager_config.user_token
         }
     });
+
+    // return new Promise((resolve, reject) => {
+    //     $.ajax({
+    //         url,
+    //         beforeSend: function setApiToken(xhrObj) {
+    //             xhrObj.setRequestHeader('x-api-key', window.manager_config.user_token);
+    //         },
+    //         dataType: 'json',
+    //         success: resolve,
+    //         error: reject
+    //     });
+    // });
+}
+
+export function getInvoices(id) {
+    const url = global.window.manager_config.companiesEndPoints.invoices.replace('{id}', id);
+
+    return axios.get(url, {
+        headers: {
+            'x-api-key': window.manager_config.user_token
+        }
+    });
+
+    // return $.ajax({
+    //     url,
+    //     beforeSend: function setApiToken(xhrObj) {
+    //         xhrObj.setRequestHeader('x-api-key', window.manager_config.user_token);
+    //     },
+    //     dataType: 'json',
+    //     success,
+    //     error: function onError(xhr, status, err) {
+    //         error(err);
+    //     }
+    // });
 }
 
 export function getAllDomains(opts, success, error) {
@@ -596,6 +610,37 @@ export function addAccountAlias(alias, success, error) {
             return error(e);
         }
     );
+}
+
+export function countAllLockoutAccounts(domainName, success, error) {
+    const searchObject = {
+        query: '(|(zimbraAccountStatus=*lockout*))',
+        types: 'accounts',
+        maxResults: 0,
+        attrs: '*'
+    };
+
+    if (domainName) {
+        searchObject.domain = domainName;
+    }
+
+    initZimbra().then((zimbra) => {
+        zimbra.directorySearch(
+            searchObject,
+            (err, data) => {
+                if (err) {
+                    const e = handleError('getAllLockoutAccounts', err);
+                    return error(e);
+                }
+
+                return success(data);
+            }
+        );
+    },
+    (err) => {
+        const e = handleError('getAllLockoutAccounts', err);
+        return error(e);
+    });
 }
 
 export function search(query, success, error) {

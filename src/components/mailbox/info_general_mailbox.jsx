@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Button from '../button.jsx';
 import StatusLabel from '../status_label.jsx';
 import * as Client from '../../utils/client.jsx';
@@ -166,7 +167,7 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 }
 
 BlockGeneralInfoMailbox.propTypes = {
-    data: React.PropTypes.object.isRequired,
-    webmail: React.PropTypes.string,
-    location: React.PropTypes.object.isRequired
+    data: PropTypes.object.isRequired,
+    webmail: PropTypes.string,
+    location: PropTypes.object.isRequired
 };

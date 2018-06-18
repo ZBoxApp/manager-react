@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class Anchor extends React.Component {
     render() {
@@ -15,12 +16,12 @@ export default class Anchor extends React.Component {
 }
 
 Anchor.propTypes = {
-    badgeName: React.PropTypes.string,
-    isBadge: React.PropTypes.bool,
-    badgeClass: React.PropTypes.string,
-    url: React.PropTypes.string,
-    label: React.PropTypes.string,
-    attrs: React.PropTypes.object
+    badgeName: PropTypes.string,
+    isBadge: PropTypes.bool,
+    badgeClass: PropTypes.string,
+    url: PropTypes.string,
+    label: PropTypes.string,
+    attrs: PropTypes.object
 };
 
 Anchor.defaultProps = {

@@ -1,5 +1,6 @@
 //import ZimbraStore from '../../stores/zimbra_store.jsx';
 import React from 'react';
+import PropTypes from 'prop-types';
 import * as Utils from '../../utils/utils.jsx';
 import bytesConvertor from 'bytes';
 import Constants from '../../utils/constants.jsx';
@@ -118,5 +119,5 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 }
 
 BlockGeneralInfoMailbox.propTypes = {
-    data: React.PropTypes.object.isRequired
+    data: PropTypes.object.isRequired
 };

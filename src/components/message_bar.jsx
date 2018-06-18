@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import {Link} from 'react-router';
 
 import Constants from '../utils/constants.jsx';
@@ -129,12 +130,12 @@ MessageBar.defaultProps = {
 };
 
 MessageBar.propTypes = {
-    message: React.PropTypes.string.isRequired,
-    type: React.PropTypes.oneOf(['SUCCESS', 'ERROR', 'WARNING', 'INFO', 'LOCKED']),
-    position: React.PropTypes.oneOf(['absolute', 'fixed', 'relative', 'static', 'inherit']),
-    canClose: React.PropTypes.bool,
-    autoclose: React.PropTypes.bool,
-    autocloseInSecs: React.PropTypes.number,
-    link: React.PropTypes.string,
-    linkText: React.PropTypes.string
+    message: PropTypes.string.isRequired,
+    type: PropTypes.oneOf(['SUCCESS', 'ERROR', 'WARNING', 'INFO', 'LOCKED']),
+    position: PropTypes.oneOf(['absolute', 'fixed', 'relative', 'static', 'inherit']),
+    canClose: PropTypes.bool,
+    autoclose: PropTypes.bool,
+    autocloseInSecs: PropTypes.number,
+    link: PropTypes.string,
+    linkText: PropTypes.string
 };

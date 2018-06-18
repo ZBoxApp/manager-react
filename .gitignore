@@ -4,6 +4,9 @@
 dist
 src/config
 node_modules
+.history
+*.zip
+.vagrant
 /path.json
 ./path.json
 .npminstall

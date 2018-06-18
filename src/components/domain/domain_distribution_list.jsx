@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import sweetAlert from 'sweetalert';
 
 import DomainStore from '../../stores/domain_store.jsx';
@@ -309,6 +310,6 @@ export default class DomainDistributionList extends React.Component {
 }
 
 DomainDistributionList.propTypes = {
-    domain: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    domain: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired
 };

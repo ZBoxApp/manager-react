@@ -15,6 +15,7 @@ import StatusLabel from '../status_label.jsx';
 import {Modal} from 'react-bootstrap';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class AddAdminModal extends React.Component {
     constructor(props) {
@@ -272,7 +273,7 @@ export default class AddAdminModal extends React.Component {
 }
 
 AddAdminModal.propTypes = {
-    show: React.PropTypes.bool.isRequired,
-    onHide: React.PropTypes.func.isRequired,
-    domain: React.PropTypes.object.isRequired
+    show: PropTypes.bool.isRequired,
+    onHide: PropTypes.func.isRequired,
+    domain: PropTypes.object.isRequired
 };

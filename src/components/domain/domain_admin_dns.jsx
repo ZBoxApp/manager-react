@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {FormGroup, Button, FormControl, InputGroup} from 'react-bootstrap';
 import sweetAlert from 'sweetalert';
 import * as Utils from '../../utils/utils.jsx';
@@ -616,10 +617,10 @@ export default class DNSZoneForm extends React.Component {
 }
 
 DNSZoneForm.propTypes = {
-    domain: React.PropTypes.object,
-    zone: React.PropTypes.oneOfType([
-        React.PropTypes.string,
-        React.PropTypes.object
+    domain: PropTypes.object,
+    zone: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.object
     ]),
-    location: React.PropTypes.object
+    location: PropTypes.object
 };

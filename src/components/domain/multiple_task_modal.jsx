@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import {Modal} from 'react-bootstrap';
 import DateTimeField from 'react-bootstrap-datetimepicker';
 import * as Client from '../../utils/client.jsx';
@@ -406,7 +406,7 @@ export default class MultipleTaskModal extends React.Component {
 }
 
 MultipleTaskModal.propTypes = {
-    show: React.PropTypes.bool.isRequired,
-    onHide: React.PropTypes.func.isRequired,
-    data: React.PropTypes.object
+    show: PropTypes.bool.isRequired,
+    onHide: PropTypes.func.isRequired,
+    data: PropTypes.object
 };

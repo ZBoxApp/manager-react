@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {browserHistory} from 'react-router';
 import * as Utils from '../../../utils/utils.jsx';
 import Constants from '../../../utils/constants.jsx';
@@ -332,5 +333,5 @@ export default class DNSZoneForm extends React.Component {
 }
 
 DNSZoneForm.propTypes = {
-    state: React.PropTypes.object
+    state: PropTypes.object
 };

@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import UserStore from '../../stores/user_store.jsx';
 import ZimbraStore from '../../stores/zimbra_store.jsx';
@@ -150,6 +151,6 @@ export default class CompanyDomains extends React.Component {
 }
 
 CompanyDomains.propTypes = {
-    company: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    company: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired
 };

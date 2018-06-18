@@ -1,9 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Button from '../button.jsx';
 import DateTimeField from 'react-bootstrap-datetimepicker';
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
 import Constants from '../../utils/constants.jsx';
+import moment from 'moment';
 
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 
@@ -15,59 +17,66 @@ export default class FormVacacionesMailbox extends React.Component {
     constructor(props) {
         super(props);
 
+        this.state = this.getOwnInitialState(props);
         this.handleSaveAutoResp = this.handleSaveAutoResp.bind(this);
-
-        this.dateStart = null;
-        this.dateEnd = null;
-        this.initialDate = Utils.setInitialDate();
 
         this.domain_id = this.props.domainId || null;
     }
 
-    handleChangeDate(x, from) {
-        const ref = this.refs[from];
-        const timestamp = Utils.getInitialDateFromTimestamp(x);
-
-        ref.value = timestamp;
+    handleChange(timestamp, fieldName) {
+        this.setState({
+            [fieldName]: timestamp
+        });
     }
 
     handleSaveAutoResp() {
-        const data = this.props.data;
-        const refs = this.refs;
-        const attrs = {};
-        const isEnabled = refs.zimbraPrefOutOfOfficeReplyEnabled.checked;
-        const start = refs.zimbraPrefOutOfOfficeFromDate.value;
-        const end = refs.zimbraPrefOutOfOfficeUntilDate.value;
-        let formatedStart = document.getElementById('zimbraPrefOutOfOfficeFromDate').value.split('/').reverse().join('') + '000000Z';
-        let formatedEnd = document.getElementById('zimbraPrefOutOfOfficeUntilDate').value.split('/').reverse().join('') + '000000Z';
+        const { id: accountId } = this.props.data;
+        const {zimbraPrefOutOfOfficeFromDate, zimbraPrefOutOfOfficeUntilDate, zimbraPrefOutOfOfficeReply, zimbraPrefOutOfOfficeReplyEnabled} = this.state;
+        const isEnabled = zimbraPrefOutOfOfficeReplyEnabled;
 
-        if ((start > end) && isEnabled) {
-            GlobalActions.emitMessage({
-                error: 'La fecha en la que termina su respuesta automática, debe ser mayor que en la que comienza.',
-                typeError: messageType.ERROR
-            });
+        const startTs = Utils.stringTSToNumber(zimbraPrefOutOfOfficeFromDate);
+        const endTs = Utils.stringTSToNumber(zimbraPrefOutOfOfficeUntilDate);
+        const message = zimbraPrefOutOfOfficeReply && zimbraPrefOutOfOfficeReply.trim();
 
-            return false;
-        } else if ((start === end) && isEnabled) {
-            GlobalActions.emitMessage({
-                error: 'La fecha en la que comienza su respuesta automática no puede ser la misma fecha en la que termina.',
-                typeError: messageType.ERROR
-            });
-
-            return false;
-        }
+        const attrs = {
+            zimbraPrefOutOfOfficeReplyEnabled: isEnabled.toString().toUpperCase()
+        };
 
         if (isEnabled) {
-            attrs.zimbraPrefOutOfOfficeReplyEnabled = isEnabled.toString().toUpperCase();
-            attrs.zimbraPrefOutOfOfficeReply = refs.zimbraPrefOutOfOfficeReply.value;
-            attrs.zimbraPrefOutOfOfficeUntilDate = formatedEnd;
-            attrs.zimbraPrefOutOfOfficeFromDate = formatedStart;
-        } else {
-            attrs.zimbraPrefOutOfOfficeReplyEnabled = isEnabled.toString().toUpperCase();
+            if (startTs > endTs) {
+                return GlobalActions.emitMessage({
+                    error: 'La fecha en la que termina su respuesta automática, debe ser mayor que en la que comienza.',
+                    typeError: messageType.ERROR
+                });
+            }
+
+            if (startTs === endTs) {
+                return GlobalActions.emitMessage({
+                    error: 'La fecha en la que comienza su respuesta automática no puede ser la misma fecha con la que termina.',
+                    typeError: messageType.ERROR
+                });
+            }
+
+            if (!message || message.length === 0) {
+                return GlobalActions.emitMessage({
+                    error: 'Debe ingresar su mensaje de respuesta automática.',
+                    typeError: messageType.ERROR
+                });
+            }
+
+            // add message to payload to be sent to zimbra server
+            attrs.zimbraPrefOutOfOfficeReply = message;
+
+            // get uct date string from timestamp
+            const uctDateStart = Utils.timestampToUTCDate(zimbraPrefOutOfOfficeFromDate);
+            const uctDateEnd = Utils.timestampToUTCDate(zimbraPrefOutOfOfficeUntilDate);
+
+            attrs.zimbraPrefOutOfOfficeFromDate = uctDateStart;
+            attrs.zimbraPrefOutOfOfficeUntilDate = uctDateEnd;
         }
 
-        Client.modifyAccount(data.id, attrs, (mailbox) => {
-            MailboxStore.updateMailbox(data.id, mailbox, this.domain_id);
+        Client.modifyAccount(accountId, attrs, (mailbox) => {
+            MailboxStore.updateMailbox(accountId, mailbox, this.domain_id);
             GlobalActions.emitMessage({
                 error: 'Se ha modificado su respuesta de vacaciones con éxito.',
                 typeError: messageType.SUCCESS
@@ -78,47 +87,28 @@ export default class FormVacacionesMailbox extends React.Component {
                 typeError: messageType.ERROR
             });
         });
-
-        return null;
     }
 
-    componentDidMount() {
-        const data = this.props.data.attrs;
+    getOwnInitialState(props) {
+        const { data } = props;
+        const { attrs } = data;
 
-        if (data.hasOwnProperty('zimbraPrefOutOfOfficeReplyEnabled')) {
-            this.refs.zimbraPrefOutOfOfficeReplyEnabled.checked = data.zimbraPrefOutOfOfficeReplyEnabled.toString().toLowerCase() === 'true';
-        }
+        const zimbraPrefOutOfOfficeFromDate = Utils.getTSFromUTC(Utils.getUTCTime(attrs.zimbraPrefOutOfOfficeFromDate));
+        const zimbraPrefOutOfOfficeUntilDate = Utils.getTSFromUTC(Utils.getUTCTime(attrs.zimbraPrefOutOfOfficeUntilDate));
 
-        if (data.hasOwnProperty('zimbraPrefOutOfOfficeReply')) {
-            this.refs.zimbraPrefOutOfOfficeReply.value = data.zimbraPrefOutOfOfficeReply;
-        }
+        const nextState = {
+            zimbraPrefOutOfOfficeReplyEnabled: Utils.parseBooleanValue(attrs.zimbraPrefOutOfOfficeReplyEnabled),
+            zimbraPrefOutOfOfficeReply: attrs.zimbraPrefOutOfOfficeReply,
+            zimbraPrefOutOfOfficeFromDate,
+            zimbraPrefOutOfOfficeUntilDate
+        };
 
-        if (this.dateStart) {
-            this.refs.zimbraPrefOutOfOfficeFromDate.value = Utils.forceTimestampFromHumanDate(this.dateStart);
-        }
-
-        if (this.dateEnd) {
-            this.refs.zimbraPrefOutOfOfficeUntilDate.value = Utils.forceTimestampFromHumanDate(this.dateEnd);
-        }
-    }
-
-    componentWillMount() {
-        const data = this.props.data.attrs;
-
-        if (data.hasOwnProperty('zimbraPrefOutOfOfficeFromDate')) {
-            this.dateStart = Utils.dateFormatted(data.zimbraPrefOutOfOfficeFromDate, true, '/');
-        } else {
-            this.dateStart = this.initialDate.formatted;
-        }
-
-        if (data.hasOwnProperty('zimbraPrefOutOfOfficeUntilDate')) {
-            this.dateEnd = Utils.dateFormatted(data.zimbraPrefOutOfOfficeUntilDate, true, '/');
-        } else {
-            this.dateEnd = this.initialDate.formatted;
-        }
+        return nextState;
     }
 
     render() {
+        const {zimbraPrefOutOfOfficeFromDate, zimbraPrefOutOfOfficeReply, zimbraPrefOutOfOfficeUntilDate, zimbraPrefOutOfOfficeReplyEnabled} = this.state;
+
         return (
             <form
                 className='simple_form form-horizontal mailbox-form'
@@ -136,9 +126,11 @@ export default class FormVacacionesMailbox extends React.Component {
                         <label className='radio-inline pretty-input'>
                             <div className='pretty-checkbox'>
                                 <input
+                                    checked={zimbraPrefOutOfOfficeReplyEnabled}
+                                    onChange={({ target: { checked, name } }) => this.handleChange(checked, name)}
                                     type='checkbox'
                                     className='pretty'
-                                    ref='zimbraPrefOutOfOfficeReplyEnabled'
+                                    name={'zimbraPrefOutOfOfficeReplyEnabled'}
                                 />
                                 <span></span>
                             </div>
@@ -156,19 +148,17 @@ export default class FormVacacionesMailbox extends React.Component {
                             inputFormat='DD/MM/YYYY'
                             inputProps={
                                 {
-                                    id: 'zimbraPrefOutOfOfficeFromDate',
                                     readOnly: 'readOnly'
                                 }
                             }
-                            onChange={(x) => {
-                                this.handleChangeDate(x, 'zimbraPrefOutOfOfficeFromDate');
+                            onChange={(timestamp) => {
+                                this.handleChange(timestamp, 'zimbraPrefOutOfOfficeFromDate');
                             }}
-                            defaultText={this.dateStart}
+                            minDate={moment()}
+                            dateTime={zimbraPrefOutOfOfficeFromDate}
+                            value={zimbraPrefOutOfOfficeFromDate}
                             mode={'date'}
-                        />
-                        <input
-                            type='hidden'
-                            ref='zimbraPrefOutOfOfficeFromDate'
+                            showToday={true}
                         />
                     </div>
                 </div>
@@ -183,20 +173,16 @@ export default class FormVacacionesMailbox extends React.Component {
                             inputFormat='DD/MM/YYYY'
                             inputProps={
                                 {
-                                    id: 'zimbraPrefOutOfOfficeUntilDate',
                                     readOnly: 'readOnly'
                                 }
                             }
-                            onChange={(x) => {
-                                this.handleChangeDate(x, 'zimbraPrefOutOfOfficeUntilDate');
+                            onChange={(timestamp) => {
+                                this.handleChange(timestamp, 'zimbraPrefOutOfOfficeUntilDate');
                             }}
-                            defaultText={this.dateEnd}
+                            minDate={moment()}
+                            dateTime={zimbraPrefOutOfOfficeUntilDate}
+                            value={zimbraPrefOutOfOfficeUntilDate}
                             mode={'date'}
-                        />
-
-                        <input
-                            type='hidden'
-                            ref='zimbraPrefOutOfOfficeUntilDate'
                         />
                     </div>
                 </div>
@@ -208,11 +194,12 @@ export default class FormVacacionesMailbox extends React.Component {
 
                     <div className='col-sm-8'>
                         <textarea
-                            name='response'
                             id='responseBox'
                             className='form-control'
                             rows='4'
-                            ref='zimbraPrefOutOfOfficeReply'
+                            value={zimbraPrefOutOfOfficeReply}
+                            name={'zimbraPrefOutOfOfficeReply'}
+                            onChange={({ target: { name, value } }) => this.handleChange(value, name)}
                         >
                         </textarea>
                     </div>
@@ -240,9 +227,9 @@ export default class FormVacacionesMailbox extends React.Component {
 }
 
 FormVacacionesMailbox.propTypes = {
-    data: React.PropTypes.oneOfType([
-        React.PropTypes.object,
-        React.PropTypes.string
+    data: PropTypes.oneOfType([
+        PropTypes.object,
+        PropTypes.string
     ]),
-    domainId: React.PropTypes.string
+    domainId: PropTypes.string
 };

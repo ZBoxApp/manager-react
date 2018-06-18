@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import $ from 'jquery';
-
 import React from 'react';
+import PropTypes from 'prop-types';
 import {Link} from 'react-router';
 
 export default class ErrorPage extends React.Component {
@@ -37,8 +37,6 @@ export default class ErrorPage extends React.Component {
     }
 }
 
-ErrorPage.defaultProps = {
-};
 ErrorPage.propTypes = {
-    location: React.PropTypes.object
+    location: PropTypes.object
 };

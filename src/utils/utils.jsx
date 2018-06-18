@@ -6,6 +6,7 @@ import * as GlobalActions from '../action_creators/global_actions.jsx';
 import Constants from './constants.jsx';
 import ZimbraStore from '../stores/zimbra_store.jsx';
 import sweetAlert from 'sweetalert';
+import moment from 'moment';
 
 const messageType = Constants.MessageType;
 
@@ -600,6 +601,25 @@ export function getInitialDateFromTimestamp(timestamp) {
     return timestampReseted;
 }
 
+export function timestampToUTCDate(timestamp) {
+    const timestampAsNumber = stringTSToNumber(timestamp);
+    const momentDate = moment(new Date(timestampAsNumber)).format('YYYY/MM/DD');
+    const UCTDate = momentDate.split('/').join('');
+    return `${UCTDate}000000Z`;
+}
+
+export function parseBooleanValue(boolean) {
+    if (typeof boolean === 'undefined') {
+        return false;
+    }
+
+    return boolean.toString().toLowerCase() === 'true';
+}
+
+export function stringTSToNumber(ts) {
+    return parseInt(ts, 10);
+}
+
 export function forceTimestampFromHumanDate(date) {
     const arrDate = date.split('/').reverse();
     const newDateArr = arrDate.map((pos, i) => {
@@ -845,4 +865,50 @@ export function getDaysFromDate2Date(dateFrom, dateTo) {
 
 export function randomRange(max, min) {
     return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+export function getHostname(nextPath) {
+    const { hostname, port, protocol } = window.location;
+    let host = `${protocol}//${hostname}`;
+    host = port && port.length > 0 ? `${host}:${port}` : host;
+    host += nextPath;
+    return host;
+}
+
+export function getConfigName() {
+    return isDevMode() ? '/config/config.development.json' : 'https://manager.zboxapp.com/ventas_api/parse/functions/getConfigManager';
+}
+
+export function isDevMode() {
+    return process.env.NODE_ENV === 'development';
+}
+
+export function getUTCTime(utc) {
+    if (!utc) {
+        return null;
+    }
+
+    const utcString = utc.slice(0, utc.length - 1);
+    const year = utcString.slice(0, 4);
+    const month = utcString.slice(4, 6);
+    const day = utcString.slice(6, 8);
+    const hours = utcString.slice(8, 10);
+    const minutes = utcString.slice(10, 12);
+    const seconds = utcString.slice(12, 14);
+
+    return [year, month, day, hours, minutes, seconds];
+}
+
+export function getTSFromUTC(utc) {
+    let time = utc;
+    const now = new Date();
+    if (!time) {
+        return now.getTime();
+    }
+
+    if (Object.prototype.toString.call(utc) === '[object Array]') {
+        time = new Date(...utc);
+    }
+
+    return time.getTime();
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class Button extends React.Component {
     render() {
@@ -9,9 +10,6 @@ export default class Button extends React.Component {
 }
 
 Button.propTypes = {
-    btnAttrs: React.PropTypes.object,
-    children: React.PropTypes.any
-};
-
-Button.defaultProps = {
+    btnAttrs: PropTypes.object,
+    children: PropTypes.any
 };

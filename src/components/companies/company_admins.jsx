@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import Promise from 'bluebird';
 
@@ -191,6 +192,6 @@ export default class CompanyAdmins extends React.Component {
 }
 
 CompanyAdmins.propTypes = {
-    company: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    company: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired
 };

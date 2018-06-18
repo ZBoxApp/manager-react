@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import * as Utils from '../../utils/utils.jsx';
 
@@ -59,7 +60,7 @@ export default class NotFound404 extends React.Component {
 }
 
 NotFound404.propTypes = {
-    location: React.PropTypes.object
+    location: PropTypes.object
 };
 
 class ZBoxShip {

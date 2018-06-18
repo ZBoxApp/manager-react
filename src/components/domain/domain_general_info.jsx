@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import Panel from '../panel.jsx';
@@ -72,7 +73,13 @@ export default class DomainGeneralInfo extends React.Component {
         }
     }
     renovationDate() {
-        const timestamp = moment(this.props.domain.attrs.zimbraCreateTimestamp);
+        const utc = Utils.getUTCTime(this.props.domain.attrs.zimbraCreateTimestamp);
+
+        if (!utc) {
+            return 'No disponible';
+        }
+
+        const timestamp = moment.utc(utc);
         const now = moment();
         timestamp.year(now.year());
         if (timestamp.isBefore(now)) {
@@ -188,7 +195,7 @@ export default class DomainGeneralInfo extends React.Component {
 }
 
 DomainGeneralInfo.propTypes = {
-    domain: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired,
-    params: React.PropTypes.object.isRequired
+    domain: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+    params: PropTypes.object.isRequired
 };

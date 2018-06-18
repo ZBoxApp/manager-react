@@ -2,8 +2,8 @@
 // See LICENSE.txt for license information.
 
 import $ from 'jquery';
-
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class NotLoggedIn extends React.Component {
     componentDidMount() {
@@ -19,10 +19,7 @@ export default class NotLoggedIn extends React.Component {
     }
 }
 
-NotLoggedIn.defaultProps = {
-};
-
 NotLoggedIn.propTypes = {
-    children: React.PropTypes.object,
-    location: React.PropTypes.object
+    children: PropTypes.object,
+    location: PropTypes.object
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import * as Client from '../../utils/client.jsx';
 import EventStore from '../../stores/event_store.jsx';
@@ -159,5 +160,5 @@ export default class ResendForm extends React.Component {
 }
 
 ResendForm.propTypes = {
-    mailbox: React.PropTypes.object
+    mailbox: PropTypes.object
 };

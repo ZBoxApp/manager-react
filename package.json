@@ -19,6 +19,7 @@
     "node-sass": "^3.8.0",
     "nprogress": "^0.2.0",
     "object-assign": "4.0.1",
+    "prop-types": "^15.6.1",
     "react": "15.0.1",
     "react-bootstrap": "0.29.2",
     "react-bootstrap-datetimepicker": "0.0.22",
@@ -31,10 +32,11 @@
     "react-toastr": "^2.6.0",
     "sweetalert": "^1.1.3",
     "toastr": "^2.1.2",
-    "zimbra-admin-api-js": "ZBoxApp/zimbra-admin-api-js#manager"
+    "zimbra-admin-api-js": "git+https://github.com/ZBoxApp/zimbra-admin-api-js.git#manager"
   },
   "devDependencies": {
     "assets-webpack-plugin": "^3.4.0",
+    "axios": "^0.18.0",
     "babel-cli": "^6.18.0",
     "babel-eslint": "6.0.4",
     "babel-loader": "^6.2.7",
@@ -44,7 +46,7 @@
     "babel-preset-react": "6.5.0",
     "babel-preset-stage-0": "6.5.0",
     "babel-runtime": "^6.6.1",
-    "body-parser": "^1.15.0",
+    "body-parser": "^1.18.3",
     "cookie-parser": "^1.4.1",
     "copy-webpack-plugin": "2.1.3",
     "cors": "^2.7.1",
@@ -53,7 +55,8 @@
     "eslint": "2.8.0",
     "eslint-plugin-react": "5.0.1",
     "exports-loader": "0.6.3",
-    "express": "^4.13.4",
+    "express": "^4.16.3",
+    "express-http-proxy": "^1.2.0",
     "extract-text-webpack-plugin": "1.0.1",
     "file-loader": "0.8.5",
     "html-loader": "0.4.3",
@@ -62,7 +65,10 @@
     "imports-loader": "0.6.5",
     "json-loader": "0.5.4",
     "morgan": "^1.7.0",
+    "nodemon": "^1.17.5",
+    "npm-run-all": "^4.1.3",
     "raw-loader": "0.5.1",
+    "request": "^2.87.0",
     "sass-loader": "3.2.0",
     "style-loader": "0.13.1",
     "url-loader": "0.5.7",
@@ -75,7 +81,8 @@
     "run": "webpack --progress --watch",
     "run-fullmap": "webpack --progress --watch",
     "companies-service": "babel-node companies-service.js",
-    "server": "babel-node server.js",
-    "sales-service": "babel-node sales-services.js"
+    "server": "nodemon server.js",
+    "sales-service": "babel-node sales-services.js",
+    "start-webapp": "NODE_ENV=development npm-run-all --parallel run server"
   }
 }

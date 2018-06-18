@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class LoginEmail extends React.Component {
     constructor(props) {
@@ -74,10 +75,8 @@ export default class LoginEmail extends React.Component {
         );
     }
 }
-LoginEmail.defaultProps = {
-};
 
 LoginEmail.propTypes = {
-    submit: React.PropTypes.func.isRequired,
-    loginError: React.PropTypes.string
+    submit: PropTypes.func.isRequired,
+    loginError: PropTypes.string
 };

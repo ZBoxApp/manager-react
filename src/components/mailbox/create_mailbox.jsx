@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import PasswordStrengthMeter from 'react-password-strength-meter';
 import Panel from '../panel.jsx';
 import Button from '../button.jsx';
@@ -766,6 +767,6 @@ export default class CreateMailBox extends React.Component {
 }
 
 CreateMailBox.propTypes = {
-    location: React.PropTypes.object,
-    params: React.PropTypes.object
+    location: PropTypes.object,
+    params: PropTypes.object
 };

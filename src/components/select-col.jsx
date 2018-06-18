@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class SelectCol extends React.Component {
     constructor(props) {
@@ -92,15 +93,15 @@ export default class SelectCol extends React.Component {
 }
 
 SelectCol.propTypes = {
-    options: React.PropTypes.object.isRequired,
-    selectAttrs: React.PropTypes.object,
-    onSelected: React.PropTypes.func,
-    disabledOptions: React.PropTypes.object,
-    selected: React.PropTypes.oneOfType([
-        React.PropTypes.string,
-        React.PropTypes.bool
+    options: PropTypes.object.isRequired,
+    selectAttrs: PropTypes.object,
+    onSelected: PropTypes.func,
+    disabledOptions: PropTypes.object,
+    selected: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.bool
     ]),
-    id: React.PropTypes.any.isRequired
+    id: PropTypes.any.isRequired
 };
 
 SelectCol.defaultProps = {

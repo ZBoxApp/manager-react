@@ -46,27 +46,24 @@ const notFoundParams = {
 };
 
 function preRenderSetup(callwhendone) {
-    const d1 = Client.getClientConfig(
-        (data) => {
-            const config = data.result || data;
+    Client.getClientConfig().then((response) => {
+        const data = response.data;
+        const config = data.result || data;
 
-            if (!config) {
-                return;
-            }
-
-            global.window.manager_config = config;
-
-            if (config.debug) {
-                global.window.Client = Client;
-                global.window.Utils = Utils;
-            }
-        },
-        (err) => {
-            console.error(err); //eslint-disable-line no-console
+        if (!config) {
+            return;
         }
-    );
 
-    $.when(d1).done(callwhendone);
+        global.window.manager_config = config;
+
+        if (config.debug) {
+            global.window.Client = Client;
+            global.window.Utils = Utils;
+        }
+        callwhendone();
+    }).catch((err) => {
+        console.error(err); //eslint-disable-line no-console
+    });
 }
 
 function onPreLoggedIn(nextState, replace, callback) {

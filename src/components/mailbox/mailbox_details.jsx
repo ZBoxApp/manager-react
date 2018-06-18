@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import {browserHistory} from 'react-router';
 
 import EventStore from '../../stores/event_store.jsx';
@@ -432,6 +433,6 @@ export default class MailboxDetails extends React.Component {
 }
 
 MailboxDetails.propTypes = {
-    location: React.PropTypes.object,
-    params: React.PropTypes.object
+    location: PropTypes.object,
+    params: PropTypes.object
 };

@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {Modal} from 'react-bootstrap';
 import * as GlobalActions from '../action_creators/global_actions.jsx';
 import SelectCols from './select-col.jsx';
@@ -537,6 +538,6 @@ export default class ImportMassiveModal extends React.Component {
 }
 
 ImportMassiveModal.propTypes = {
-    show: React.PropTypes.bool.isRequired,
-    onHide: React.PropTypes.func.isRequired
+    show: PropTypes.bool.isRequired,
+    onHide: PropTypes.func.isRequired
 };

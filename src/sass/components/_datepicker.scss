@@ -1,0 +1,24 @@
+.datepicker-days {
+  padding: 10px 10px 0px 10px;
+
+  .switch {
+    text-align: center;
+  }
+
+  .today {
+    color: #337ab7;
+  }
+
+  .day {
+    text-align: center;
+
+    &.disabled {
+      opacity: .5;
+    }
+  }
+
+  .active {
+    color: #FFF;
+    background-color: #337ab7;
+  }
+}

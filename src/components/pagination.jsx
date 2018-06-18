@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {browserHistory} from 'react-router';
 
 export default class Pagination extends React.Component {
@@ -199,12 +200,12 @@ export default class Pagination extends React.Component {
 }
 
 Pagination.propTypes = {
-    url: React.PropTypes.string.isRequired,
-    currentPage: React.PropTypes.number.isRequired,
-    totalPages: React.PropTypes.number.isRequired,
-    range: React.PropTypes.number,
-    total: React.PropTypes.number,
-    name: React.PropTypes.string
+    url: PropTypes.string.isRequired,
+    currentPage: PropTypes.number.isRequired,
+    totalPages: PropTypes.number.isRequired,
+    range: PropTypes.number,
+    total: PropTypes.number,
+    name: PropTypes.string
 };
 
 Pagination.defaultProps = {

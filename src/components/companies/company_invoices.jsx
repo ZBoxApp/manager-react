@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import moment from 'moment';
 import _ from 'lodash';
 
@@ -27,35 +28,32 @@ export default class CompanyInvoices extends React.Component {
     componentDidMount() {
         this.getInvoices();
     }
+
     getInvoices() {
         if (global.window.manager_config.companiesEndPoints.invoices) {
-            return Client.getInvoices(
-                this.props.company.id,
-                (invoices) => {
-                    const hasDebt = _.find(invoices, {status: 2});
-                    if (hasDebt) {
-                        GlobalActions.showAlert({
-                            type: 'error',
-                            title: 'Cuenta con deuda',
-                            body: 'Tiene una o más facturas impagas. Por favor corrija esta situación para prevenir un bloqueo de los servicios',
-                            options: {
-                                timeOut: 10000,
-                                extendedTimeOut: 5000,
-                                closeButton: true
-                            }
-                        });
-                    }
-                    this.setState({invoices});
-                },
-                (error) => {
-                    this.setState({
-                        error: {
-                            message: error.message,
-                            type: messageType.ERROR
+            Client.getInvoices(this.props.company.id).then((invoices) => {
+                const hasDebt = _.find(invoices, {status: 2});
+                if (hasDebt) {
+                    GlobalActions.showAlert({
+                        type: 'error',
+                        title: 'Cuenta con deuda',
+                        body: 'Tiene una o más facturas impagas. Por favor corrija esta situación para prevenir un bloqueo de los servicios',
+                        options: {
+                            timeOut: 10000,
+                            extendedTimeOut: 5000,
+                            closeButton: true
                         }
                     });
                 }
-            );
+                this.setState({invoices});
+            }).catch((error) => {
+                this.setState({
+                    error: {
+                        message: error.message,
+                        type: messageType.ERROR
+                    }
+                });
+            });
         }
 
         return this.setState({
@@ -186,6 +184,6 @@ export default class CompanyInvoices extends React.Component {
 }
 
 CompanyInvoices.propTypes = {
-    company: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    company: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired
 };

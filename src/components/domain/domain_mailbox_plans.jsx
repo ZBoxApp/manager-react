@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
@@ -226,7 +227,7 @@ export default class DomainMailboxPlans extends React.Component {
 }
 
 DomainMailboxPlans.propTypes = {
-    domain: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired,
-    params: React.PropTypes.object.isRequired
+    domain: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+    params: PropTypes.object.isRequired
 };

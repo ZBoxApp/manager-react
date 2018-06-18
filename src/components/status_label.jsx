@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 // Cambiar por algo que reciba el status y el tamaño y se cree el componente de una vez
 export default class StatusLabel extends React.Component {
@@ -12,8 +13,8 @@ export default class StatusLabel extends React.Component {
 }
 
 StatusLabel.propTypes = {
-    classes: React.PropTypes.string,
-    children: React.PropTypes.any
+    classes: PropTypes.string,
+    children: PropTypes.any
 };
 
 StatusLabel.defaultProps = {

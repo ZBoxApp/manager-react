@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class PageInfo extends React.Component {
     render() {
@@ -18,8 +19,8 @@ export default class PageInfo extends React.Component {
 }
 
 PageInfo.propTypes = {
-    titlePage: React.PropTypes.any.isRequired,
-    descriptionPage: React.PropTypes.any
+    titlePage: PropTypes.any.isRequired,
+    descriptionPage: PropTypes.any
 };
 
 PageInfo.defaultProps = {

@@ -1,5 +1,6 @@
 //import Textarea from 'react-textarea-autosize';
 import React from 'react';
+import PropTypes from 'prop-types';
 import {browserHistory} from 'react-router';
 
 import MessageBar from '../message_bar.jsx';
@@ -423,5 +424,5 @@ export default class EditDomain extends React.Component {
 }
 
 EditDomain.propTypes = {
-    params: React.PropTypes.object.isRequired
+    params: PropTypes.object.isRequired
 };

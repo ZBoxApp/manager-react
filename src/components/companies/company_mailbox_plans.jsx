@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import MessageBar from '../message_bar.jsx';
 import Panel from '../panel.jsx';
@@ -172,5 +173,5 @@ export default class CompanyMailboxPlans extends React.Component {
 }
 
 CompanyMailboxPlans.propTypes = {
-    company: React.PropTypes.object.isRequired
+    company: PropTypes.object.isRequired
 };

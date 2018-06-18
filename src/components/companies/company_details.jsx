@@ -4,6 +4,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import Promise from 'bluebird';
 
 import CompanyInfo from './company_info.jsx';
@@ -217,6 +218,6 @@ export default class CompaniesDetails extends React.Component {
 }
 
 CompaniesDetails.propTypes = {
-    location: React.PropTypes.object.isRequired,
-    params: React.PropTypes.object.isRequired
+    location: PropTypes.object.isRequired,
+    params: PropTypes.object.isRequired
 };

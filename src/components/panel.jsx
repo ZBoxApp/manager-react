@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Button from './button.jsx';
 
 export default class Panel extends React.Component {
@@ -47,14 +48,14 @@ export default class Panel extends React.Component {
 }
 
 Panel.propTypes = {
-    hasHeader: React.PropTypes.bool,
-    btnsHeader: React.PropTypes.array,
-    title: React.PropTypes.string,
-    classHeader: React.PropTypes.string,
-    error: React.PropTypes.element,
-    children: React.PropTypes.any,
-    filter: React.PropTypes.element,
-    classCss: React.PropTypes.array
+    hasHeader: PropTypes.bool,
+    btnsHeader: PropTypes.array,
+    title: PropTypes.string,
+    classHeader: PropTypes.string,
+    error: PropTypes.element,
+    children: PropTypes.any,
+    filter: PropTypes.element,
+    classCss: PropTypes.array
 };
 
 Panel.defaultProps = {

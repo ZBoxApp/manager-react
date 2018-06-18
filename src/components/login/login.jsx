@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import {browserHistory} from 'react-router';
 
 import UserStore from '../../stores/user_store.jsx';
@@ -152,8 +153,6 @@ export default class Login extends React.Component {
     }
 }
 
-Login.defaultProps = {
-};
 Login.propTypes = {
-    location: React.PropTypes.object.isRequired
+    location: PropTypes.object.isRequired
 };

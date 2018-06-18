@@ -3,6 +3,7 @@
 //import ToggleModalButton from '../toggle_modal_button.jsx';
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import sweetAlert from 'sweetalert';
 import Button from '../button.jsx';
 import MessageBar from '../message_bar.jsx';
@@ -1124,6 +1125,6 @@ export default class EditMailBox extends React.Component {
 }
 
 EditMailBox.propTypes = {
-    location: React.PropTypes.object,
-    params: React.PropTypes.any
+    location: PropTypes.object,
+    params: PropTypes.any
 };

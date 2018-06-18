@@ -3,6 +3,7 @@
 
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import Promise from 'bluebird';
 import EventStore from '../../stores/event_store.jsx';
 import {browserHistory} from 'react-router';
@@ -191,18 +192,22 @@ export default class Mailboxes extends React.Component {
         );
     }
 
-    getAccounts(domainName, maxResult) {
-        //const promises = [];
+    countAllLockoutAccounts(domainName) {
+        return new Promise((resolve, reject) => {
+            Client.countAllLockoutAccounts(domainName, (response) => {
+                resolve(response);
+            }, (error) => {
+                reject(error);
+            });
+        });
+    }
+
+    getAccountsFromAPI(domainName, maxResult) {
         const attrneeded = Utils.getAttrsBySectionFromConfig('mailboxes');
+
         const attrs = {
             maxResults: maxResult
         };
-
-        if (!this.state.loading) {
-            this.setState({
-                loading: true
-            });
-        }
 
         if (attrneeded) {
             attrs.attrs = attrneeded;
@@ -213,57 +218,32 @@ export default class Mailboxes extends React.Component {
             this.domainName = domainName;
         }
 
-        new Promise((resolve, reject) => {
-            // if domain name exists, just search all mailbox from this domain
-            if (domainName) {
-                const hasMailboxForDomain = this.isStoreEnabled ? MailboxStore.getMailboxByDomainId(this.domainId) : null;
+        return new Promise((resolve, reject) => {
+            Client.getAllAccounts(attrs, resolve, reject);
+        });
+    }
 
-                // if mailbox by domain exists return it
-                if (hasMailboxForDomain) {
-                    return resolve(hasMailboxForDomain);
-                }
+    getAccounts(domainName, maxResult) {
+        if (!this.state.loading) {
+            this.setState({ loading: true });
+        }
 
-                // get all mailboxes from domain
-                return Client.getAllAccounts(attrs, (success) => {
-                    if (success.total) {
-                        const data = Utils.extractLockOuts(success);
-                        if (this.isStoreEnabled) {
-                            MailboxStore.setMailboxesByDomain(this.domainId, data);
-                        } else {
-                            this.setState({
-                                accounts: data
-                            });
-                        }
-                    }
+        const countLockoutAccounts = this.countAllLockoutAccounts(domainName);
+        const allAccounts = this.getAccountsFromAPI(domainName, maxResult);
 
-                    return resolve(success);
-                }, (error) => {
-                    return reject(error);
+        Promise.all([countLockoutAccounts, allAccounts]).then((results) => {
+            const lockout = results[0];
+            const accounts = results[1];
+
+            if (lockout.total > 0) {
+                GlobalActions.emitMessage({
+                    error: `${lockout.total} casillas bloqueadas.`,
+                    typeError: messageType.LOCKED
                 });
             }
 
-            // if all mailbox exists just return it
-            const hasMailboxes = this.isStoreEnabled ? MailboxStore.hasMailboxes() : null;
-
-            if (hasMailboxes) {
-                return resolve(MailboxStore.getMailboxes());
-            }
-
-            // if all mailboxes doesn't exist just search them.
-            return Client.getAllAccounts(attrs, (success) => {
-                const data = Utils.extractLockOuts(success);
-
-                if (this.isStoreEnabled) {
-                    MailboxStore.setMailboxes(data);
-                }
-
-                return resolve(data);
-            }, (error) => {
-                return reject(error);
-            });
-        }).then((data) => {
-            if (data.account) {
-                this.mailboxes = data;
+            if (accounts.total > 0) {
+                this.mailboxes = accounts;
 
                 this.isRefreshing = false;
 
@@ -281,7 +261,7 @@ export default class Mailboxes extends React.Component {
                 return this.setState({
                     data: tables,
                     loading: false,
-                    ac: data.account
+                    ac: accounts.account
                 });
             }
 
@@ -290,33 +270,19 @@ export default class Mailboxes extends React.Component {
                 domain: domainName,
                 loading: false
             });
-        }).catch((error) => {
-            if (error.code === codes.TOO_MANY_SEARCH_RESULTS) {
-                this.isRefreshing = true;
-                const newMaxResult = (parseInt(maxResult, 10) + window.manager_config.autoincrementOnFailRequestZimbra);
-                window.manager_config.maxResultOnRequestZimbra = newMaxResult;
-                setTimeout(() => {
-                    this.getAccounts(domainName, newMaxResult);
-                }, 250);
-            }
-        }).finally(() => {
-            if (!this.isRefreshing) {
-                return GlobalActions.emitEndLoading();
-            }
-
-            return GlobalActions.emitEndLoading();
-        });
+        }).catch(console.error.bind('error'));
     }
 
     getAllMailboxes(domainId) {
+        const MAX_RESULTS = 0; //window.manager_config.maxResultOnRequestZimbra;
         if (domainId) {
             return this.domainInfo(domainId).then((data) => {
                 const domain = this.isStoreEnabled ? DomainStore.getCurrent() : data;
-                this.getAccounts(domain.name, window.manager_config.maxResultOnRequestZimbra);
+                this.getAccounts(domain.name, MAX_RESULTS);
             });
         }
 
-        return this.getAccounts(null, window.manager_config.maxResultOnRequestZimbra);
+        return this.getAccounts(null, MAX_RESULTS);
     }
 
     refreshAllAccounts() {
@@ -767,6 +733,6 @@ export default class Mailboxes extends React.Component {
 }
 
 Mailboxes.propTypes = {
-    location: React.PropTypes.object.isRequired,
-    params: React.PropTypes.object.isRequired
+    location: PropTypes.object.isRequired,
+    params: PropTypes.object.isRequired
 };

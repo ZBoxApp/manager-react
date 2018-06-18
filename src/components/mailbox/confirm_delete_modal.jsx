@@ -10,6 +10,7 @@ import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import MailboxStore from '../../stores/mailbox_store.jsx';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class ConfirmDeleteModal extends React.Component {
     constructor(props) {
@@ -161,8 +162,8 @@ export default class ConfirmDeleteModal extends React.Component {
 }
 
 ConfirmDeleteModal.propTypes = {
-    show: React.PropTypes.bool.isRequired,
-    onHide: React.PropTypes.func.isRequired,
-    data: React.PropTypes.object,
-    location: React.PropTypes.object
+    show: PropTypes.bool.isRequired,
+    onHide: PropTypes.func.isRequired,
+    data: PropTypes.object,
+    location: PropTypes.object
 };

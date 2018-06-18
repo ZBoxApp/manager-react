@@ -1,5 +1,6 @@
 //import Datalist from 'react-datalist';
 import React from 'react';
+import PropTypes from 'prop-types';
 import Button from './button.jsx';
 import PaginateArray from '../stores/paginate_array_store.jsx';
 import DataList from 'react-datalist';
@@ -638,22 +639,22 @@ export default class PanelActions extends React.Component {
 }
 
 PanelActions.propTypes = {
-    name: React.PropTypes.string.isRequired,
-    onApplyChanges: React.PropTypes.func.isRequired,
-    data: React.PropTypes.oneOfType([
-        React.PropTypes.array,
-        React.PropTypes.string
+    name: PropTypes.string.isRequired,
+    onApplyChanges: PropTypes.func.isRequired,
+    data: PropTypes.oneOfType([
+        PropTypes.array,
+        PropTypes.string
     ]),
-    options: React.PropTypes.array,
-    hasComboInput: React.PropTypes.bool,
-    onAdd: React.PropTypes.func,
-    onDelete: React.PropTypes.func,
-    onCancel: React.PropTypes.func,
-    hasExport: React.PropTypes.bool,
-    showNameOnButton: React.PropTypes.bool,
-    onExport: React.PropTypes.func,
-    isEmail: React.PropTypes.bool,
-    nameFunc: React.PropTypes.string.isRequired
+    options: PropTypes.array,
+    hasComboInput: PropTypes.bool,
+    onAdd: PropTypes.func,
+    onDelete: PropTypes.func,
+    onCancel: PropTypes.func,
+    hasExport: PropTypes.bool,
+    showNameOnButton: PropTypes.bool,
+    onExport: PropTypes.func,
+    isEmail: PropTypes.bool,
+    nameFunc: PropTypes.string.isRequired
 };
 
 PanelActions.defaultProps = {

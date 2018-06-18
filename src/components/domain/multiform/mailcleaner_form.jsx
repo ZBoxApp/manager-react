@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import * as Utils from '../../../utils/utils.jsx';
 import {browserHistory} from 'react-router';
 
@@ -95,5 +96,5 @@ export default class MailCleanerForm extends React.Component {
 }
 
 MailCleanerForm.propTypes = {
-    state: React.PropTypes.object
+    state: PropTypes.object
 };
