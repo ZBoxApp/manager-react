@@ -73,7 +73,7 @@ function initZimbra() {
 }
 
 export function getClientConfig() {
-    const method = Utils.isDevMode() ? 'GET' : 'POST';
+    const method = 'GET';
     const url = Utils.getConfigName();
     return axios({
         url,
