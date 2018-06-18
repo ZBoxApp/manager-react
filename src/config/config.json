@@ -2,7 +2,7 @@
     "debug": true,
     "dev": false,
     "enableStores": false,
-    "zimbraUrl": "/zimbra_proxy/service/admin/soap",
+    "zimbraUrl": "https://manager.zboxapp.com/zimbra_proxy/service/admin/soap",
     "zimbraProxy": "https://zimbra.zboxapp.dev:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
     "webMailUrl": "https://admin-mail.zboxapp.com/",

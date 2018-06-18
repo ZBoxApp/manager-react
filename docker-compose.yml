@@ -1,0 +1,29 @@
+#our docker-compose version
+version: "3.3"
+
+# NOTE ======================================
+# all config vars are passing as a env vars *
+# ===========================================
+
+# let's define our services being using for our app
+services:
+  # define our services name
+  node_front_app:
+    # build key is used to build our docker based on a Dockerfile placed into the path where docker-compose lives
+    build: .
+    container_name: zbox_manager_development
+    # let's create a volume to persist data between our machine and image docker
+    # copying all files into root path to /app folder
+    volumes:
+      - ./:/app
+      - /app/node_modules/
+      - /app/dist/
+    # map our port where app will be exposed, LOCAL_MACHINE_PORT:IMAGE_DOCKER_PORT
+    ports:
+      # pass the exposed port as a env var, eg: PORT=1000 should pass to docker 1000:1000
+      - "${PORT}:${PORT}"
+    # passing throug env vars to container docker
+    environment:
+      # all config vars are passing as a env vars
+      PORT: ${PORT}
+      NODE_ENV: ${NODE_ENV}

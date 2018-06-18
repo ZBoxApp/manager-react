@@ -82,7 +82,9 @@
     "run-fullmap": "webpack --progress --watch",
     "companies-service": "babel-node companies-service.js",
     "server": "nodemon server.js",
+    "dev-server": "node server.js",
     "sales-service": "babel-node sales-services.js",
-    "start-webapp": "NODE_ENV=development npm-run-all --parallel run server"
+    "start-webapp": "NODE_ENV=development npm-run-all --parallel run server",
+    "dev-webapp": "NODE_ENV=production npm-run-all --parallel build dev-server"
   }
 }

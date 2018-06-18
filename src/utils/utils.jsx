@@ -876,7 +876,8 @@ export function getHostname(nextPath) {
 }
 
 export function getConfigName() {
-    return isDevMode() ? '/config/config.development.json' : 'https://manager.zboxapp.com/ventas_api/parse/functions/getConfigManager';
+    // return isDevMode() ? '/config/config.development.json' : 'https://manager.zboxapp.com/ventas_api/parse/functions/getConfigManager';
+    return isDevMode() ? '/config/config.development.json' : '/config/config.json';
 }
 
 export function isDevMode() {
