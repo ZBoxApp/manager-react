@@ -19,8 +19,8 @@ services:
     # map our port where app will be exposed, LOCAL_MACHINE_PORT:IMAGE_DOCKER_PORT
     ports:
       # pass the exposed port as a env var, eg: PORT=1000 should pass to docker 1000:1000
-      - "7500:7500"
-    command: npm run start-webapp
+      - 7500:7500
+    command: npm run dev-webapp
     # passing throug env vars to container docker
     environment:
       # all config vars are passing as a env vars
