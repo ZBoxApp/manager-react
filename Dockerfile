@@ -15,7 +15,7 @@ RUN npm install
 COPY . /app
 
 # start our server application by executing `npm start`, this command can be found into package.json scripts
-CMD ["npm", "dev-webapp"]
+# CMD ["npm", "run", "dev-webapp"]
 
 # let's expose our app for port number 3300
 #expose 3300

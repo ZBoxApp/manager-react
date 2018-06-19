@@ -9,7 +9,7 @@ const config = require(configPath);
 const express = require('express');
 const server = express();
 const bodyParser = require('body-parser');
-const port = process.env.PORT || 8000;
+const port = process.env.PORT;
 
 const managerProxyURL = process.env.managerProxy || config.managerProxy; //eslint-disable-line no-process-env
 const URlsToProxy = ['/zimbra_proxy', '/powerdns_proxy', '/folio'];

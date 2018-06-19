@@ -2,7 +2,7 @@
     "debug": true,
     "dev": false,
     "enableStores": false,
-    "zimbraUrl": "https://manager.zboxapp.com/zimbra_proxy/service/admin/soap",
+    "zimbraUrl": "https://manager2.zboxapp.com/zimbra_proxy/service/admin/soap",
     "zimbraProxy": "https://zimbra.zboxapp.dev:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
     "webMailUrl": "https://admin-mail.zboxapp.com/",
@@ -16,7 +16,7 @@
     "invoiceAPI": { "currency": "CLP", "requireTax": true },
     "timeoutRequest": 600000,
     "dns": {
-      "url": "https://manager.zboxapp.com/powerdns_proxy/",
+      "url": "https://manager2.zboxapp.com/powerdns_proxy/",
       "token": "otto",
       "inmutable": ["mx", "soa", "ns", "spf"],
       "template": {
@@ -130,10 +130,10 @@
     "multiFormDomain": { "hasMailCleaner": false, "hasDNSZone": true },
     "webmailLifetime": 3600,
     "companiesEndPoints": {
-      "list": "https://manager.zboxapp.com/folio/companies.json",
-      "detail": "https://manager.zboxapp.com/folio/companies/{id}.json",
+      "list": "https://manager2.zboxapp.com/folio/companies.json",
+      "detail": "https://manager2.zboxapp.com/folio/companies/{id}.json",
       "invoices":
-        "https://manager.zboxapp.com/folio/companies/{id}/invoices.json?exclude=draft"
+        "https://manager2.zboxapp.com/folio/companies/{id}/invoices.json?exclude=draft"
     },
     "globalAttrsBySection": {
       "mailboxes": {
