@@ -1,8 +1,8 @@
 {
     "debug": true,
-    "dev": false,
+    "dev": true,
     "enableStores": false,
-    "managerProxy": "https://manager2.zboxapp.com",
+    "managerProxy": "https://devmanager.zboxapp.com",
     "zimbraUrl": "/zimbra_proxy/service/admin/soap",
     "zimbraProxy": "https://zimbra.zboxapp.dev:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
