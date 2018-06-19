@@ -20,7 +20,7 @@ const NPM_TARGET = process.env.npm_lifecycle_event; //eslint-disable-line no-pro
 const timestamp = new Date().getTime().toString();
 const hash = timestamp.slice(-6, timestamp.length);
 
-var DEV = process.env.ENV_NODE === 'development';
+var DEV = process.env.NODE_ENV === 'development';
 var FULLMAP = false;
 if (NPM_TARGET === 'run' || NPM_TARGET === 'run-fullmap' || NPM_TARGET === 'deploy') {
     DEV = true;
