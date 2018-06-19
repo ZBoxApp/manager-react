@@ -25,4 +25,4 @@ services:
     environment:
       # all config vars are passing as a env vars
       PORT: 7500
-      NODE_ENV: development
+      NODE_ENV: production
