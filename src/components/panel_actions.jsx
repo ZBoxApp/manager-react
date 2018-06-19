@@ -47,7 +47,8 @@ export default class PanelActions extends React.Component {
         e.preventDefault();
 
         if (this.props.onExport) {
-            return this.props.onExport(this.state['items' + this.props.name]);
+            const { data: items } = this.props;
+            return this.props.onExport(items);
         }
 
         throw new Error('onExport function was not defined, onExport :' + this.props.onExport);
