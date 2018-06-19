@@ -7,10 +7,10 @@ version: "3.3"
 
 # let's define our services being using for our app
 services:
-  manager_front_app:
+  manager_front_dev_app:
     # build key is used to build our docker based on a Dockerfile placed into the path where docker-compose lives
     build: .
-    container_name: manager_zboxapp_app
+    container_name: manager_zboxapp_dev_app
     # let's create a volume to persist data between our machine and image docker
     # copying all files into root path to /app folder
     volumes:
