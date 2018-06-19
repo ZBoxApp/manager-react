@@ -21,7 +21,6 @@ const timestamp = new Date().getTime().toString();
 const hash = timestamp.slice(-6, timestamp.length);
 
 var DEV = process.env.ENV_NODE === 'development';
-console.log("DEV", DEV);
 var FULLMAP = false;
 if (NPM_TARGET === 'run' || NPM_TARGET === 'run-fullmap' || NPM_TARGET === 'deploy') {
     DEV = true;
