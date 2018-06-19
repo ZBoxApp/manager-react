@@ -1,12 +1,12 @@
 .datepicker-days {
-  padding: 10px 10px 0px 10px;
+  padding: 10px 10px 0;
 
   .switch {
     text-align: center;
   }
 
   .today {
-    color: #337ab7;
+    color: $color-active-day;
   }
 
   .day {
@@ -18,7 +18,7 @@
   }
 
   .active {
-    color: #FFF;
-    background-color: #337ab7;
+    background-color: $color-active-day;
+    color: $white;
   }
 }

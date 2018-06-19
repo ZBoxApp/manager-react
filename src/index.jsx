@@ -31,7 +31,6 @@ import * as Client from './utils/client.jsx';
 import * as Utils from './utils/utils.jsx';
 import Constants from './utils/constants.jsx';
 
-import $ from 'jquery';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router, Route, IndexRedirect, Redirect, browserHistory} from 'react-router';

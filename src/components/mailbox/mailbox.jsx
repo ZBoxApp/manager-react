@@ -31,7 +31,6 @@ import ZimbraStore from '../../stores/zimbra_store.jsx';
 
 const QueryOptions = Constants.QueryOptions;
 const messageType = Constants.MessageType;
-const codes = Constants.ZimbraCodes;
 
 export default class Mailboxes extends React.Component {
     constructor(props) {
@@ -270,7 +269,7 @@ export default class Mailboxes extends React.Component {
                 domain: domainName,
                 loading: false
             });
-        }).catch(console.error.bind('error'));
+        }).catch((err) => err);
     }
 
     getAllMailboxes(domainId) {

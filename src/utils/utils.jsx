@@ -881,6 +881,7 @@ export function getConfigName() {
 }
 
 export function isDevMode() {
+    // eslint-disable-next-line
     return process.env.NODE_ENV === 'development';
 }
 
