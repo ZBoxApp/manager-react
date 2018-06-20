@@ -25,6 +25,7 @@ export default class Login extends React.Component {
 
         this.submit = this.submit.bind(this);
         this.onUserChange = this.onUserChange.bind(this);
+        this.currentYear = new Date().getFullYear();
 
         this.state = {
             user: null
@@ -145,7 +146,7 @@ export default class Login extends React.Component {
                     <div className='col-md-12 text-center'>
                         {'ZBox Manager : Administra tu Correo en la nube, seguro y facil de usar'}
                         <br/>
-                        {'Copyright © 2016 ZBox Spa. Todos los derechos reservados'}
+                        {`Copyright © 2016 - ${this.currentYear} ZBox Spa. Todos los derechos reservados`}
                     </div>
                 </div>
             </div>
