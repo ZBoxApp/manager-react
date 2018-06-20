@@ -307,6 +307,51 @@ export function getDomain(id, success, error) {
     );
 }
 
+export function getAdminByDomainName(domain, attributes) {
+    const searchObject = {
+        query: '(|(zimbraIsDelegatedAdminAccount=TRUE)(zimbraIsAdminAccount=TRUE))',
+        types: 'accounts',
+        maxResults: 0,
+        attrs: 'zimbraIsDelegatedAdminAccount,zimbraIsAdminAccount',
+        domain
+    };
+
+    if (attributes && typeof attributes === 'string') {
+        let _attributes = searchObject.attrs.split(',');
+        const customAttributes = attributes.split(',').map((attribute) => attribute.trim());
+        _attributes = [..._attributes, ...customAttributes];
+        searchObject.attrs = _attributes.join(',');
+    }
+
+    return new Promise((resolve, reject) => {
+        initZimbra().then(
+            (zimbra) => {
+                zimbra.directorySearch(searchObject, (err, data) => {
+                    if (err) {
+                        const e = handleError('getAdminByDomainName', err);
+                        return reject(e);
+                    }
+
+                    return resolve(data);
+                });
+            },
+            (err) => {
+                const e = handleError('getAdminByDomainName', err);
+                return reject(e);
+            }
+        );
+    });
+}
+
+export function revokeAdmin(zimbraId) {
+    return new Promise((resolve, reject) => {
+        modifyAccount(zimbraId, {
+            zimbraIsDelegatedAdminAccount: 'FALSE',
+            zimbraIsAdminAccount: 'FALSE'
+        }, resolve, reject);
+    });
+}
+
 export function createDomain(domain, success, error) {
     initZimbra().then(
         (zimbra) => {
