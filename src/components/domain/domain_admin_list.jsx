@@ -37,38 +37,27 @@ export default class DomainAdminList extends React.Component {
         };
     }
 
-    getAdmins(getAllFromAPI) {
-        const domain = this.props.domain;
-        const getStuffFromAPI = getAllFromAPI || false;
-        if (!getStuffFromAPI) {
-            return domain.getAdmins((err, data) => {
-                const admins = data.account || [];
-                if (this.isStoreEnabled) {
-                    DomainStore.setAdmins(domain, admins);
-                }
-                this.setState({admins});
-            });
+    getAdmins() {
+        const { domain } = this.props;
+
+        if (domain) {
+            return Client.getAdminByDomainName(domain.name, 'givenName, displayName, sn, cn').then(({ account: admins }) => {
+                this.setState({ admins });
+            }).catch();
         }
 
         return Client.getDomain(domain.name, (data) => {
-            return data.getAdmins((err, res) => {
-                const admins = res.account || [];
-                if (this.isStoreEnabled) {
-                    DomainStore.setAdmins(domain, admins);
-                }
-                return this.setState({admins});
-            });
+            Client.getAdminByDomainName(data.name).then(({ account: admins }) => {
+                this.setState({ admins });
+            }).catch();
         }, (err) => {
             return err;
         });
     }
 
     handleRemoveAdmin(e, admin) {
-        const plans = Object.keys(window.manager_config.plans).filter((plan) => {
-            return window.manager_config.plans[plan].forRights;
-        });
-
         e.preventDefault();
+
         const response = {
             title: 'Se ha borrado con éxito',
             type: 'success'
@@ -86,28 +75,22 @@ export default class DomainAdminList extends React.Component {
             },
             (isDeleted) => {
                 if (isDeleted) {
-                    this.props.domain.removeAdmin(
-                        admin.name,
-                        plans,
-                        (error) => {
-                            if (error) {
-                                response.title = 'Ha ocurrido un error.';
-                                response.type = 'error';
-                                response.confirmButtonText = 'Intentar de nuevo';
-                                response.confirmButtonColor = '#DD6B55';
+                    const { id } = admin;
+                    const { admins } = this.state;
 
-                                return sweetAlert(response);
-                            }
+                    Client.revokeAdmin(id).then(() => {
+                        // let's remove the admin for state to avoid search it into api
+                        const nextAdmins = admins.filter((admin) => admin.id !== id);
+                        this.setState({ admins: nextAdmins });
+                        return sweetAlert(response);
+                    }).catch(() => {
+                        response.title = 'Ha ocurrido un error.';
+                        response.type = 'error';
+                        response.confirmButtonText = 'Intentar de nuevo';
+                        response.confirmButtonColor = '#DD6B55';
 
-                            if (this.isStoreEnabled) {
-                                DomainStore.removeAdmin(admin.id);
-                            } else {
-                                DomainStore.emitAdminsChange();
-                            }
-
-                            return sweetAlert(response);
-                        }
-                    );
+                        return sweetAlert(response);
+                    });
                 }
             }
         );
@@ -116,10 +99,10 @@ export default class DomainAdminList extends React.Component {
     onAdminsChange() {
         const admins = this.isStoreEnabled ? DomainStore.getAdmins(this.props.domain) : null;
         if (!admins) {
-            return this.getAdmins(true);
+            return this.getAdmins();
         }
 
-        return this.setState({admins});
+        return this.setState({ admins });
     }
 
     componentDidMount() {
@@ -129,9 +112,11 @@ export default class DomainAdminList extends React.Component {
             this.getAdmins();
         }
     }
+
     componentWillUnmount() {
         DomainStore.removeAdminsChangeListener(this.onAdminsChange);
     }
+
     render() {
         let btnAddNewAdmin = null;
         if (!this.state.admins) {
