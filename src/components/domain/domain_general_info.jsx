@@ -3,7 +3,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 
 import Panel from '../panel.jsx';
 import StatusLabel from '../status_label.jsx';
@@ -73,20 +72,7 @@ export default class DomainGeneralInfo extends React.Component {
         }
     }
     renovationDate() {
-        const utc = Utils.getUTCTime(this.props.domain.attrs.zimbraCreateTimestamp);
-
-        if (!utc) {
-            return 'No disponible';
-        }
-
-        const timestamp = moment.utc(utc);
-        const now = moment();
-        timestamp.year(now.year());
-        if (timestamp.isBefore(now)) {
-            timestamp.add(1, 'year');
-        }
-
-        return timestamp.format('DD/MM/YYYY');
+        return Utils.getRenovationDate(this.props.domain.attrs.zimbraCreateTimestamp);
     }
     render() {
         const domain = this.props.domain;

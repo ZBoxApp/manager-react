@@ -1,6 +1,8 @@
 language: node_js
-node_js:
-  - 5.9.0
+node_js: '7.10.0'
+cache:
+  directories:
+    - node_modules
 sudo: required
 before_install:
   - sudo apt-get -qq update
