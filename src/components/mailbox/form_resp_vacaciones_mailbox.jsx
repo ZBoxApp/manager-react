@@ -93,8 +93,8 @@ export default class FormVacacionesMailbox extends React.Component {
         const { data } = props;
         const { attrs } = data;
 
-        const zimbraPrefOutOfOfficeFromDate = Utils.getTSFromUTC(Utils.getUTCTime(attrs.zimbraPrefOutOfOfficeFromDate));
-        const zimbraPrefOutOfOfficeUntilDate = Utils.getTSFromUTC(Utils.getUTCTime(attrs.zimbraPrefOutOfOfficeUntilDate));
+        const zimbraPrefOutOfOfficeFromDate = Utils.getTSFromUTC(attrs.zimbraPrefOutOfOfficeFromDate);
+        const zimbraPrefOutOfOfficeUntilDate = Utils.getTSFromUTC(attrs.zimbraPrefOutOfOfficeUntilDate);
 
         const nextState = {
             zimbraPrefOutOfOfficeReplyEnabled: Utils.parseBooleanValue(attrs.zimbraPrefOutOfOfficeReplyEnabled),
@@ -156,8 +156,7 @@ export default class FormVacacionesMailbox extends React.Component {
                             }}
                             minDate={moment()}
                             dateTime={zimbraPrefOutOfOfficeFromDate}
-                            value={zimbraPrefOutOfOfficeFromDate}
-                            mode={'date'}
+                            mode={'datetime'}
                             showToday={true}
                         />
                     </div>
@@ -181,8 +180,7 @@ export default class FormVacacionesMailbox extends React.Component {
                             }}
                             minDate={moment()}
                             dateTime={zimbraPrefOutOfOfficeUntilDate}
-                            value={zimbraPrefOutOfOfficeUntilDate}
-                            mode={'date'}
+                            mode={'datetime'}
                         />
                     </div>
                 </div>
