@@ -885,6 +885,22 @@ export function isDevMode() {
     return process.env.NODE_ENV === 'development';
 }
 
+export function getRenovationDate(creationDate, noAvailable = 'No disponible') {
+    if (!creationDate) {
+        return noAvailable;
+    }
+
+    const domainCreationDate = moment(creationDate, 'YYYYMMDDHHmmssZ');
+    const now = moment();
+
+    domainCreationDate.year(now.year());
+    if (domainCreationDate.isBefore(now)) {
+        domainCreationDate.add(1, 'year');
+    }
+
+    return domainCreationDate.format('DD/MM/YYYY');
+}
+
 export function getTSFromUTC(utc) {
     let time = utc;
     if (!time) {
