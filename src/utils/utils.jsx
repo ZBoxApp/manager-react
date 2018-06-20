@@ -603,9 +603,9 @@ export function getInitialDateFromTimestamp(timestamp) {
 
 export function timestampToUTCDate(timestamp) {
     const timestampAsNumber = stringTSToNumber(timestamp);
-    const momentDate = moment(new Date(timestampAsNumber)).format('YYYY/MM/DD');
-    const UCTDate = momentDate.split('/').join('');
-    return `${UCTDate}000000Z`;
+    const UCTTime = new Date(timestampAsNumber).toISOString();
+    const utc = moment(UCTTime, 'YYYYMMDDHHmmssZ').format('YYYYMMDDHHmmss');
+    return `${utc}Z`;
 }
 
 export function parseBooleanValue(boolean) {
@@ -885,32 +885,15 @@ export function isDevMode() {
     return process.env.NODE_ENV === 'development';
 }
 
-export function getUTCTime(utc) {
-    if (!utc) {
-        return null;
-    }
-
-    const utcString = utc.slice(0, utc.length - 1);
-    const year = utcString.slice(0, 4);
-    const month = utcString.slice(4, 6);
-    const day = utcString.slice(6, 8);
-    const hours = utcString.slice(8, 10);
-    const minutes = utcString.slice(10, 12);
-    const seconds = utcString.slice(12, 14);
-
-    return [year, month, day, hours, minutes, seconds];
-}
-
 export function getTSFromUTC(utc) {
     let time = utc;
-    const now = new Date();
     if (!time) {
-        return now.getTime();
+        return moment().format('x');
     }
 
     if (Object.prototype.toString.call(utc) === '[object Array]') {
         time = new Date(...utc);
     }
 
-    return time.getTime();
+    return moment(utc, 'YYYYMMDDHHmmssZ').format('x');
 }
