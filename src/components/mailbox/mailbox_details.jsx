@@ -21,6 +21,7 @@ import MessageBar from '../message_bar.jsx';
 import Promise from 'bluebird';
 import MailboxStore from '../../stores/mailbox_store.jsx';
 import ResendForm from './reenvios_form.jsx';
+import DistributionListsBelongsTo from './distribution_lists_belongs_to.jsx';
 
 import * as Client from '../../utils/client.jsx';
 import * as Utils from '../../utils/utils.jsx';
@@ -47,7 +48,9 @@ export default class MailboxDetails extends React.Component {
         this.editUrlFromParams = this.domain_id ? `/domains/${this.domain_id}/mailboxes/${this.mailboxId}` : `/mailboxes/${this.mailboxId}`;
         this.editUrlFromParams += '/edit';
 
-        this.state = {};
+        this.state = {
+            dl: []
+        };
     }
 
     setDomainId(domainId) {
@@ -114,7 +117,10 @@ export default class MailboxDetails extends React.Component {
 
             //if is not into store just search it.
             return Client.getAccount(id, (data) => {
-                return resolve(data);
+                Client.getAccountMembership(id).then(({ dl }) => {
+                    this.setState({ dl });
+                    return resolve(data);
+                }).catch();
             }, (error) => {
                 return reject(error);
             });
@@ -354,17 +360,22 @@ export default class MailboxDetails extends React.Component {
                 />
             );
 
+            const tabDistributionListsBelongsTp = (
+                <DistributionListsBelongsTo items={this.state.dl}/>
+            );
+
             const reenvios = (
                 <ResendForm mailbox={this.state.data}/>
             );
 
             panelTabs = (
                 <PanelTab
-                    tabNames={['Resp Vacaciones', 'Alias', 'Reenvios']}
+                    tabNames={['Resp Vacaciones', 'Alias', 'Reenvios', 'Mis Listas de Distribucion']}
                     tabs={{
                         resp_vacaciones: tabAdmin,
                         alias: tabAlias,
-                        reenvios
+                        reenvios,
+                        mis_listas_de_distribucion: tabDistributionListsBelongsTp
                     }}
                     location={this.props.location}
                 />
