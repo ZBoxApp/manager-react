@@ -478,6 +478,48 @@ export function removeAccountByBatch(id) {
     return ZimbraStore.getCurrent().removeAccount(id);
 }
 
+export function getAccountById(id) {
+    return new Promise((resolve, reject) => {
+        initZimbra().then(
+            (zimbra) => {
+                zimbra.getAccount(id, (err, data) => {
+                    if (err) {
+                        const e = handleError('getAccount', err);
+                        return reject(e);
+                    }
+
+                    return resolve(data);
+                });
+            },
+            (err) => {
+                const e = handleError('getAccount', err);
+                return reject(e);
+            }
+        );
+    });
+}
+
+export function getAccountMembership(accountId) {
+    return new Promise((resolve, reject) => {
+        initZimbra().then(
+            (zimbra) => {
+                zimbra.getAccountMembership(accountId, (err, data) => {
+                    if (err) {
+                        const e = handleError('getAccountMembership', err);
+                        return reject(e);
+                    }
+
+                    return resolve(data);
+                });
+            },
+            (err) => {
+                const e = handleError('getAccountMembership', err);
+                return reject(e);
+            }
+        );
+    });
+}
+
 export function getAccount(id, success, error) {
     initZimbra().then(
         (zimbra) => {
