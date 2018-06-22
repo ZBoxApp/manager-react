@@ -196,11 +196,22 @@ export default class DistributionListsBelongsTo extends Component {
 
     render() {
         const { items } = this.props;
+
+        if (items && items.length > 0) {
+            return (
+                <Table
+                    items={items}
+                    columns={columns}
+                />
+            );
+        }
+
         return (
-            <Table
-                items={items}
-                columns={columns}
-            />
+            <div>
+                <h2>
+                    {'No pertenece a ninguna Lista de Distribución'}
+                </h2>
+            </div>
         );
     }
 }
