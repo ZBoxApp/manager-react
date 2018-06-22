@@ -7,6 +7,7 @@ import * as Utils from '../../utils/utils.jsx';
 import * as GlobalActions from '../../action_creators/global_actions.jsx';
 import ZimbraStore from '../../stores/zimbra_store.jsx';
 import MailboxStore from '../../stores/mailbox_store.jsx';
+import Pop3DownloadPicker from '../ChangePop3Download.jsx';
 
 export default class BlockGeneralInfoMailbox extends React.Component {
     constructor(props) {
@@ -59,7 +60,9 @@ export default class BlockGeneralInfoMailbox extends React.Component {
 
         if (this.state.hasDomain) {
             const data = this.props.data;
+            const { id: accountId } = data;
             const attrs = this.props.data.attrs;
+            const { zimbraPrefPop3DownloadSince } = attrs;
             const owner = attrs.displayName ? attrs.displayName : `${attrs.givenName || attrs.cn} ${attrs.sn}`;
             const mail = data.name;
 
@@ -155,6 +158,13 @@ export default class BlockGeneralInfoMailbox extends React.Component {
                                 </StatusLabel>
                             </span>
                         </p>
+                    </div>
+
+                    <div className={'pop3-download-since'}>
+                        <Pop3DownloadPicker
+                            since={zimbraPrefPop3DownloadSince}
+                            accountId={accountId}
+                        />
                     </div>
                 </article>
             );

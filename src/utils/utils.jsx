@@ -603,8 +603,8 @@ export function getInitialDateFromTimestamp(timestamp) {
 
 export function timestampToUTCDate(timestamp) {
     const timestampAsNumber = stringTSToNumber(timestamp);
-    const UCTTime = new Date(timestampAsNumber).toISOString();
-    const utc = moment(UCTTime, 'YYYYMMDDHHmmssZ').format('YYYYMMDDHHmmss');
+    // const UCTTime = new Date(timestampAsNumber).toISOString();
+    const utc = moment.utc(timestampAsNumber).format('YYYYMMDDHHmmss');
     return `${utc}Z`;
 }
 

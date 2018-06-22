@@ -3,12 +3,10 @@
   background-color: transparent;
   border: 0;
   box-shadow: 0;
-  margin-bottom: 25px;
 
   &.panel-collapse {
     > .panel-heading {
       background: $white;
-      border: 1px solid $border-color;
       border-color: $border-color;
       border-radius: 2px;
       padding: 10px;
@@ -16,7 +14,7 @@
   }
 
   > .panel-heading {
-    border: 1px solid transparent;
+    border-bottom: 1px solid $border-color;
     color: inherit;
     font-weight: 600;
     padding: 10px 4px;
@@ -43,14 +41,14 @@
 
   .hbuilt {
     background: $white;
-    border: 1px solid $border-color;
+    border-bottom: 1px solid $border-color;
     border-color: $border-color;
     border-radius: 2px;
     padding: 10px;
 
-    &.panel-heading {
-      border-bottom: 0;
-    }
+    // &.panel-heading {
+    //   border-bottom: 0;
+    // }
 
     > .panel-footer,
     > .panel-section {
@@ -65,7 +63,7 @@
 
   .panel-body {
     background: $white;
-    border: 1px solid $border-color;
+    // border: 1px solid $border-color;
     border-radius: 2px;
     padding: 20px;
     position: relative;
