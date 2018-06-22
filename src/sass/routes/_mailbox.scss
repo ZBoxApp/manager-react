@@ -3,8 +3,16 @@
 }
 
 .account-info {
+  h4 {
+    margin: 0;
+  }
+
   p {
     margin-bottom: 3px;
+  }
+
+  .pop3-download-since {
+    margin-top: 10px;
   }
 }
 
