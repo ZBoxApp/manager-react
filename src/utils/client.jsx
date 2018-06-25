@@ -1024,3 +1024,24 @@ export function makeSale(data, success, error) {
         }
     });
 }
+
+export function getGrants(target, grantee) {
+    return new Promise((resolve, reject) => {
+        initZimbra().then(
+            (zimbra) => {
+                zimbra.getGrants(target, grantee, (err, data) => {
+                    if (err) {
+                        const e = handleError('renameAccount', err);
+                        return reject(e);
+                    }
+
+                    return resolve(data);
+                });
+            },
+            (err) => {
+                const e = handleError('renameAccount', err);
+                return reject(e);
+            }
+        );
+    });
+}
