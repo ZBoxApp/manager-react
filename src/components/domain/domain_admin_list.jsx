@@ -31,7 +31,7 @@ export default class DomainAdminList extends React.Component {
     }
 
     getStateFromStores() {
-        const admins = this.isStoreEnabled ? DomainStore.getAdmins(this.props.domain) : null;
+        const admins = this.isStoreEnabled ? DomainStore.getAdmins(this.props.domain) : [];
         return {
             admins
         };
@@ -119,9 +119,10 @@ export default class DomainAdminList extends React.Component {
 
     render() {
         let btnAddNewAdmin = null;
-        if (!this.state.admins) {
-            return <div/>;
-        }
+        // comment this code to avoid empty screen when not admin list found
+        // if (!this.state.admins) {
+        //     return <div/>;
+        // }
 
         let messageBar;
         if (this.state.error) {
