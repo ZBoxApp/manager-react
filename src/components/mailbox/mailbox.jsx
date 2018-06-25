@@ -130,11 +130,12 @@ export default class Mailboxes extends React.Component {
     handleExportAsCSV(e) {
         e.preventDefault();
         const mailboxesByDomainId = this.isStoreEnabled ? MailboxStore.getMailboxByDomainId(this.domainId) : null;
-        const accountsFromState = this.state.accounts;
+        const accountsFromState = this.state.ac;
+
         if (mailboxesByDomainId || accountsFromState) {
             const accounts = mailboxesByDomainId || accountsFromState;
-            const title = `Casillas de ${accounts.account[0].domain}`;
-            return Utils.exportAsCSV(accounts.account, 'domain', title, true);
+            const title = `Casillas de ${accounts[0].domain}`;
+            return Utils.exportAsCSV(accounts, 'domain', title, true);
         }
 
         return false;
@@ -240,6 +241,8 @@ export default class Mailboxes extends React.Component {
                     typeError: messageType.LOCKED
                 });
             }
+
+            GlobalActions.emitEndLoading();
 
             if (accounts.total > 0) {
                 this.mailboxes = accounts;
