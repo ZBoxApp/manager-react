@@ -49,7 +49,8 @@ export default class MailboxDetails extends React.Component {
         this.editUrlFromParams += '/edit';
 
         this.state = {
-            dl: []
+            dl: [],
+            hasRight: false
         };
     }
 
@@ -117,10 +118,23 @@ export default class MailboxDetails extends React.Component {
 
             //if is not into store just search it.
             return Client.getAccount(id, (data) => {
-                Client.getAccountMembership(id).then(({ dl }) => {
-                    this.setState({ dl });
-                    return resolve(data);
+                const { domain } = data;
+                const getAccountMembership = Client.getAccountMembership(id);
+                const getAccountGrants = Client.getGrants({ type: 'domain', identifier: domain }, { type: 'usr', identifier: id });
+
+                Promise.all([getAccountMembership, getAccountGrants]).then((results) => {
+                    const membership = results.shift();
+                    const grants = results.shift();
+                    const { dl } = membership;
+                    const hasNotRight = (grants && grants.hasOwnProperty('length') ? grants : []).some((right) => right.rightName === 'adminLoginAs' && right.right.deny);
+                    this.setState({ dl, hasRight: !hasNotRight });
+                    resolve(data);
                 }).catch();
+
+                // .then(({ dl }) => {
+                //     this.setState({ dl });
+                //     return resolve(data);
+                // }).catch();
             }, (error) => {
                 return reject(error);
             });
@@ -295,7 +309,7 @@ export default class MailboxDetails extends React.Component {
                 }
             ];
 
-            if (this.state.webmail) {
+            if (this.state.webmail && this.state.hasRight) {
                 btnsStats = [
                     {
                         props: {
