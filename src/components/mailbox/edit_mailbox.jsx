@@ -242,7 +242,7 @@ export default class EditMailBox extends React.Component {
 
         sweetAlert({
                 title: 'Borrar Casilla',
-                text: `¿Esta seguro que dese borrar la casilla ${account.name}?`,
+                text: `¿Esta seguro que desea borrar la casilla ${account.name}?`,
                 type: 'info',
                 showCancelButton: true,
                 confirmButtonColor: '#DD6B55',
