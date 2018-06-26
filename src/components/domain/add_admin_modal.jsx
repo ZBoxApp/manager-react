@@ -26,7 +26,9 @@ export default class AddAdminModal extends React.Component {
         this.handleAddAdmin = this.handleAddAdmin.bind(this);
 
         this.state = {
-            users: null
+            users: null,
+            loading: false,
+            activatingUser: null
         };
 
         this.plans = Object.keys(window.manager_config.plans).filter((plan) => {
@@ -76,10 +78,19 @@ export default class AddAdminModal extends React.Component {
     handleAddAdmin(e, user) {
         e.preventDefault();
 
+        // return if there is a user activating
+        if (this.state.loading) {
+            return;
+        }
+
+        this.setState({ loading: true, activatingUser: user });
+
         this.props.domain.addAdmin(
             user.id,
             this.plans,
             (error) => {
+                this.setState({ loading: false, activatingUser: null });
+
                 if (error) {
                     return this.setState({
                         error: {
@@ -129,8 +140,14 @@ export default class AddAdminModal extends React.Component {
         }
     }
 
+    isUserActivating(id) {
+        const { loading, activatingUser } = this.state;
+
+        return loading && activatingUser && (activatingUser.id === id);
+    }
+
     render() {
-        const users = this.state.users;
+        const { users } = this.state;
         let results;
         if (users) {
             if (users.length === 0) {
@@ -184,8 +201,9 @@ export default class AddAdminModal extends React.Component {
                                 <a
                                     className='btn btn-info btn-xs'
                                     onClick={(e) => this.handleAddAdmin(e, u)}
+                                    disabled={this.isUserActivating(u.id)}
                                 >
-                                    {'Activar Admin'}
+                                    {this.isUserActivating(u.id) ? 'Activando Administrador...' : 'Activar Administrador'}
                                 </a>
                             </td>
                         </tr>
