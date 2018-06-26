@@ -4,6 +4,7 @@
 import AppDispatcher from '../dispatcher/app_dispatcher.jsx';
 import Constants from '../utils/constants.jsx';
 const ActionTypes = Constants.ActionTypes;
+const EventTypes = Constants.EventTypes;
 
 export function emitStartLoading() {
     AppDispatcher.handleViewAction({
@@ -52,3 +53,9 @@ export function showAlert(message) {
     });
 }
 
+export function watchUserDeletingAccount(account) {
+    AppDispatcher.handleViewAction({
+        type: EventTypes.WATCHING_DELETE_ACCOUNT,
+        account
+    });
+}

@@ -258,6 +258,17 @@ export default class EditMailBox extends React.Component {
                         GlobalActions.emitStartLoading();
                         this.isRemove = false;
 
+                        // Client.removeAccount(
+                        //     account.id,
+                        //     () => {
+                        //         this.isRemove = true;
+                        //         return resolve(true);
+                        //     },
+                        //     (error) => {
+                        //         this.isRemove = true;
+                        //         return reject(error);
+                        //     }
+                        // );
                         Client.removeAccount(
                             account.id,
                             () => {
@@ -266,15 +277,31 @@ export default class EditMailBox extends React.Component {
                             },
                             (error) => {
                                 this.isRemove = true;
-                                return reject(error);
+                                reject(error);
                             }
                         );
-                        this.watcherRemoveAccount(account.id, resolve);
-                    }).then(() => {
+
+                        // sent to "background" ASAP
+                        setTimeout(() => {
+                            this.isRemove = true;
+                            resolve({ background: true });
+                        }, 4000);
+                        // this.watcherRemoveAccount(account.id, resolve);
+                    }).then((respPromise) => {
+                        let msg = 'Será redireccionado a Casillas.';
+                        if (typeof respPromise !== 'boolean' && respPromise.hasOwnProperty && respPromise.hasOwnProperty('background')) {
+                            msg = 'Tu cuenta se esta borrando, te informaremos cuando este borrada, serás redireccionado a Casillas.';
+                            response.title = 'Estamos borrando tu cuenta';
+                        }
+
                         if (this.isStoreEnabled) {
                             MailboxStore.removeAccount(account);
                         }
-                        response.text = 'Será redireccionado a Casillas.';
+
+                        GlobalActions.watchUserDeletingAccount(account);
+
+                        response.text = msg;
+
                         return sweetAlert(
                             response,
                             () => {

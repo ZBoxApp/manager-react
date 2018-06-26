@@ -5,6 +5,7 @@ import * as Client from '../utils/client.jsx';
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import WatchDeleteAccount from '../stores/watchDeletingAccount.jsx';
 
 import {browserHistory} from 'react-router';
 
@@ -32,7 +33,14 @@ export default class Root extends React.Component {
     }
 
     componentWillMount() {
+        WatchDeleteAccount.addListenerDeletingAccount();
+        WatchDeleteAccount.addListenerOnDeletedAccount();
         this.redirectIfNecessary(this.props);
+    }
+
+    componentWillUnmount() {
+        WatchDeleteAccount.removeListenerDeletingAccount();
+        WatchDeleteAccount.removeListenerOnDeletedAccount();
     }
 
     render() {
