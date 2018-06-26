@@ -34,7 +34,9 @@ export default {
         MAILBOX_ADD_MASSIVE_EVENT: null,
         NEXT_STEP_EVENT: null,
         ZONE_DNS_CHANGE_EVENT: null,
-        SEND_DOMAINID_EVENT: null
+        SEND_DOMAINID_EVENT: null,
+        WATCHING_DELETE_ACCOUNT: null,
+        ACCOUNT_REMOVED: null
     }),
 
     MessageType: keyMirror({
