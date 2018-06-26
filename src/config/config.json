@@ -6,7 +6,7 @@
     "zimbraUrl": "/zimbra_proxy/service/admin/soap",
     "zimbraProxy": "https://zimbra.zboxapp.dev:7071",
     "dnsApiUrl": "http://zimbra.zboxapp.dev:3000",
-    "webMailUrl": "https://admin-mail.zboxapp.com/",
+    "webMailUrl": "https://admin-mail.zboxapp.com",
     "salesAPI": {
       "base": "https://manager-api.zboxapp.com/parse",
       "getPrices": "/functions/getPrices",

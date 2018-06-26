@@ -33,24 +33,27 @@ export default class DomainAdminList extends React.Component {
     getStateFromStores() {
         const admins = this.isStoreEnabled ? DomainStore.getAdmins(this.props.domain) : [];
         return {
-            admins
+            admins,
+            loading: false
         };
     }
 
     getAdmins() {
         const { domain } = this.props;
+        this.setState({ loading: true });
 
         if (domain) {
             return Client.getAdminByDomainName(domain.name, 'givenName, displayName, sn, cn').then(({ account: admins }) => {
-                this.setState({ admins });
-            }).catch();
+                this.setState({ admins, loading: false });
+            }).catch(() => this.setState({ loading: false }));
         }
 
         return Client.getDomain(domain.name, (data) => {
             Client.getAdminByDomainName(data.name).then(({ account: admins }) => {
-                this.setState({ admins });
+                this.setState({ admins, loading: false });
             }).catch();
         }, (err) => {
+            this.setState({ loading: false });
             return err;
         });
     }
@@ -108,8 +111,8 @@ export default class DomainAdminList extends React.Component {
     componentDidMount() {
         DomainStore.addAdminsChangeListener(this.onAdminsChange);
 
-        if (!this.state.admins) {
-            this.getAdmins();
+        if (Array.isArray(this.state.admins) && this.state.admins.length === 0) {
+            this.getAdmins(this.props.domain);
         }
     }
 
@@ -119,10 +122,10 @@ export default class DomainAdminList extends React.Component {
 
     render() {
         let btnAddNewAdmin = null;
-        // comment this code to avoid empty screen when not admin list found
-        // if (!this.state.admins) {
-        //     return <div/>;
-        // }
+
+        if (this.state.loading) {
+            return <div>{'Cargando Administradores...'}</div>;
+        }
 
         let messageBar;
         if (this.state.error) {
