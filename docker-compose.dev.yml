@@ -21,6 +21,8 @@ services:
       # pass the exposed port as a env var, eg: PORT=1000 should pass to docker 1000:1000
       - 7500:7500
     command: npm run dev-webapp
+    # restart docker always the service is restarted
+    restart: always
     # passing throug env vars to container docker
     environment:
       # all config vars are passing as a env vars
