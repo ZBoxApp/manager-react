@@ -50,7 +50,8 @@ export default class DomainAdminList extends React.Component {
         }
 
         return Client.getDomain(domain.name, (data) => {
-            Client.getAdminByDomainName(data.name).then(({ account: admins }) => {
+            Client.getAdminByDomainName(data.name).then(({ account, searchTotal }) => {
+                const admins = searchTotal > 0 ? account : [];
                 this.setState({ admins, loading: false });
             }).catch();
         }, (err) => {
@@ -113,7 +114,7 @@ export default class DomainAdminList extends React.Component {
         DomainStore.addAdminsChangeListener(this.onAdminsChange);
 
         if (Array.isArray(this.state.admins) && this.state.admins.length === 0) {
-            this.getAdmins(this.props.domain);
+            this.getAdmins();
         }
     }
 
