@@ -6,6 +6,7 @@ import * as Client from '../utils/client.jsx';
 import React from 'react';
 import PropTypes from 'prop-types';
 import WatchDeleteAccount from '../stores/watchDeletingAccount.jsx';
+import { getHostname } from '../utils/utils.jsx';
 
 import {browserHistory} from 'react-router';
 
@@ -36,6 +37,11 @@ export default class Root extends React.Component {
         WatchDeleteAccount.addListenerDeletingAccount();
         WatchDeleteAccount.addListenerOnDeletedAccount();
         this.redirectIfNecessary(this.props);
+
+        // set href dynamically based on hostname to load static files
+        const baseTag = document.getElementById('basetag');
+        const hostname = getHostname('');
+        baseTag.setAttribute('href', hostname);
     }
 
     componentWillUnmount() {
