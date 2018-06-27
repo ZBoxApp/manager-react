@@ -50,7 +50,7 @@ export default class DomainAdminList extends React.Component {
         }
 
         return Client.getDomain(domain.name, (data) => {
-            Client.getAdminByDomainName(data.name).then(({ account, searchTotal }) => {
+            Client.getAdminByDomainName(data.name, 'givenName, displayName, sn, cn').then(({ account, searchTotal }) => {
                 const admins = searchTotal > 0 ? account : [];
                 this.setState({ admins, loading: false });
             }).catch();
