@@ -704,7 +704,7 @@ export function countAllLockoutAccounts(domainName, success, error) {
         query: '(|(zimbraAccountStatus=*lockout*))',
         types: 'accounts',
         maxResults: 0,
-        attrs: '*'
+        attrs: 'zimbraAccountStatus'
     };
 
     if (domainName) {

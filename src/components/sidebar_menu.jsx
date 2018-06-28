@@ -62,20 +62,26 @@ export default class SidebarMenu extends React.Component {
                     </a>
                 </li>
                 <li id='sidebar-domains'>
-                    <a
+                    {/* <a
                         href='#'
                         onClick={(e) => this.handleLink(e, '/domains')}
                     >
                         <span className='nav-label'>{'dominios'}</span>
-                    </a>
+                    </a> */}
+                    <Link
+                        className={'nav-label'}
+                        to='/domains'
+                    >
+                        Dominios
+                    </Link>
                 </li>
                 <li id='sidebar-mailboxes'>
-                    <a
-                        href='#'
-                        onClick={(e) => this.handleLink(e, '/mailboxes')}
+                    <Link
+                        className={'nav-label'}
+                        to='/mailboxes'
                     >
-                        <span className='nav-label'>{'casillas'}</span>
-                    </a>
+                        Casillas
+                    </Link>
                 </li>
                 <li>
                     <a
@@ -97,19 +103,17 @@ export default class SidebarMenu extends React.Component {
                 </li>
                 {UserStore.isGlobalAdmin() && (
                     <li>
-                        <a
-                            className='nav-label'
-                            href='#'
-                            onClick={(e) => this.handleLink(e, '/deleteMassive')}
+                        <Link
+                            className={'nav-label'}
+                            to='/deleteMassive'
                         >
-                            {'Borrado Masivo'}
-                        </a>
+                            Borrado Masivo
+                        </Link>
                     </li>
                 )}
                 <li>
                     <Link
                         to='/logout'
-                        title='Cerrar Sesión'
                     >
                         Cerrar Sesión
                     </Link>
