@@ -2,13 +2,6 @@ const webpack = require('webpack');
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const AssetsPlugin = require('assets-webpack-plugin');
-const assetsPluginInstance = new AssetsPlugin({
-    filename: 'path.json',
-    processOutput: function (assets) {
-        return 'module.exports = ' + JSON.stringify(assets);
-    }
-});
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const htmlExtract = new ExtractTextPlugin('html', 'index.html');
@@ -79,7 +72,6 @@ var config = {
     },
     plugins: [
         Instancehtmlwebpackplugin,
-        assetsPluginInstance,
         new CopyWebpackPlugin([
             {from: 'src/config', to: 'config'}
         ]),
@@ -90,10 +82,7 @@ var config = {
         new webpack.LoaderOptionsPlugin({
             minimize: true,
             debug: false
-        }),
-        /*new webpack.optimize.UglifyJsPlugin({
-            compress: { warnings: false }
-        })*/
+        })
     ],
     resolve: {
         alias: {
