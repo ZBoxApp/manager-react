@@ -1,0 +1,25 @@
+.spinner-container {
+  height: 100%;
+  position: relative;
+
+  .spinner-layer {
+    align-items: center;
+    background: $opacity-silver;
+    display: flex;
+    flex-direction: row;
+    height: inherit;
+    justify-content: center;
+    max-height: 1000px;
+    opacity: 1;
+    position: absolute;
+    transition: opacity .5s, max-height 0s;
+    width: 100%;
+    z-index: 100;
+
+    &.spinner-hide {
+      max-height: 0;
+      opacity: 0;
+      transition: opacity .5s, max-height 0s .5s;
+    }
+  }
+}

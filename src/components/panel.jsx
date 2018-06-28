@@ -9,7 +9,7 @@ export default class Panel extends React.Component {
         if (this.props.btnsHeader) {
             btns = this.props.btnsHeader.map((btn, i) => {
                 if (btn.setComponent) {
-                    return btn.setComponent;
+                    return <span key={`button-${i}`}>{btn.setComponent}</span>;
                 }
                 return (
                     <Button
@@ -24,9 +24,9 @@ export default class Panel extends React.Component {
 
         let panelHeader;
         if (this.props.hasHeader && (this.props.btnsHeader || this.props.title || this.props.filter)) {
-            const {classCss} = this.props;
+            const { classCss } = this.props;
             panelHeader = (
-                <div className={`panel-heading hbuilt clearfix ${classCss}`}>
+                <div className={`panel-heading hbuilt clearfix ${classCss || ''}`}>
                     <div className='pull-right text-right'>{btns}</div>
                     <div className='heading-buttons pull-left text-left'>
                         {this.props.title || this.props.filter}
@@ -36,7 +36,7 @@ export default class Panel extends React.Component {
         }
 
         return (
-            <div className={'hpanel ' + this.props.classHeader}>
+            <div className={`hpanel ${this.props.classHeader || ''}`}>
                 {panelHeader}
                 {this.props.error}
                 <div className='panel-body'>

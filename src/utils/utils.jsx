@@ -352,7 +352,7 @@ export function getDomainFromString(string, otherwise) {
 }
 
 export function exportAsCSV(data, target, title, hasLabel) {
-    let info = (typeof data === 'object') ? data : JSON.parse(data);
+    const info = isArray(data) ? data : JSON.parse(data);
     const cos = getEnabledPlansByCosId(ZimbraStore.getAllCos());
     const headers = window.manager_config.export[target];
     const keys = Object.keys(headers);
@@ -912,4 +912,37 @@ export function getTSFromUTC(utc) {
     }
 
     return moment(utc, 'YYYYMMDDHHmmssZ').format('x');
+}
+
+export const trimString = (word) => {
+    return typeof word === 'string' ? word.trim() : '';
+};
+
+export const normalizeAccountName = (displayName, givenName, cn, sn, _default = 'No definido') => {
+    const displayname = trimString(displayName);
+    if (displayname && displayname.length > 0) {
+        return displayname;
+    }
+
+    let fullname = givenName || cn;
+    fullname += sn && ' ' + sn || '';
+    fullname = trimString(fullname);
+
+    return fullname.length > 0 ? fullname : _default;
+};
+
+export const normalizeStatusFilter = (statuses) => {
+    return Object.keys(statuses).filter((status) => status !== 'unknown').map((statusKey) => {
+        const status = statuses[statusKey];
+        const { label } = status;
+
+        return {
+            label,
+            value: statusKey
+        };
+    });
+};
+
+export function isArray(array) {
+    return Object.prototype.toString.call(array) === '[object Array]';
 }

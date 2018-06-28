@@ -126,7 +126,7 @@
     "computed-property-spacing": [2, "never"],
     "consistent-this": [2, "self"],
     "func-names": 2,
-    "func-style": [2, "declaration"],
+    //"func-style": [2, "declaration"],
     # "indent": [2, 2, {"SwitchCase": 0}],
     "jsx-quotes": [2, "prefer-single"],
     "key-spacing": [2, {"beforeColon": false, "afterColon": true}],
@@ -180,7 +180,7 @@
     "require-yield": 2,
 
     // React Specific
-    "react/display-name": [2, { "ignoreTranspilerName": false }],
+    //"react/display-name": [2, { "ignoreTranspilerName": false }],
     "react/no-deprecated": 2,
     "react/no-is-mounted": 2,
     "react/no-string-refs": 0,

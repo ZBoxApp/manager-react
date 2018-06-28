@@ -4,7 +4,7 @@ import Button from '../button.jsx';
 import { handleLink } from '../../utils/utils.jsx';
 
 /* eslint-disable */
-class TableColumnHeader extends Component {
+export class TableColumnHeader extends Component {
     static propTypes = {
         children: PropTypes.element
     };
@@ -20,7 +20,7 @@ class TableColumnHeader extends Component {
     }
 }
 
-class TableColumn extends Component {
+export class TableColumn extends Component {
     static propTypes = {
         children: PropTypes.element
     };
@@ -36,7 +36,7 @@ class TableColumn extends Component {
     }
 }
 
-class TableRow extends Component {
+export class TableRow extends Component {
     static propTypes = {
         children: PropTypes.element
     };
@@ -52,11 +52,12 @@ class TableRow extends Component {
     }
 }
 
-class Table extends Component {
+export class Table extends Component {
     constructor(props) {
         super(props);
 
         this.headers = this.makeColsHeaders();
+        this.rows = 0;
     }
 
     static defaultProps = {
@@ -102,9 +103,10 @@ class Table extends Component {
     }
 
     renderRow(item, column, index) {
+        this.rows++;
         const { render, dataIndex, key } = column;
         const value = this.getAttribute(item, dataIndex);
-        const _key = this.getAttribute(item, key) || `col-item-${index}`;
+        const _key = this.getAttribute(item, key) || `col-item-${index}-rows-${this.rows}`;
 
         if (render && typeof render === 'function') {
             return (
