@@ -467,7 +467,6 @@ export default class DNSZoneForm extends React.Component {
                                     this.removeRow(e, index);
                                 }}
                             >
-                            {"DELETE"}
                                 <i
                                     className='fa fa-trash-o'
                                     title='Delete'
@@ -549,7 +548,6 @@ export default class DNSZoneForm extends React.Component {
                                     this.removeRow(e, element, i);
                                 }}
                                 >
-                                {i}
                                     <i
                                         className='fa fa-trash-o'
                                         title='Delete'
